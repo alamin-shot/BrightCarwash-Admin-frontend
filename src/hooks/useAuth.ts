@@ -3,9 +3,9 @@
 import { useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/store";
-import { setUser, setLoading, clearAuth, initAuth } from "@/store/slices/authSlice";
+import { setUser, clearAuth, initAuth } from "@/store/slices/authSlice";
 import { setTokens, clearTokens, isAuthenticated as checkAuth } from "@/lib/auth-client";
-import { useLoginMutation, useGetProfileQuery } from "@/services/auth.api";
+import * as authService from "@/services/auth.service";
 import type { LoginCredentials } from "@/types/auth";
 import { toast } from "react-toastify";
 
@@ -13,29 +13,27 @@ export function useAuth() {
   const dispatch = useAppDispatch();
   const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
   const router = useRouter();
-  const [loginMutation] = useLoginMutation();
-  const { data: profile, error: profileError } = useGetProfileQuery(undefined, {
-    skip: !checkAuth(),
-  });
-
-  useEffect(() => {
-    if (profile) {
-      dispatch(setUser(profile));
-    }
-    if (profileError) {
-      clearTokens();
-      dispatch(clearAuth());
-    }
-  }, [profile, profileError, dispatch]);
 
   useEffect(() => {
     dispatch(initAuth());
   }, [dispatch]);
 
+  useEffect(() => {
+    if (checkAuth() && !user) {
+      authService
+        .getProfile()
+        .then((profile) => dispatch(setUser(profile)))
+        .catch(() => {
+          clearTokens();
+          dispatch(clearAuth());
+        });
+    }
+  }, [user, dispatch]);
+
   const login = useCallback(
     async (credentials: LoginCredentials) => {
       try {
-        const response = await loginMutation(credentials).unwrap();
+        const response = await authService.login(credentials);
         setTokens(response.accessToken, response.expiresIn, response.refreshToken);
         dispatch(setUser(response.user));
         toast.success("Login successful");
@@ -45,16 +43,14 @@ export function useAuth() {
         throw error;
       }
     },
-    [loginMutation, dispatch, router]
+    [dispatch, router]
   );
 
   const logout = useCallback(async () => {
     try {
-      // Call logout service via axios (already handled in auth.service.ts)
-      const { logout: logoutService } = await import("@/services/auth.service");
-      await logoutService();
+      await authService.logout();
     } catch {
-      // Proceed with local cleanup regardless
+      // cleanup anyway
     } finally {
       clearTokens();
       dispatch(clearAuth());
@@ -63,11 +59,5 @@ export function useAuth() {
     }
   }, [dispatch, router]);
 
-  return {
-    user,
-    isAuthenticated,
-    isLoading,
-    login,
-    logout,
-  };
+  return { user, isAuthenticated, isLoading, login, logout };
 }

@@ -1,8 +1,9 @@
 import { ReactNode } from "react";
+import { Inbox } from "lucide-react";
 
 export interface Column<T> {
   key: string;
-  header: string;
+  header: string | ReactNode;
   render: (row: T) => ReactNode;
   className?: string;
 }
@@ -19,11 +20,7 @@ export function DataTable<T>({ columns, data, rowKey, className = "" }: DataTabl
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4 text-center rounded-lg border border-[#E8E8E9] bg-white">
         <div className="w-12 h-12 rounded-full bg-[#F8FAFB] flex items-center justify-center mb-3">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 4H20V20H4V4Z" stroke="#777980" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M8 12H16" stroke="#777980" strokeWidth="1.5" strokeLinecap="round"/>
-            <path d="M12 8V16" stroke="#777980" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
+          <Inbox size={24} className="text-[#777980]" />
         </div>
         <p className="text-[#777980] font-inter text-sm">No data available</p>
       </div>

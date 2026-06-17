@@ -1,11 +1,12 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import type { ChartDataPoint } from "@/types/dashboard";
 
 const Chart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
-  loading: () => <div className="h-full min-h-[300px] bg-gray-100 animate-pulse rounded-lg w-full" />,
+  loading: () => <div className="h-full min-h-[250px] bg-gray-100 animate-pulse rounded-lg w-full" />,
 });
 
 interface InquiriesChartProps {
@@ -13,6 +14,12 @@ interface InquiriesChartProps {
 }
 
 export function InquiriesChart({ data }: InquiriesChartProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const months = data.map((d) => d.month);
   const inquiries = data.map((d) => d.inquiries);
   const deposits = data.map((d) => d.deposits);
@@ -70,6 +77,10 @@ export function InquiriesChart({ data }: InquiriesChartProps) {
     },
     legend: { show: false },
   };
+
+  if (!mounted) {
+    return <div className="h-full min-h-[250px] bg-gray-100 animate-pulse rounded-lg w-full" />;
+  }
 
   return (
     <div className="w-full h-full p-3 sm:p-4 rounded-lg border border-[#DFE1E7] bg-white flex flex-col gap-2 sm:gap-3">

@@ -1,15 +1,32 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useAppSelector } from "@/lib/store";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/Button";
 import Image from "next/image";
 import type { NavbarProps } from "@/types/navigation";
 
+const pageTitles: Record<string, string> = {
+  "/dashboard": "Welcome back",
+  "/leads": "Comprehensive Lead Insights",
+  "/payments": "Payments Overview",
+  "/campaigns": "Campaigns",
+  "/staffs": "Staff Management",
+  "/website-cms": "Website CMS",
+  "/reports": "Reports",
+  "/activity-log": "Activity Log",
+  "/settings": "Settings",
+  "/settings/change-password": "Change Password",
+};
+
 export function Navbar({ onMenuClick }: NavbarProps) {
+  const pathname = usePathname();
   const user = useAppSelector((state) => state.auth.user);
   const [avatarError, setAvatarError] = useState(false);
+
+  const title = pageTitles[pathname] || "Welcome back";
 
   return (
     <header className="flex w-full h-[72px] px-3 sm:px-4 lg:px-6 py-5 justify-between items-center border-b border-[#DFE1E7] bg-white sticky top-0 z-30">
@@ -23,7 +40,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
           <Icon name="menu" width={24} height={24} />
         </Button>
         <h1 className="text-[#1B1B1B] font-inter text-base sm:text-lg lg:text-2xl font-medium leading-[150%] tracking-[-0.36px] m-0 truncate">
-          Welcome back, {user?.name || "User"}
+          {title}, {user?.name || "User"}
         </h1>
       </div>
 

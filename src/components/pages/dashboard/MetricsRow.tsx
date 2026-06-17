@@ -7,7 +7,7 @@ interface MetricsRowProps {
 
 export function MetricsRow({ metrics }: MetricsRowProps) {
   return (
-    <div className="flex items-center gap-3 self-stretch max-md:flex-col">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 w-full">
       {metrics.map((metric) => (
         <MetricCard key={metric.id} data={metric} />
       ))}

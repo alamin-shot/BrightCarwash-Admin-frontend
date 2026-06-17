@@ -11,17 +11,17 @@ interface RecentInquiriesTableProps {
 
 export function RecentInquiriesTable({ data }: RecentInquiriesTableProps) {
   return (
-    <div className="flex flex-col items-start gap-4 flex-1 self-stretch">
-      <div className="flex justify-between items-center self-stretch">
-        <h3 className="text-[#1A1C21] font-inter text-lg font-semibold leading-[130%] tracking-[0.09px]">
+    <div className="flex flex-col items-start gap-3 sm:gap-4 w-full">
+      <div className="flex justify-between items-center w-full">
+        <h3 className="text-[#1A1C21] font-inter text-base sm:text-lg font-semibold leading-[130%] tracking-[0.09px]">
           Recent Inquiries
         </h3>
-        <Link href="/leads">
+        <Link href="/leads" className="shrink-0">
           <Button
             variant="outline"
-            className="flex py-[10px] px-4 justify-center items-center gap-2 rounded border border-[#DFE1E7] text-[#1B1B1B] font-inter text-sm font-normal"
+            className="flex py-2 sm:py-[10px] px-3 sm:px-4 justify-center items-center gap-1.5 sm:gap-2 rounded border border-[#DFE1E7] text-[#1B1B1B] font-inter text-xs sm:text-sm font-normal"
           >
-            <Icon name="view-all" width={16} height={16} />
+            <Icon name="view-all" width={14} height={14} className="sm:w-4 sm:h-4" />
             View all
           </Button>
         </Link>
@@ -31,6 +31,7 @@ export function RecentInquiriesTable({ data }: RecentInquiriesTableProps) {
         columns={recentInquiriesColumns}
         data={data}
         rowKey={(row: RecentInquiry) => row.id}
+        className="w-full"
       />
     </div>
   );

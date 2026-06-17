@@ -17,10 +17,23 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     }
   }, [isLoading, isAuthenticated, router]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>Loading...</p>
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-[#0098E8] border-t-transparent rounded-full animate-spin" />
+          <p className="text-[#777980] font-inter text-sm">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -28,11 +41,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="min-h-screen bg-white">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="lg:pl-[250px]">
         <Navbar onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 p-6 bg-white max-sm:p-4">{children}</main>
+        <main className="p-3 sm:p-4 lg:p-6 bg-white">
+          {children}
+        </main>
       </div>
     </div>
   );

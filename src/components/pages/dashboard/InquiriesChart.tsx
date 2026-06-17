@@ -5,7 +5,7 @@ import type { ChartDataPoint } from "@/types/dashboard";
 
 const Chart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
-  loading: () => <div className="h-[300px] bg-gray-100 animate-pulse rounded-lg" />,
+  loading: () => <div className="h-full min-h-[300px] bg-gray-100 animate-pulse rounded-lg w-full" />,
 });
 
 interface InquiriesChartProps {
@@ -25,7 +25,7 @@ export function InquiriesChart({ data }: InquiriesChartProps) {
     },
     stroke: {
       curve: "smooth",
-      width: 3,
+      width: 2,
     },
     colors: ["#0098E8", "#B23730"],
     fill: {
@@ -51,12 +51,17 @@ export function InquiriesChart({ data }: InquiriesChartProps) {
     grid: { borderColor: "#E8E8E9", strokeDashArray: 4 },
     xaxis: {
       categories: months,
-      labels: { style: { colors: "#777980", fontSize: "12px" } },
+      labels: {
+        style: { colors: "#777980", fontSize: "10px" },
+        rotate: -45,
+        hideOverlappingLabels: true,
+      },
       axisBorder: { show: false },
       axisTicks: { show: false },
+      tickAmount: 6,
     },
     yaxis: {
-      labels: { style: { colors: "#777980", fontSize: "12px" } },
+      labels: { style: { colors: "#777980", fontSize: "10px" } },
     },
     tooltip: {
       theme: "dark",
@@ -67,31 +72,34 @@ export function InquiriesChart({ data }: InquiriesChartProps) {
   };
 
   return (
-    <div className="flex-[2] max-md:flex-none max-md:w-full p-4 rounded-lg border border-[#DFE1E7] bg-white flex flex-col gap-3">
-      <div className="flex justify-between items-end self-stretch">
-        <h3 className="text-[#1A1C21] font-inter text-lg font-semibold leading-[130%] tracking-[0.09px]">
+    <div className="w-full h-full p-3 sm:p-4 rounded-lg border border-[#DFE1E7] bg-white flex flex-col gap-2 sm:gap-3">
+      <div className="flex justify-between items-end flex-wrap gap-2 shrink-0">
+        <h3 className="text-[#1A1C21] font-inter text-base sm:text-lg font-semibold leading-[130%] tracking-[0.09px]">
           Inquiries & deposits
         </h3>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#0098E8]" />
-            <span className="text-[#777980] font-inter text-xs">Inquiries</span>
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#0098E8] shrink-0" />
+            <span className="text-[#777980] font-inter text-[10px] sm:text-xs">Inquiries</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#B23730]" />
-            <span className="text-[#777980] font-inter text-xs">Deposits</span>
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#B23730] shrink-0" />
+            <span className="text-[#777980] font-inter text-[10px] sm:text-xs">Deposits</span>
           </div>
         </div>
       </div>
-      <Chart
-        options={options}
-        series={[
-          { name: "Inquiries", data: inquiries },
-          { name: "Deposits", data: deposits },
-        ]}
-        type="area"
-        height={300}
-      />
+      <div className="flex-1 w-full min-h-0">
+        <Chart
+          options={options}
+          series={[
+            { name: "Inquiries", data: inquiries },
+            { name: "Deposits", data: deposits },
+          ]}
+          type="area"
+          height="100%"
+          width="100%"
+        />
+      </div>
     </div>
   );
 }

@@ -61,7 +61,7 @@ export function DashboardContent() {
 
       <MetricsRow metrics={data.metrics} />
 
-      <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 !w-full items-stretch">
+      <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 w-full items-stretch">
         <div className="w-full lg:w-2/3">
           <InquiriesChart data={data.chartData} />
         </div>

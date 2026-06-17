@@ -17,7 +17,7 @@ interface DataTableProps<T> {
 export function DataTable<T>({ columns, data, rowKey, className = "" }: DataTableProps<T>) {
   if (data.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+      <div className="flex flex-col items-center justify-center py-12 px-4 text-center rounded-lg border border-[#E8E8E9] bg-white">
         <div className="w-12 h-12 rounded-full bg-[#F8FAFB] flex items-center justify-center mb-3">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M4 4H20V20H4V4Z" stroke="#777980" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -32,7 +32,7 @@ export function DataTable<T>({ columns, data, rowKey, className = "" }: DataTabl
 
   return (
     <div className={`w-full overflow-x-auto rounded-lg border border-[#E8E8E9] ${className}`}>
-      <table className="w-full border-collapse min-w-[600px]">
+      <table className="w-full border-collapse min-w-[700px]">
         <thead>
           <tr className="bg-[#F1F1F1]">
             {columns.map((col, index) => (

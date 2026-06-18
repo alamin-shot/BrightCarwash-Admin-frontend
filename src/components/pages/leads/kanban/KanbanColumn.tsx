@@ -28,31 +28,41 @@ export function KanbanColumn({ id, title, borderColor, icon, items }: KanbanColu
         className="flex w-[280px] min-w-[280px] h-full p-3 pt-5 flex-col items-center gap-4 rounded-2xl bg-[#F7F7F7] flex-shrink-0 overflow-hidden relative shadow-sm"
         style={{ borderTop: `5px solid ${borderColor}` }}
       >
-        <div className="flex items-center gap-2 self-stretch px-2 shrink-0">
+        
           <div
-            className="flex py-[7px] px-3 items-center gap-2 rounded-lg border shadow-sm backdrop-blur-sm transition-all"
-            style={{ backgroundColor: badgeTint, borderColor }}
-          >
-            <Icon name={icon} width={18} height={18} />
-            <span className="text-sm font-semibold capitalize text-[#1B1B1B] leading-none tracking-tight">
-              {title}
-            </span>
-            <span
-              className="text-white font-inter text-xs font-bold px-2 py-0.5 rounded-full leading-none shadow-[0_2px_4px_rgba(0,0,0,0.15)]"
-              style={{ backgroundColor: borderColor }}
-            >
-              {items.length}
-            </span>
-          </div>
-
-          <Button
+  className="flex py-3 pl-3 pr-4 items-start gap-2 self-stretch rounded-lg border transition-all"
+  style={{
+    backgroundColor: badgeTint,
+    borderColor: borderColor,
+  }}
+>
+  <Icon name={icon} width={18} height={18} />
+  <span
+    className="text-sm font-semibold capitalize leading-none tracking-tight"
+    style={{ color: borderColor }}
+  >
+    {title}
+  </span>
+  <span
+    className="text-white font-inter text-xs font-bold px-2 py-0.5 rounded-full leading-none shadow-[0_2px_4px_rgba(0,0,0,0.15)]"
+    style={{ backgroundColor: borderColor }}
+  >
+    {items.length}
+  </span>
+  <div >
+    <Button
             variant="icon"
             onClick={() => setModalOpen(true)}
             className="flex p-1.5 items-center rounded-lg border border-transparent text-[#777980] cursor-pointer ml-auto hover:bg-white/70 hover:border-[#D0D5DD] hover:text-[#1B1B1B] transition-all duration-200"
           >
             <Plus size={18} />
           </Button>
-        </div>
+  </div>
+  
+</div>
+
+          
+        
 
         <Droppable droppableId={id}>
           {(provided, snapshot) => (

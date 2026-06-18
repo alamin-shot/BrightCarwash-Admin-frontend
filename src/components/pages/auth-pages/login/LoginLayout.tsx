@@ -27,7 +27,7 @@ export function LoginLayout() {
               Hi, welcome back again!
             </h1>
             <p className="text-[#E9E9EA] font-inter text-sm font-normal leading-[160%]">
-              Login with your email and password that you have been created before, or you can create account if you don't have Asanah account.
+              Login with your email and password that you have been created before, or you can create account if you don`t have Asanah account.
             </p>
           </div>
           <LoginForm />

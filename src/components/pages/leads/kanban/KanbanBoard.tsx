@@ -1,59 +1,74 @@
-"use client";
+'use client';
 
-import { useRef, useCallback } from "react";
-import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
-import { KANBAN_STAGES } from "@/configs/kanban.config";
-import { KanbanColumn } from "@/components/pages/leads/kanban/KanbanColumn";
-import type { Lead, LeadStage } from "@/types/leads";
+import { useRef, useCallback } from 'react';
+import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
+import { KanbanColumn } from '@/components/pages/leads/kanban/KanbanColumn';
+import type { Lead } from '@/types/leads';
+import type { StageOption } from '@/components/ui/StageDropdown';
 
 interface KanbanBoardProps {
-  leads: Lead[];
-  onStageChange: (id: string, stage: LeadStage) => void;
+	leads: Lead[];
+	stages: StageOption[];
+	onStageChange: (id: string, stageId: string) => void;
 }
 
-export function KanbanBoard({ leads, onStageChange }: KanbanBoardProps) {
-  const boardRef = useRef<HTMLDivElement>(null);
+function getIconForStage(stage: StageOption): string {
+	const label = stage.label.toLowerCase();
+	if (label.includes('new')) return 'new';
+	if (label.includes('contract')) return 'contract';
+	if (label.includes('convert')) return 'convert';
+	if (label.includes('lost')) return 'lost';
+	return 'new';
+}
 
-  const getLeadsByStage = (stage: LeadStage): Lead[] =>
-    leads.filter((l) => l.stage === stage);
+export function KanbanBoard({
+	leads,
+	stages,
+	onStageChange,
+}: KanbanBoardProps) {
+	const boardRef = useRef<HTMLDivElement>(null);
 
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
-    const { draggableId, destination } = result;
-    const newStage = destination.droppableId as LeadStage;
-    const lead = leads.find((l) => l.id === draggableId);
-    if (!lead || lead.stage === newStage) return;
-    onStageChange(draggableId, newStage);
-  };
+	const getLeadsByStage = (stageValue: string): Lead[] =>
+		leads.filter((l) => l.stage === stageValue);
 
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    const target = e.target as HTMLElement;
-    const scrollableParent = target.closest(".adm-kanban-scroll");
-    if (scrollableParent) return; // let column scroll naturally
-    if (!boardRef.current) return;
-    e.preventDefault();
-    boardRef.current.scrollLeft += e.deltaY;
-  }, []);
+	const handleDragEnd = (result: DropResult) => {
+		if (!result.destination) return;
+		const { draggableId, destination } = result;
+		const targetStage = destination.droppableId;
+		const lead = leads.find((l) => l.id === draggableId);
+		if (!lead || lead.stage === targetStage) return;
+		const stageOption = stages.find((s) => s.value === targetStage);
+		onStageChange(draggableId, stageOption?.stageId || targetStage);
+	};
 
-  return (
-    <DragDropContext onDragEnd={handleDragEnd}>
-      <div
-        ref={boardRef}
-        onWheel={handleWheel}
-        className="flex gap-4 overflow-x-auto pb-4 adm-kanban-board h-full"
-      >
-        {KANBAN_STAGES.map((stage) => (
-          <KanbanColumn
-            key={stage.id}
-            id={stage.id}
-            title={stage.title}
-            borderColor={stage.borderColor}
-            stageColor={stage.stageColor}
-            icon={stage.icon}
-            items={getLeadsByStage(stage.id)}
-          />
-        ))}
-      </div>
-    </DragDropContext>
-  );
+	const handleWheel = useCallback((e: React.WheelEvent) => {
+		const target = e.target as HTMLElement;
+		if (target.closest('.adm-kanban-scroll')) return;
+		if (!boardRef.current) return;
+		e.preventDefault();
+		boardRef.current.scrollLeft += e.deltaY;
+	}, []);
+
+	return (
+		<DragDropContext onDragEnd={handleDragEnd}>
+			<div
+				ref={boardRef}
+				onWheel={handleWheel}
+				className='flex gap-4 overflow-x-auto pb-4 adm-kanban-board h-full'
+			>
+				{stages.map((stage) => (
+					<KanbanColumn
+						key={stage.stageId}
+						id={stage.value}
+						stageId={stage.stageId}
+						title={stage.label}
+						borderColor={stage.color}
+						stageColor={stage.color}
+						icon={getIconForStage(stage)}
+						items={getLeadsByStage(stage.value)}
+					/>
+				))}
+			</div>
+		</DragDropContext>
+	);
 }

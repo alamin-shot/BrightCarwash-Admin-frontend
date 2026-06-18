@@ -1,113 +1,118 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Droppable, Draggable } from "@hello-pangea/dnd";
-import { Plus } from "lucide-react";
-import { Icon } from "@/components/ui/Icon";
-import { Button } from "@/components/ui/Button";
-import { KanbanCard } from "@/components/pages/leads/kanban/KanbanCard";
-import { AddLeadModal } from "@/components/pages/leads/kanban/AddLeadModal";
-import type { Lead, LeadStage } from "@/types/leads";
+import { useState } from 'react';
+import { Droppable, Draggable } from '@hello-pangea/dnd';
+import { Plus } from 'lucide-react';
+import { Icon } from '@/components/ui/Icon';
+import { Button } from '@/components/ui/Button';
+import { KanbanCard } from '@/components/pages/leads/kanban/KanbanCard';
+import { AddLeadModal } from '@/components/pages/leads/kanban/AddLeadModal';
+import type { Lead, LeadStage } from '@/types/leads';
 
 interface KanbanColumnProps {
-  id: LeadStage;
-  title: string;
-  borderColor: string;
-  stageColor: string;
-  icon: string;
-  items: Lead[];
+	id: string;
+	stageId: string;
+	title: string;
+	borderColor: string;
+	stageColor: string;
+	icon: string;
+	items: Lead[];
 }
 
-export function KanbanColumn({ id, title, borderColor, icon, items }: KanbanColumnProps) {
-  const [modalOpen, setModalOpen] = useState(false);
-  const badgeTint = borderColor + "26";
+export function KanbanColumn({
+	id,
+	title,
+	borderColor,
+	icon,
+	items,
+	stageId,
+}: KanbanColumnProps) {
+	const [modalOpen, setModalOpen] = useState(false);
+	const badgeTint = borderColor + '26';
 
-  return (
-    <>
-      <div
-        className="flex w-[280px] min-w-[280px] h-full p-3 pt-5 flex-col items-center gap-4 rounded-2xl bg-[#F7F7F7] flex-shrink-0 overflow-hidden relative shadow-sm"
-        style={{ borderTop: `5px solid ${borderColor}` }}
-      >
-        
-          <div
-  className="flex py-3 pl-3 pr-4 items-start gap-2 self-stretch rounded-lg border transition-all"
-  style={{
-    backgroundColor: badgeTint,
-    borderColor: borderColor,
-  }}
->
-  <Icon name={icon} width={18} height={18} />
-  <span
-    className="text-sm font-semibold capitalize leading-none tracking-tight"
-    style={{ color: borderColor }}
-  >
-    {title}
-  </span>
-  <span
-    className="text-white font-inter text-xs font-bold px-2 py-0.5 rounded-full leading-none shadow-[0_2px_4px_rgba(0,0,0,0.15)]"
-    style={{ backgroundColor: borderColor }}
-  >
-    {items.length}
-  </span>
-  <div >
-    <Button
-            variant="icon"
-            onClick={() => setModalOpen(true)}
-            className="flex p-1.5 items-center rounded-lg border border-transparent text-[#777980] cursor-pointer ml-auto hover:bg-white/70 hover:border-[#D0D5DD] hover:text-[#1B1B1B] transition-all duration-200"
-          >
-            <Plus size={18} />
-          </Button>
-  </div>
-  
-</div>
+	return (
+		<>
+			<div
+				className='flex w-70 min-w-70 h-full p-3 pt-5 flex-col items-center gap-4 rounded-2xl bg-[#F7F7F7] shrink-0 overflow-hidden relative shadow-sm'
+				style={{ borderTop: `5px solid ${borderColor}` }}
+			>
+				<div
+					className='flex py-3 pl-3 pr-4 items-center gap-2 self-stretch rounded-lg border transition-all justify-between'
+					style={{
+						backgroundColor: badgeTint,
+						borderColor: borderColor,
+					}}
+				>
+					<div className='flex items-center gap-2'>
+						<Icon name={icon} width={18} height={18} color={borderColor} />
+						<span
+							className='text-sm font-semibold capitalize leading-none tracking-tight'
+							style={{ color: borderColor }}
+						>
+							{title}
+						</span>
+						<span
+							className='text-white font-inter text-xs font-bold px-2 py-0.5 rounded-full leading-none shadow-[0_2px_4px_rgba(0,0,0,0.15)]'
+							style={{ backgroundColor: borderColor }}
+						>
+							{items.length}
+						</span>
+					</div>
 
-          
-        
+					<Button
+						variant='icon'
+						onClick={() => setModalOpen(true)}
+						className='flex p-1.5 items-center rounded-lg border border-transparent text-[#777980] cursor-pointer hover:bg-white/70 hover:border-[#D0D5DD] hover:text-[#1B1B1B] transition-all duration-200'
+					>
+						<Plus size={18} />
+					</Button>
+				</div>
 
-        <Droppable droppableId={id}>
-          {(provided, snapshot) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className={`flex-1 w-full overflow-hidden rounded-xl min-h-0 transition-colors ${
-                snapshot.isDraggingOver
-                  ? "bg-[#EBF5FF] shadow-[inset_0_0_0_2px_rgba(0,152,232,0.2)]"
-                  : ""
-              }`}
-            >
-              <div className="flex flex-col items-center gap-3 w-full h-full overflow-y-auto adm-kanban-scroll py-1">
-                {items.map((lead, index) => (
-                  <Draggable key={lead.id} draggableId={lead.id} index={index}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className={`w-full transition-all duration-200 ${
-                          snapshot.isDragging
-                            ? "z-50 scale-105 rotate-1 shadow-2xl"
-                            : ""
-                        }`}
-                        style={provided.draggableProps.style}
-                      >
-                        <KanbanCard lead={lead} index={index} />
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            </div>
-          )}
-        </Droppable>
-      </div>
+				<Droppable droppableId={id}>
+					{(provided, snapshot) => (
+						<div
+							ref={provided.innerRef}
+							{...provided.droppableProps}
+							className={`flex-1 w-full overflow-hidden rounded-xl min-h-0 transition-colors ${
+								snapshot.isDraggingOver
+									? 'bg-[#EBF5FF] shadow-[inset_0_0_0_2px_rgba(0,152,232,0.2)]'
+									: ''
+							}`}
+						>
+							<div className='flex flex-col items-center gap-3 w-full h-full overflow-y-auto adm-kanban-scroll py-1'>
+								{items.map((lead, index) => (
+									<Draggable key={lead.id} draggableId={lead.id} index={index}>
+										{(provided, snapshot) => (
+											<div
+												ref={provided.innerRef}
+												{...provided.draggableProps}
+												{...provided.dragHandleProps}
+												className={`w-full transition-all duration-200 ${
+													snapshot.isDragging
+														? 'z-50 scale-105 rotate-1 shadow-2xl'
+														: ''
+												}`}
+												style={provided.draggableProps.style}
+											>
+												<KanbanCard lead={lead} index={index} />
+											</div>
+										)}
+									</Draggable>
+								))}
+								{provided.placeholder}
+							</div>
+						</div>
+					)}
+				</Droppable>
+			</div>
 
-      <AddLeadModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        stage={id}
-        borderColor={borderColor}
-      />
-    </>
-  );
+			<AddLeadModal
+				isOpen={modalOpen}
+				onClose={() => setModalOpen(false)}
+				stage={id}
+				stageId={stageId}
+				borderColor={borderColor}
+			/>
+		</>
+	);
 }

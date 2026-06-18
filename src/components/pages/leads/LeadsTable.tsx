@@ -8,7 +8,7 @@ import { LeadsFilters } from "@/components/pages/leads/LeadsFilters";
 import { ViewToggle } from "@/components/pages/leads/ViewToggle";
 import { KanbanBoard } from "@/components/pages/leads/kanban/KanbanBoard";
 import { useGetLeadsQuery, useUpdateLeadStageMutation } from "@/services/leads.api";
-import { exportToCSV } from "@/lib/csv-export";
+import { exportToExcel } from "@/lib/excel-export";
 import type { Lead, LeadStage } from "@/types/leads";
 import { toast } from "react-toastify";
 
@@ -56,9 +56,9 @@ export const LeadsTable = forwardRef<LeadsTableHandle>(function LeadsTable(_prop
       const q = searchQuery.toLowerCase();
       return lead.name.toLowerCase().includes(q) || lead.service.toLowerCase().includes(q) || lead.vehicle.toLowerCase().includes(q);
     })
-    .filter((lead) => (sourceFilter ? lead.source === sourceFilter : true))
-    .filter((lead) => (depositFilter ? lead.deposit === depositFilter : true)),
-  [leads, searchQuery, sourceFilter, depositFilter]);
+    .filter((lead) => !sourceFilter || lead.source === sourceFilter)
+    .filter((lead) => !depositFilter || lead.depositStatus === depositFilter),
+    [leads, searchQuery, sourceFilter, depositFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filteredLeads.length / ITEMS_PER_PAGE));
   useEffect(() => { if (currentPage > totalPages) setCurrentPage(1); }, [totalPages, currentPage]);
@@ -80,7 +80,7 @@ export const LeadsTable = forwardRef<LeadsTableHandle>(function LeadsTable(_prop
       { key: "vehicle", header: "Vehicle" }, { key: "source", header: "Source" },
       { key: "deposit", header: "Deposit" }, { key: "stage", header: "Stage" }, { key: "date", header: "Date" },
     ];
-    exportToCSV(dataToExport, cols, "leads-export");
+    exportToExcel(dataToExport, cols, "leads-export");
     toast.success(`Exported ${dataToExport.length} leads`);
   }, [filteredLeads, selectedIds]);
 
@@ -110,14 +110,16 @@ export const LeadsTable = forwardRef<LeadsTableHandle>(function LeadsTable(_prop
       </div>
 
       {viewMode === "list" ? (
-        <>
-          <DataTable columns={columns} data={paginatedLeads} rowKey={(row) => row.id} className="w-full" />
-          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}
-            totalItems={filteredLeads.length} itemsPerPage={ITEMS_PER_PAGE} />
-        </>
-      ) : (
-        <KanbanBoard leads={filteredLeads} onStageChange={handleStageChange} />
-      )}
+  <>
+    <DataTable columns={columns} data={paginatedLeads} rowKey={(row) => row.id} className="w-full" />
+    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage}
+      totalItems={filteredLeads.length} itemsPerPage={ITEMS_PER_PAGE} />
+  </>
+) : (
+  <div className="h-[calc(100vh-220px)] overflow-hidden">
+    <KanbanBoard leads={filteredLeads} onStageChange={handleStageChange} />
+  </div>
+)}
     </div>
   );
 });

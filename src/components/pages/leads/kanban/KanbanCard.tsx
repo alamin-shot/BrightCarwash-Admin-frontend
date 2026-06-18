@@ -10,7 +10,7 @@ interface KanbanCardProps {
   index: number;
 }
 
-const depositStyles: Record<string, string> = {
+const depositStatusStyles: Record<string, string> = {
   paid: "text-[#006F1F] border-[#DFE1E7] bg-white",
   pending: "text-[#FFAF00] border-[#DFE1E7] bg-white",
   refunded: "text-[#FF4345] border-[#DFE1E7] bg-white",
@@ -54,9 +54,9 @@ export function KanbanCard({ lead }: KanbanCardProps) {
       </div>
 
       <div className="flex items-center gap-2 flex-wrap">
-        <span className={`inline-flex py-1 px-2 justify-center items-center gap-1 rounded border text-xs capitalize ${depositStyles[lead.deposit]}`}>
-          {lead.deposit}
-        </span>
+        <span className={`inline-flex py-1 px-2 justify-center items-center gap-1 rounded border text-xs capitalize ${depositStatusStyles[lead.depositStatus]}`}>
+  {lead.depositStatus}
+</span>
         <span className="inline-flex py-1 px-2 justify-center items-center gap-1 rounded border border-[#DFE1E7] bg-white text-xs text-[#1B1B1B] capitalize">
           {lead.source}
         </span>

@@ -1,5 +1,5 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import type { Lead } from "@/types/leads";
+import type { Lead, CreateLeadRequest } from "@/types/leads";
 import { APP_CONFIG } from "@/configs/app.config";
 import { mockLeads } from "@/mocks/leads.mock";
 import axiosInstance from "@/lib/axios-instance";
@@ -56,7 +56,34 @@ export const leadsApi = createApi({
       },
       invalidatesTags: ["Leads"],
     }),
+    createLead: builder.mutation<Lead, CreateLeadRequest>({
+      queryFn: async (body) => {
+        try {
+          if (APP_CONFIG.MOCK_MODE) {
+            await delay(APP_CONFIG.MOCK_DELAY_MS);
+            const newLead: Lead = {
+              id: `inq_${Date.now()}`,
+              avatar: "/images/avatar-placeholder.png",
+              date: new Date().toISOString().split("T")[0],
+              ...body,
+            };
+            mockLeads.push(newLead);
+            return { data: { ...newLead } };
+          }
+          const { data } = await axiosInstance.post<Lead>("/leads", body);
+          return { data };
+        } catch (error) {
+          return {
+            error: {
+              status: 500,
+              data: error instanceof Error ? error.message : "Failed to create lead",
+            },
+          };
+        }
+      },
+      invalidatesTags: ["Leads"],
+    }),
   }),
 });
 
-export const { useGetLeadsQuery, useUpdateLeadStageMutation } = leadsApi;
+export const { useGetLeadsQuery, useUpdateLeadStageMutation, useCreateLeadMutation } = leadsApi;

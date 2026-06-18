@@ -27,7 +27,11 @@ export function KanbanBoard({ leads, onStageChange }: KanbanBoardProps) {
   };
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
+    const target = e.target as HTMLElement;
+    const scrollableParent = target.closest(".adm-kanban-scroll");
+    if (scrollableParent) return; // let column scroll naturally
     if (!boardRef.current) return;
+    e.preventDefault();
     boardRef.current.scrollLeft += e.deltaY;
   }, []);
 

@@ -27,11 +27,13 @@ export function Button({
   children,
   className = "",
   disabled,
+  type = "button",          // ← default to "button" to prevent form submissions
   ...props
 }: ButtonProps) {
   if (variant === "icon" || variant === "sidebar" || variant === "link") {
     return (
       <button
+        type={type}
         disabled={disabled || isLoading}
         className={className}
         {...props}
@@ -43,6 +45,7 @@ export function Button({
 
   return (
     <button
+      type={type}
       disabled={disabled || isLoading}
       className={`w-full py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${variantClasses[variant]} ${className}`}
       {...props}

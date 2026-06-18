@@ -4,7 +4,7 @@ import { ActionsDropdown } from "@/components/ui/ActionsDropdown";
 import type { Column } from "@/components/ui/DataTable";
 import type { Lead, LeadStage } from "@/types/leads";
 
-const depositStyles: Record<string, string> = {
+const depositStatusStyles: Record<string, string> = {
   paid: "text-[#006F1F] border-[#E8E8E9] bg-white",
   pending: "text-[#FFAF00] border-[#E8E8E9] bg-white",
   refunded: "text-[#FF4345] border-[#E8E8E9] bg-white",
@@ -92,13 +92,11 @@ export function createLeadsColumns({
       ),
     },
     {
-      key: "deposit",
+      key: "depositStatus",
       header: "Deposit",
       render: (row) => (
-        <span
-          className={`inline-flex py-[6px] px-2 justify-center items-center gap-1 rounded border text-sm capitalize ${depositStyles[row.deposit]}`}
-        >
-          {row.deposit}
+        <span className={`inline-flex py-[6px] px-2 justify-center items-center gap-1 rounded border text-sm capitalize ${depositStatusStyles[row.depositStatus]}`}>
+          {row.depositStatus}
         </span>
       ),
     },

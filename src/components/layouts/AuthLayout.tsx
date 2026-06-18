@@ -13,6 +13,7 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
 	const [imgError, setImgError] = useState(false);
+	const [imgSrc, setImgSrc] = useState('/images/login-bg.png');
 
 	return (
 		<div className='flex h-screen overflow-hidden bg-[#0B1220]'>
@@ -49,13 +50,27 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
 			<div className='flex-1 relative hidden lg:block'>
 				{!imgError ? (
 					<Image
-						src='/images/login-bg.png'
+						src={imgSrc}
 						alt='Dashboard preview'
 						fill
 						className='object-cover'
 						priority
 						unoptimized
-						onError={() => setImgError(true)}
+						onError={(error) => {
+							console.error('[AuthLayout] Image loading error:', error);
+							console.log('[AuthLayout] Attempting fallback image...');
+							// Try fallback to Dashboard.png if login-bg.png fails
+							if (imgSrc === '/images/login-bg.png') {
+								console.log('[AuthLayout] Switching to Dashboard.png fallback');
+								setImgSrc('/images/Dashboard.png');
+							} else {
+								// If fallback also fails, show gradient
+								console.log(
+									'[AuthLayout] Fallback also failed, showing gradient',
+								);
+								setImgError(true);
+							}
+						}}
 					/>
 				) : (
 					<div className='absolute inset-0 bg-gradient-to-br from-[#0B1220] via-[#1a2a3a] to-[#0B1220]' />

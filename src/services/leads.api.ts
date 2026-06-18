@@ -85,7 +85,6 @@ export const leadsApi = createApi({
 						const lead = mockLeads.find((l) => l.id === id);
 						if (!lead) throw new Error('Lead not found');
 						lead.stageId = stageId;
-						// Map stageId to stage name
 						const stageMap: Record<string, string> = {
 							stage_new: 'new',
 							stage_contracted: 'contracted',
@@ -113,6 +112,28 @@ export const leadsApi = createApi({
 									: 'Failed to update stage',
 						},
 					};
+				}
+			},
+			async onQueryStarted({ id, stageId }, { dispatch, queryFulfilled }) {
+				const patchResult = dispatch(
+					leadsApi.util.updateQueryData('getLeads', undefined, (draft) => {
+						const lead = draft.find((l) => l.id === id);
+						if (lead) {
+							lead.stageId = stageId;
+							const stageMap: Record<string, string> = {
+								stage_new: 'new',
+								stage_contracted: 'contracted',
+								stage_converted: 'converted',
+								stage_lost: 'lost',
+							};
+							lead.stage = stageMap[stageId] || lead.stage;
+						}
+					}),
+				);
+				try {
+					await queryFulfilled;
+				} catch {
+					patchResult.undo();
 				}
 			},
 			invalidatesTags: ['Leads'],

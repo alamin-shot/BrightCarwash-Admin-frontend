@@ -57,22 +57,26 @@ export function NotesSection({ leadId, notes }: Props) {
 					onClick={handleAdd}
 					isLoading={isSubmitting}
 					loadingText='Adding...'
-					className='px-4 py-2.5 rounded text-sm'
+					className='px-4 py-2.5 rounded text-sm w-40!'
 				>
 					+ Add Notes
 				</Button>
 			</div>
-			{localNotes.map((note) => (
-				<div
-					key={note.id}
-					className='flex py-3 px-4 items-center self-stretch rounded-md border border-[#DFE1E7] bg-white gap-4'
-				>
-					<span className='flex-1 text-sm text-[#1B1B1B]'>{note.content}</span>
-					<span className='text-xs text-[#777980] whitespace-nowrap'>
-						{note.author} • {note.date}
-					</span>
-				</div>
-			))}
+			<div className='flex items-start gap-4 self-stretch flex-wrap'>
+				{localNotes.map((note) => (
+					<div
+						key={note.id}
+						className='flex py-3 px-4 items-center rounded-md border border-[#DFE1E7] bg-white gap-4 flex-1 min-w-[250px]'
+					>
+						<span className='flex-1 text-sm text-[#1B1B1B]'>
+							{note.content}
+						</span>
+						<span className='text-xs text-[#777980] whitespace-nowrap'>
+							{note.author} • {note.date}
+						</span>
+					</div>
+				))}
+			</div>
 		</div>
 	);
 }

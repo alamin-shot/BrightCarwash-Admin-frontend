@@ -33,14 +33,23 @@ const ITEMS_PER_PAGE = 10;
 export interface LeadsTableHandle {
 	exportCSV: () => void;
 }
-
 function mapStagesToOptions(stages: Stage[]): StageOption[] {
-	return stages.map((s) => ({
-		value: s.name.toLowerCase().replace(/\s+/g, '_'),
-		label: s.name,
-		color: s.color,
-		stageId: s.id,
-	}));
+	return stages.map((s) => {
+		// Extract a simple key from the stage name
+		const label = s.name.toLowerCase();
+		let value = 'new';
+		if (label.includes('contract')) value = 'contracted';
+		else if (label.includes('convert')) value = 'converted';
+		else if (label.includes('lost')) value = 'lost';
+		else if (label.includes('new')) value = 'new';
+
+		return {
+			value,
+			label: s.name,
+			color: s.color,
+			stageId: s.id,
+		};
+	});
 }
 
 async function deleteLeadFromBackend(id: string): Promise<void> {

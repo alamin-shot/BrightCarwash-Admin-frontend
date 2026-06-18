@@ -8,16 +8,10 @@ const dotColors: Record<ActivityType, string> = {
 	stage: 'bg-[#B23730]',
 	staff: 'bg-[#B23730]',
 	lead: 'bg-[#0098E8]',
-	coupon: '',
+	coupon: 'bg-[#0098E8]',
 };
 
 function TimelineDot({ type }: { type: ActivityType }) {
-	if (type === 'coupon')
-		return (
-			<div className='shrink-0 bg-[#0098E8] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm'>
-				Coupon
-			</div>
-		);
 	return (
 		<div className={`w-3 h-3 rounded-full shrink-0 mt-1 ${dotColors[type]}`} />
 	);

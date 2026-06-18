@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
-import { TokenRefreshProvider } from "@/components/shared/TokenRefreshProvider";
 import { StoreProvider } from "@/app/StoreProvider";
 
 export const metadata: Metadata = {
@@ -18,9 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <StoreProvider>
-          <TokenRefreshProvider>{children}</TokenRefreshProvider>
-        </StoreProvider>
+        <StoreProvider>{children}</StoreProvider>
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
       </body>
     </html>

@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { User, AuthState } from "@/types/auth";
-import { isAuthenticated as checkAuth, getAccessToken } from "@/lib/auth-client";
+import { isAuthenticated as checkAuth } from "@/lib/auth-client";
 
 const initialState: AuthState = {
   user: null,

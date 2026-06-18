@@ -9,10 +9,10 @@ const stageOptions = ["new", "contracted", "converted", "lost"] as const;
 type Stage = (typeof stageOptions)[number];
 
 const stageStyles: Record<Stage, string> = {
-  converted: "bg-[#006F1F] text-white",
-  contracted: "bg-[#FFAF00] text-white",
-  lost: "bg-[#FF4345] text-white",
-  new: "bg-[#0098E8] text-white",
+  converted: "bg-[#DCF7EA] text-[#006F1F]",
+  contracted: "bg-[#FFF7E6] text-[#FFAF00]",
+  lost: "bg-[#FFE6E6] text-[#FF4345]",
+  new: "bg-[#8ad7ff] text-[#0098E8]",
 };
 
 const stageIcons: Record<Stage, string> = {
@@ -20,6 +20,13 @@ const stageIcons: Record<Stage, string> = {
   contracted: "contract",
   lost: "lost",
   new: "new",
+};
+
+const stageColors: Record<Stage, string> = {
+  converted: "#006F1F",
+  contracted: "#FFAF00",
+  lost: "#FF4345",
+  new: "#0098E8",
 };
 
 interface StageDropdownProps {
@@ -46,7 +53,7 @@ export function StageDropdown({ currentStage, onSelect }: StageDropdownProps) {
         onClick={() => setOpen(!open)}
         className={`inline-flex py-[6px] pl-2 pr-1 justify-center items-center gap-1 rounded text-sm capitalize cursor-pointer ${stageStyles[currentStage]}`}
       >
-        <Icon name={stageIcons[currentStage]} width={14} height={14} />
+        <Icon name={stageIcons[currentStage]} width={14} height={14} color={stageColors[currentStage]} />
         {currentStage}
         <ChevronDown size={12} className="opacity-70" />
       </Button>
@@ -64,8 +71,12 @@ export function StageDropdown({ currentStage, onSelect }: StageDropdownProps) {
                   : "text-[#1B1B1B] hover:bg-[#F8FAFB]"
               }`}
             >
-              <Icon name={stageIcons[stage]} width={14} height={14}
-                className={stage === currentStage ? "opacity-100" : "opacity-60"} />
+              <Icon
+                name={stageIcons[stage]}
+                width={14}
+                height={14}
+                color={stage === currentStage ? "#FFFFFF" : stageColors[stage]}
+              />
               {stage}
             </Button>
           ))}

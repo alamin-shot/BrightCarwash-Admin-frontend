@@ -4,25 +4,39 @@ export interface LoginCredentials {
 }
 
 export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-  user: User;
+  success: boolean;
+  message: string;
+  authorization: {
+    type: string;
+    access_token: string;
+    refresh_token: string;
+  };
+  roles: string[];
+}
+
+export interface UserResponse {
+  success: boolean;
+  data: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    avatar: string | null;
+    roleUsers: {
+      role: {
+        name: string;
+      };
+    }[];
+  };
 }
 
 export interface User {
   id: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  name: string;
-  role: 'admin' | 'user';
-}
-
-export interface TokenPayload {
-  sub: string;
-  email: string;
-  role: 'admin' | 'user';
-  iat: number;
-  exp: number;
+  avatar: string | null;
+  role: string;
 }
 
 export interface AuthState {
@@ -43,14 +57,15 @@ export interface VerifyOtpRequest {
 export interface ResetPasswordRequest {
   email: string;
   otp: string;
-  newPassword: string;
+  new_password: string;
 }
 
 export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
+  old_password: string;
+  new_password: string;
 }
 
 export interface AuthMessageResponse {
+  success: boolean;
   message: string;
 }

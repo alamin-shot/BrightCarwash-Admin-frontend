@@ -3,7 +3,7 @@
 import { useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/store";
-import { setUser, clearAuth, initAuth } from "@/store/slices/authSlice";
+import { setUser, setLoading, clearAuth, initAuth } from "@/store/slices/authSlice";
 import { setTokens, clearTokens, isAuthenticated as checkAuth } from "@/lib/auth-client";
 import * as authService from "@/services/auth.service";
 import type { LoginCredentials } from "@/types/auth";
@@ -20,6 +20,7 @@ export function useAuth() {
 
   useEffect(() => {
     if (checkAuth() && !user) {
+      dispatch(setLoading(true));
       authService
         .getProfile()
         .then((profile) => dispatch(setUser(profile)))
@@ -34,8 +35,9 @@ export function useAuth() {
     async (credentials: LoginCredentials) => {
       try {
         const response = await authService.login(credentials);
-        setTokens(response.accessToken, response.expiresIn, response.refreshToken);
-        dispatch(setUser(response.user));
+        setTokens(response.authorization.access_token, response.authorization.refresh_token);
+        const profile = await authService.getProfile();
+        dispatch(setUser(profile));
         toast.success("Login successful");
         router.push("/dashboard");
       } catch (error) {

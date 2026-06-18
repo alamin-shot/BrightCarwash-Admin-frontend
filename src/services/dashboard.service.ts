@@ -8,7 +8,7 @@ function delay(ms: number): Promise<void> {
 }
 
 export async function getDashboardData(): Promise<DashboardData> {
-  if (APP_CONFIG.MOCK_MODE) {
+  if (APP_CONFIG.MOCK_MODE || APP_CONFIG.DASHBOARD_MOCK) {
     await delay(APP_CONFIG.MOCK_DELAY_MS);
     return mockDashboardData;
   }

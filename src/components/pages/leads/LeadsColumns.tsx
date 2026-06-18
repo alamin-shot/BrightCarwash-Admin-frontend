@@ -21,6 +21,13 @@ interface LeadsColumnsParams {
   selectedIds: Set<string>;
 }
 
+const stageColors: Record<string, string> = {
+  converted: "#006F1F",
+  contracted: "#FFAF00",
+  lost: "#FF4345",
+  new: "#0098E8",
+};
+
 export function createLeadsColumns({
   onStageChange,
   onView,

@@ -1,12 +1,11 @@
 export const AUTH_CONFIG = {
   MOCK_CREDENTIALS: {
-    email: "admin@example.com",
-    password: "Password123!",
+    email: "admin@email.com",
+    password: "Admin@123!",
   },
   MOCK_OTP: "123456",
-  ACCESS_TOKEN_MAX_AGE: 15 * 60,
+  ACCESS_TOKEN_MAX_AGE: 7 * 24 * 60 * 60, // 7 days (backend access token validity)
   REFRESH_TOKEN_MAX_AGE: 7 * 24 * 60 * 60,
-  REFRESH_BUFFER_SECONDS: 60,
   ACCESS_TOKEN_COOKIE: "accessToken",
   REFRESH_TOKEN_COOKIE: "refreshToken",
 } as const;

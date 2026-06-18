@@ -2,6 +2,7 @@ import type {
   LoginCredentials,
   LoginResponse,
   User,
+  UserResponse,
   ForgotPasswordRequest,
   VerifyOtpRequest,
   ResetPasswordRequest,
@@ -17,6 +18,17 @@ import {
   mockChangePassword,
 } from "@/mocks/auth.mock";
 import { mockOrReal } from "@/services/base-query";
+
+function mapUser(data: UserResponse["data"]): User {
+  return {
+    id: data.id,
+    firstName: data.first_name,
+    lastName: data.last_name,
+    email: data.email,
+    avatar: data.avatar,
+    role: data.roleUsers?.[0]?.role?.name || "staff",
+  };
+}
 
 export const authEndpoints = {
   login: {
@@ -41,11 +53,11 @@ export const authEndpoints = {
   getProfile: {
     queryFn: async () => {
       try {
-        const result = await mockOrReal<User>(
+        const result = await mockOrReal<UserResponse>(
           () => mockGetProfile(),
-          { url: "/auth/profile", method: "GET" }
+          { url: "/auth/me", method: "GET" }
         );
-        return result;
+        return { data: mapUser(result.data.data) };
       } catch (error) {
         return {
           error: {
@@ -63,9 +75,9 @@ export const authEndpoints = {
         const result = await mockOrReal<AuthMessageResponse>(
           () => {
             mockForgotPassword(body.email);
-            return { message: "If the email exists, an OTP has been sent" };
+            return { success: true, message: "If the email exists, an OTP has been sent" };
           },
-          { url: "/auth/forgot-password", method: "POST", body }
+          { url: "/auth/forgot-password/send-otp", method: "POST", body }
         );
         return result;
       } catch (error) {
@@ -85,9 +97,9 @@ export const authEndpoints = {
         const result = await mockOrReal<AuthMessageResponse>(
           () => {
             mockVerifyOtp(body.email, body.otp);
-            return { message: "OTP verified successfully" };
+            return { success: true, message: "OTP verified successfully" };
           },
-          { url: "/auth/verify-otp", method: "POST", body }
+          { url: "/auth/forgot-password/verify-otp", method: "POST", body }
         );
         return result;
       } catch (error) {
@@ -106,10 +118,10 @@ export const authEndpoints = {
       try {
         const result = await mockOrReal<AuthMessageResponse>(
           () => {
-            mockResetPassword(body.email, body.otp, body.newPassword);
-            return { message: "Password reset successfully" };
+            mockResetPassword(body.email, body.otp, body.new_password);
+            return { success: true, message: "Password reset successfully" };
           },
-          { url: "/auth/reset-password", method: "POST", body }
+          { url: "/auth/forgot-password/reset-password", method: "POST", body }
         );
         return result;
       } catch (error) {
@@ -128,8 +140,8 @@ export const authEndpoints = {
       try {
         const result = await mockOrReal<AuthMessageResponse>(
           () => {
-            mockChangePassword(body.currentPassword, body.newPassword);
-            return { message: "Password changed successfully" };
+            mockChangePassword(body.old_password, body.new_password);
+            return { success: true, message: "Password changed successfully" };
           },
           { url: "/auth/change-password", method: "POST", body }
         );

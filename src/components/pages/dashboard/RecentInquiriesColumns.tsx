@@ -11,10 +11,10 @@ const depositStyles: Record<string, string> = {
 };
 
 const stageStyles: Record<string, string> = {
-  converted: "bg-[#006F1F] text-white",
-  contracted: "bg-[#FFAF00] text-white",
-  lost: "bg-[#FF4345] text-white",
-  new: "bg-[#0098E8] text-white",
+  converted: "bg-[#DCF7EA] text-[#006F1F]",
+  contracted: "bg-[#FFF7E6] text-[#FFAF00]",
+  lost: "bg-[#FFE6E6] text-[#FF4345]",
+  new: "bg-[#8ad7ff] text-[#0098E8]",
 };
 
 const stageIcons: Record<string, string> = {
@@ -22,6 +22,13 @@ const stageIcons: Record<string, string> = {
   contracted: "contract",
   lost: "lost",
   new: "new",
+};
+
+const stageColors: Record<string, string> = {
+  converted: "#006F1F",
+  contracted: "#FFAF00",
+  lost: "#FF4345",
+  new: "#0098E8",
 };
 
 export const recentInquiriesColumns: Column<RecentInquiry>[] = [
@@ -84,7 +91,7 @@ export const recentInquiriesColumns: Column<RecentInquiry>[] = [
       <span
         className={`inline-flex py-[6px] px-2 justify-center items-center gap-1 rounded text-sm capitalize ${stageStyles[row.stage]}`}
       >
-        <Icon name={stageIcons[row.stage]} width={14} height={14} />
+        <Icon name={stageIcons[row.stage]} width={14} height={14} color={stageColors[row.stage]} />
         {row.stage}
       </span>
     ),

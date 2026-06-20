@@ -8,7 +8,7 @@ import {
 	type LeadsTableHandle,
 } from '@/components/pages/leads/LeadsTable';
 import { AddLeadModal } from '@/components/pages/leads/kanban/AddLeadModal';
-import Link from 'next/link';
+
 
 export function LeadsContent() {
 	const tableRef = useRef<LeadsTableHandle>(null);
@@ -23,7 +23,7 @@ export function LeadsContent() {
 				<div className='flex items-center gap-3 sm:gap-4 shrink-0'>
 					<Button
 						variant='outline'
-						className='flex py-2 sm:py-[10px] px-3 sm:px-4 justify-center items-center gap-1.5 sm:gap-2 rounded border border-[#DFE1E7] text-[#1B1B1B] font-inter text-xs sm:text-sm font-normal'
+						className='flex py-2 sm:py-2.5 px-3 sm:px-4 justify-center items-center gap-1.5 sm:gap-2 rounded border border-[#DFE1E7] text-[#1B1B1B] font-inter text-xs sm:text-sm font-normal'
 						onClick={() => tableRef.current?.exportCSV()}
 					>
 						<Icon
@@ -35,7 +35,7 @@ export function LeadsContent() {
 						Export
 					</Button>
 					<Button
-						className='flex py-2 sm:py-[10px] px-3 sm:px-4 justify-center items-center gap-1.5 sm:gap-2 rounded bg-[#0098E8] text-white font-inter text-xs sm:text-sm font-normal hover:bg-[#0088D8] transition-colors whitespace-nowrap'
+						className='flex py-2 sm:py-2.5 px-3 sm:px-4 justify-center items-center gap-1.5 sm:gap-2 rounded bg-[#0098E8] text-white font-inter text-xs sm:text-sm font-normal hover:bg-[#0088D8] transition-colors whitespace-nowrap'
 						onClick={() => setModalOpen(true)}
 					>
 						<Icon

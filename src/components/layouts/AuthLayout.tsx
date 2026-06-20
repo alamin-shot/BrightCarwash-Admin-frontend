@@ -24,7 +24,7 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
 						alt='Logo'
 						width={40}
 						height={48}
-						className='object-contain sm:w-12.5 sm:h-14.25 lg:w-14.25 lg:h-[64px]'
+						className='object-contain sm:w-12.5 sm:h-14.25 lg:w-14.25 lg:h-16'
 						unoptimized
 					/>
 					<LanguageSelector />

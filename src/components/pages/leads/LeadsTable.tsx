@@ -20,7 +20,9 @@ import {
 	useUpdateLeadStageMutation,
 } from '@/services/leads.api';
 import { getStages } from '@/services/stage.service';
-import { exportToExcel } from '@/lib/excel-export';
+import { useExportExcel } from '@/hooks/useExportExcel';
+import { useLeadFilters } from '@/hooks/useLeadFilters';
+import { useLeadSelection } from '@/hooks/useLeadSelection';
 import type { Lead } from '@/types/leads';
 import type { StageOption } from '@/components/ui/StageDropdown';
 import type { Stage } from '@/types/stage';
@@ -65,10 +67,18 @@ export const LeadsTable = forwardRef<LeadsTableHandle>(
 		const router = useRouter();
 		const { data: leads = [], isLoading, error } = useGetLeadsQuery();
 		const [updateStage] = useUpdateLeadStageMutation();
-		const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-		const [searchQuery, setSearchQuery] = useState('');
-		const [sourceFilter, setSourceFilter] = useState('');
-		const [depositFilter, setDepositFilter] = useState('');
+		const {
+			searchQuery,
+			setSearchQuery,
+			sourceFilter,
+			setSourceFilter,
+			depositFilter,
+			setDepositFilter,
+			filteredLeads,
+			uniqueSources,
+		} = useLeadFilters(leads);
+		const { selectedIds, handleSelectRow, handleSelectAll } =
+			useLeadSelection();
 		const [currentPage, setCurrentPage] = useState(1);
 		const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
 		const [stages, setStages] = useState<StageOption[]>([]);
@@ -78,11 +88,8 @@ export const LeadsTable = forwardRef<LeadsTableHandle>(
 		}, []);
 
 		const refreshStages = useCallback(async () => {
-			const s = await getStages();
-			setStages(mapStagesToOptions(s));
+			setStages(mapStagesToOptions(await getStages()));
 		}, []);
-
-		const resetPage = useCallback(() => setCurrentPage(1), []);
 
 		const handleStageChange = useCallback(
 			async (id: string, stageId: string) => {
@@ -112,39 +119,6 @@ export const LeadsTable = forwardRef<LeadsTableHandle>(
 			}
 		}, []);
 
-		const handleView = useCallback(
-			(lead: Lead) => router.push(`/leads/${lead.id}`),
-			[router],
-		);
-
-		const handleSelectRow = useCallback((id: string) => {
-			setSelectedIds((prev) => {
-				const next = new Set(prev);
-				if (next.has(id)) next.delete(id);
-				else next.add(id);
-				return next;
-			});
-		}, []);
-
-		const filteredLeads = useMemo(
-			() =>
-				leads
-					.filter((lead) => {
-						if (!searchQuery) return true;
-						const q = searchQuery.toLowerCase();
-						return (
-							lead.name.toLowerCase().includes(q) ||
-							lead.service.toLowerCase().includes(q) ||
-							lead.vehicle.toLowerCase().includes(q)
-						);
-					})
-					.filter((lead) => !sourceFilter || lead.source === sourceFilter)
-					.filter(
-						(lead) => !depositFilter || lead.depositStatus === depositFilter,
-					),
-			[leads, searchQuery, sourceFilter, depositFilter],
-		);
-
 		const totalPages = Math.max(
 			1,
 			Math.ceil(filteredLeads.length / ITEMS_PER_PAGE),
@@ -153,29 +127,17 @@ export const LeadsTable = forwardRef<LeadsTableHandle>(
 			if (currentPage > totalPages) setCurrentPage(1);
 		}, [totalPages, currentPage]);
 
-		const paginatedLeads = useMemo(() => {
-			const start = (currentPage - 1) * ITEMS_PER_PAGE;
-			return filteredLeads.slice(start, start + ITEMS_PER_PAGE);
-		}, [filteredLeads, currentPage]);
+		const paginatedLeads = useMemo(
+			() =>
+				filteredLeads.slice(
+					(currentPage - 1) * ITEMS_PER_PAGE,
+					currentPage * ITEMS_PER_PAGE,
+				),
+			[filteredLeads, currentPage],
+		);
 
-		const handleSelectAll = useCallback(() => {
-			setSelectedIds(
-				selectedIds.size === paginatedLeads.length
-					? new Set()
-					: new Set(paginatedLeads.map((l) => l.id)),
-			);
-		}, [paginatedLeads, selectedIds.size]);
-
-		const handleExport = useCallback(() => {
-			const dataToExport =
-				selectedIds.size > 0
-					? filteredLeads.filter((l) => selectedIds.has(l.id))
-					: filteredLeads;
-			if (dataToExport.length === 0) {
-				toast.warning('No data to export');
-				return;
-			}
-			const cols = [
+		const exportColumns = useMemo(
+			() => [
 				{ key: 'name', header: 'Lead Name' },
 				{ key: 'service', header: 'Service' },
 				{ key: 'vehicle', header: 'Vehicle' },
@@ -183,31 +145,32 @@ export const LeadsTable = forwardRef<LeadsTableHandle>(
 				{ key: 'depositStatus', header: 'Deposit' },
 				{ key: 'stage', header: 'Stage' },
 				{ key: 'date', header: 'Date' },
-			];
-			exportToExcel(dataToExport, cols, 'leads-export');
-			toast.success(`Exported ${dataToExport.length} leads`);
-		}, [filteredLeads, selectedIds]);
-
-		useImperativeHandle(ref, () => ({ exportCSV: handleExport }), [
-			handleExport,
-		]);
-
-		const uniqueSources = useMemo(
-			() => [...new Set(leads.map((l) => l.source))],
-			[leads],
+			],
+			[],
 		);
-		const allSelected =
-			paginatedLeads.length > 0 && selectedIds.size === paginatedLeads.length;
+
+		const { handleExport } = useExportExcel({
+			data: filteredLeads,
+			columns: exportColumns,
+			filename: 'leads-export',
+		});
+		useImperativeHandle(
+			ref,
+			() => ({ exportCSV: () => handleExport(selectedIds) }),
+			[handleExport, selectedIds],
+		);
 
 		const columns = useMemo(
 			() =>
 				createLeadsColumns({
 					onStageChange: handleStageChange,
-					onView: handleView,
+					onView: (lead) => router.push(`/leads/${lead.id}`),
 					onDelete: handleDelete,
 					onSelectRow: handleSelectRow,
-					onSelectAll: handleSelectAll,
-					allSelected,
+					onSelectAll: () => handleSelectAll(paginatedLeads.map((l) => l.id)),
+					allSelected:
+						paginatedLeads.length > 0 &&
+						selectedIds.size === paginatedLeads.length,
 					selectedIds,
 					router,
 					stages,
@@ -215,12 +178,11 @@ export const LeadsTable = forwardRef<LeadsTableHandle>(
 				}),
 			[
 				handleStageChange,
-				handleView,
 				handleDelete,
 				handleSelectRow,
 				handleSelectAll,
-				allSelected,
 				selectedIds,
+				paginatedLeads,
 				router,
 				stages,
 				refreshStages,
@@ -243,20 +205,11 @@ export const LeadsTable = forwardRef<LeadsTableHandle>(
 				<div className='flex justify-between items-center w-full gap-4 flex-wrap'>
 					<LeadsFilters
 						searchQuery={searchQuery}
-						onSearchChange={(v) => {
-							setSearchQuery(v);
-							resetPage();
-						}}
+						onSearchChange={setSearchQuery}
 						sourceFilter={sourceFilter}
-						onSourceChange={(v) => {
-							setSourceFilter(v);
-							resetPage();
-						}}
+						onSourceChange={setSourceFilter}
 						depositFilter={depositFilter}
-						onDepositChange={(v) => {
-							setDepositFilter(v);
-							resetPage();
-						}}
+						onDepositChange={setDepositFilter}
 						uniqueSources={uniqueSources}
 					/>
 					<ViewToggle viewMode={viewMode} onChange={setViewMode} />

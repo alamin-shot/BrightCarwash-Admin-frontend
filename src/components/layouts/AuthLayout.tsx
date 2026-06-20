@@ -9,10 +9,16 @@ interface AuthLayoutProps {
 	title: string;
 	subtitle: string;
 	children: React.ReactNode;
+	videoSrc?: string;
 }
 
-export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
-	const [imgError, setImgError] = useState(false);
+export function AuthLayout({
+	title,
+	subtitle,
+	children,
+	videoSrc,
+}: AuthLayoutProps) {
+	const [videoError, setVideoError] = useState(false);
 
 	return (
 		<div className='flex h-screen overflow-hidden bg-[#0B1220]'>
@@ -45,25 +51,33 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
 				<LoginFooter />
 			</div>
 
-			{/* Right panel — white border frame + image with gradient */}
-			<div className='flex-1 relative hidden lg:block bg-white'>
-				<div className='absolute top-6 sm:top-8 left-6 sm:left-8 right-0 sm:right-0 bottom-0 sm:bottom-0 rounded-tl-2xl overflow-hidden'>
-					{!imgError ? (
+			{/* Right panel — video with gradient overlay */}
+			<div className='flex-1 relative hidden lg:block'>
+				<div className='absolute top-6 sm:top-8 left-6 sm:left-8 right-6 sm:right-8 bottom-6 sm:bottom-8 rounded-tl-2xl overflow-hidden'>
+					{!videoError && videoSrc ? (
+						<video
+							autoPlay
+							loop
+							muted
+							playsInline
+							className='absolute inset-0 w-full h-full object-cover'
+							onError={() => setVideoError(true)}
+						>
+							<source src={videoSrc} type='video/mp4' />
+						</video>
+					) : (
 						<Image
 							src='/images/login-bg.png'
 							alt='Dashboard preview'
 							fill
-							className=''
+							className='object-cover'
 							priority
 							unoptimized
-							onError={() => setImgError(true)}
+							onError={() => setVideoError(true)}
 						/>
-					) : (
-						<div className='absolute inset-0 bg-linear-to-br from-[#0B1220] via-[#1a2a3a] to-[#0B1220]' />
 					)}
-					{/* Gradient overlay — fades from top to bottom */}
-					<div className='absolute inset-0 bg-linear-to-t from-[#ffffff]/70 via-[#0B1220]/50 to-transparent' />
-					{/* Top edge subtle fade */}
+					{/* Gradient overlay */}
+					<div className='absolute inset-0 bg-linear-to-t from-[#0B1220]/90 via-[#0B1220]/30 to-transparent' />
 					<div className='absolute top-0 left-0 right-0 h-8 bg-linear-to-b from-[#0B1220]/20 to-transparent' />
 				</div>
 			</div>

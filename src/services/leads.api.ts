@@ -88,12 +88,6 @@ export const leadsApi = createApi({
 						const lead = mockLeads.find((l) => l.id === id);
 						if (!lead) throw new Error('Lead not found');
 						lead.stageId = stageId;
-						// const stageMap: Record<string, string> = {
-						// 	stage_new: 'new',
-						// 	stage_contracted: 'contracted',
-						// 	stage_converted: 'converted',
-						// 	stage_lost: 'lost',
-						// };
 						lead.stage = stageName || lead.stage;
 						return { data: { ...lead } };
 					}
@@ -164,13 +158,29 @@ export const leadsApi = createApi({
 						mockLeads.push(newLead);
 						return { data: { ...newLead } };
 					}
-					const json = await fetchFromBackend<{
-						success: boolean;
-						data: LeadApiResponse;
-					}>('/admin/lead', {
+					const formData = new FormData();
+					formData.append('name', body.name);
+					formData.append('email', body.email);
+					if (body.phone) formData.append('phone', body.phone);
+					formData.append('service', body.service);
+					formData.append('vehicle', body.vehicle);
+					if (body.source) formData.append('source', body.source);
+					if (body.priority) formData.append('priority', body.priority);
+					if (body.deposit_status)
+						formData.append('deposit_status', body.deposit_status);
+					if (body.stage_name) formData.append('stage_name', body.stage_name);
+					else if (body.stage) formData.append('stage_name', body.stage);
+					if (body.notes)
+						body.notes.forEach((note) => formData.append('notes', note));
+
+					const token = getAccessToken();
+					const res = await fetch(`${APP_CONFIG.API_BASE_URL}/admin/lead`, {
 						method: 'POST',
-						body: JSON.stringify(body),
+						headers: { Authorization: `Bearer ${token}` },
+						body: formData,
 					});
+					if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+					const json = await res.json();
 					return { data: mapApiToLead(json.data) };
 				} catch (error) {
 					return {

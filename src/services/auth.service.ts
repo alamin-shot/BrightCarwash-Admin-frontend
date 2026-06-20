@@ -20,6 +20,8 @@ import type {
 	AuthMessageResponse,
 } from '@/types/auth';
 import axiosInstance from '@/lib/axios-instance';
+import axios from 'axios';
+import { getRefreshToken } from '@/lib/auth-client';
 
 function delay(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -136,6 +138,26 @@ export async function changePassword(
 	const { data } = await axiosInstance.post<AuthMessageResponse>(
 		'/auth/change-password',
 		reqData,
+	);
+	return data;
+}
+
+export async function refreshAccessToken(): Promise<{
+	access_token: string;
+	refresh_token: string;
+}> {
+	if (APP_CONFIG.MOCK_MODE) {
+		await delay(APP_CONFIG.MOCK_DELAY_MS);
+		// In mock mode, just return the same tokens (mock doesn't expire)
+		return { access_token: 'mock_access', refresh_token: 'mock_refresh' };
+	}
+	const refreshToken = getRefreshToken();
+	if (!refreshToken) throw new Error('No refresh token available');
+	const { data } = await axios.post(
+		`${APP_CONFIG.API_BASE_URL}/auth/refresh-tokens`,
+		{
+			refresh_token: refreshToken,
+		},
 	);
 	return data;
 }

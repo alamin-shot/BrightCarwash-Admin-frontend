@@ -29,6 +29,7 @@ export interface CreateLeadRequest {
 	stage_id: string;
 	notes?: string[];
 	stage?: string;
+	stage_name?: string;
 }
 
 export interface UpdateLeadRequest extends Partial<CreateLeadRequest> {

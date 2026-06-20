@@ -22,6 +22,10 @@ export function getAccessToken(): string | null {
   return getCookie(AUTH_CONFIG.ACCESS_TOKEN_COOKIE);
 }
 
+export function getRefreshToken(): string | null {
+  return getCookie(AUTH_CONFIG.REFRESH_TOKEN_COOKIE);
+}
+
 export function setTokens(accessToken: string, refreshToken: string): void {
   setCookie(AUTH_CONFIG.ACCESS_TOKEN_COOKIE, accessToken, AUTH_CONFIG.ACCESS_TOKEN_MAX_AGE);
   setCookie(AUTH_CONFIG.REFRESH_TOKEN_COOKIE, refreshToken, AUTH_CONFIG.REFRESH_TOKEN_MAX_AGE);

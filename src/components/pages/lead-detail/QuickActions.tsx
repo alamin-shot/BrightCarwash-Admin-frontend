@@ -1,10 +1,8 @@
-import { Phone, Mail, UserPlus, Trash2 } from 'lucide-react';
+import { Mail, UserPlus } from 'lucide-react';
 
 const actions = [
-	{ icon: Phone, label: 'Call lead', color: 'text-[#0098E8]' },
 	{ icon: Mail, label: 'Send Email', color: 'text-[#B23730]' },
 	{ icon: UserPlus, label: 'Assign staff', color: 'text-[#006F1F]' },
-	{ icon: Trash2, label: 'Delete Lead', color: 'text-[#FF4345]' },
 ];
 
 export function QuickActions() {

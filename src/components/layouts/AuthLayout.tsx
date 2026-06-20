@@ -13,19 +13,18 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
 	const [imgError, setImgError] = useState(false);
-	const [imgSrc, setImgSrc] = useState('/images/login-bg.png');
 
 	return (
 		<div className='flex h-screen overflow-hidden bg-[#0B1220]'>
 			{/* Left panel */}
-			<div className='flex w-full lg:max-w-[650px] flex-col items-start self-stretch overflow-y-auto'>
+			<div className='flex w-full lg:max-w-162.5 flex-col items-start self-stretch overflow-y-auto'>
 				<div className='flex px-4 sm:px-6 lg:px-8 py-3 sm:py-4 justify-between items-center self-stretch'>
 					<Image
 						src='/images/logo.png'
 						alt='Logo'
 						width={40}
 						height={48}
-						className='object-contain sm:w-[50px] sm:h-[57px] lg:w-[57px] lg:h-[64px]'
+						className='object-contain sm:w-12.5 sm:h-14.25 lg:w-14.25 lg:h-[64px]'
 						unoptimized
 					/>
 					<LanguageSelector />
@@ -46,36 +45,27 @@ export function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
 				<LoginFooter />
 			</div>
 
-			{/* Right panel */}
-			<div className='flex-1 relative hidden lg:block'>
-				{!imgError ? (
-					<Image
-						src={imgSrc}
-						alt='Dashboard preview'
-						fill
-						className='object-cover'
-						priority
-						unoptimized
-						onError={(error) => {
-							console.error('[AuthLayout] Image loading error:', error);
-							console.log('[AuthLayout] Attempting fallback image...');
-							// Try fallback to Dashboard.png if login-bg.png fails
-							if (imgSrc === '/images/login-bg.png') {
-								console.log('[AuthLayout] Switching to Dashboard.png fallback');
-								setImgSrc('/images/Dashboard.png');
-							} else {
-								// If fallback also fails, show gradient
-								console.log(
-									'[AuthLayout] Fallback also failed, showing gradient',
-								);
-								setImgError(true);
-							}
-						}}
-					/>
-				) : (
-					<div className='absolute inset-0 bg-gradient-to-br from-[#0B1220] via-[#1a2a3a] to-[#0B1220]' />
-				)}
-				<div className='absolute inset-0 bg-gradient-to-t from-[#0B1220]/80 via-[#0B1220]/20 to-transparent' />
+			{/* Right panel — white border frame + image with gradient */}
+			<div className='flex-1 relative hidden lg:block bg-white'>
+				<div className='absolute top-6 sm:top-8 left-6 sm:left-8 right-0 sm:right-0 bottom-0 sm:bottom-0 rounded-tl-2xl overflow-hidden'>
+					{!imgError ? (
+						<Image
+							src='/images/login-bg.png'
+							alt='Dashboard preview'
+							fill
+							className=''
+							priority
+							unoptimized
+							onError={() => setImgError(true)}
+						/>
+					) : (
+						<div className='absolute inset-0 bg-linear-to-br from-[#0B1220] via-[#1a2a3a] to-[#0B1220]' />
+					)}
+					{/* Gradient overlay — fades from top to bottom */}
+					<div className='absolute inset-0 bg-linear-to-t from-[#ffffff]/70 via-[#0B1220]/50 to-transparent' />
+					{/* Top edge subtle fade */}
+					<div className='absolute top-0 left-0 right-0 h-8 bg-linear-to-b from-[#0B1220]/20 to-transparent' />
+				</div>
 			</div>
 		</div>
 	);

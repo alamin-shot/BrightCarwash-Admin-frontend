@@ -33,23 +33,22 @@ const ITEMS_PER_PAGE = 10;
 export interface LeadsTableHandle {
 	exportCSV: () => void;
 }
-function mapStagesToOptions(stages: Stage[]): StageOption[] {
-	return stages.map((s) => {
-		// Extract a simple key from the stage name
-		const label = s.name.toLowerCase();
-		let value = 'new';
-		if (label.includes('contract')) value = 'contracted';
-		else if (label.includes('convert')) value = 'converted';
-		else if (label.includes('lost')) value = 'lost';
-		else if (label.includes('new')) value = 'new';
 
-		return {
-			value,
-			label: s.name,
-			color: s.color,
-			stageId: s.id,
-		};
-	});
+function mapStagesToOptions(stages: Stage[]): StageOption[] {
+	const nameToValue: Record<string, string> = {
+		'new lead': 'new',
+		contracted: 'contracted',
+		converted: 'converted',
+		lost: 'lost',
+	};
+	return stages.map((s) => ({
+		value:
+			nameToValue[s.name.toLowerCase()] ??
+			s.name.toLowerCase().replace(/\s+/g, '_'),
+		label: s.name,
+		color: s.color,
+		stageId: s.id,
+	}));
 }
 
 async function deleteLeadFromBackend(id: string): Promise<void> {
@@ -78,18 +77,26 @@ export const LeadsTable = forwardRef<LeadsTableHandle>(
 			getStages().then((s) => setStages(mapStagesToOptions(s)));
 		}, []);
 
+		const refreshStages = useCallback(async () => {
+			const s = await getStages();
+			setStages(mapStagesToOptions(s));
+		}, []);
+
 		const resetPage = useCallback(() => setCurrentPage(1), []);
 
 		const handleStageChange = useCallback(
 			async (id: string, stageId: string) => {
+				const stageOption = stages.find((s) => s.stageId === stageId);
+				const stageName =
+					stageOption?.label.toLowerCase().replace(/\s+/g, '_') || undefined;
 				try {
-					await updateStage({ id, stageId }).unwrap();
+					await updateStage({ id, stageId, stageName }).unwrap();
 					toast.success('Stage updated');
 				} catch {
 					toast.error('Failed to update stage');
 				}
 			},
-			[updateStage],
+			[updateStage, stages],
 		);
 
 		const handleDelete = useCallback(async (lead: Lead) => {
@@ -113,7 +120,8 @@ export const LeadsTable = forwardRef<LeadsTableHandle>(
 		const handleSelectRow = useCallback((id: string) => {
 			setSelectedIds((prev) => {
 				const next = new Set(prev);
-				next.has(id) ? next.delete(id) : next.add(id);
+				if (next.has(id)) next.delete(id);
+				else next.add(id);
 				return next;
 			});
 		}, []);
@@ -203,6 +211,7 @@ export const LeadsTable = forwardRef<LeadsTableHandle>(
 					selectedIds,
 					router,
 					stages,
+					onStageCreated: refreshStages,
 				}),
 			[
 				handleStageChange,
@@ -214,12 +223,13 @@ export const LeadsTable = forwardRef<LeadsTableHandle>(
 				selectedIds,
 				router,
 				stages,
+				refreshStages,
 			],
 		);
 
 		if (isLoading)
 			return (
-				<div className='h-[300px] bg-gray-100 rounded-lg animate-pulse w-full' />
+				<div className='h-75 bg-gray-100 rounded-lg animate-pulse w-full' />
 			);
 		if (error)
 			return (

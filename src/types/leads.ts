@@ -28,6 +28,7 @@ export interface CreateLeadRequest {
 	deposit_status: Lead['depositStatus'];
 	stage_id: string;
 	notes?: string[];
+	stage?: string;
 }
 
 export interface UpdateLeadRequest extends Partial<CreateLeadRequest> {

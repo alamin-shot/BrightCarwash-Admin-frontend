@@ -7,7 +7,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Button } from '@/components/ui/Button';
 import { KanbanCard } from '@/components/pages/leads/kanban/KanbanCard';
 import { AddLeadModal } from '@/components/pages/leads/kanban/AddLeadModal';
-import type { Lead, LeadStage } from '@/types/leads';
+import type { Lead } from '@/types/leads';
 
 interface KanbanColumnProps {
 	id: string;

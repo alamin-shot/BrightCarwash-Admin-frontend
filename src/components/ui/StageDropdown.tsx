@@ -17,12 +17,12 @@ interface StageDropdownProps {
 	currentStage: string;
 	stages: StageOption[];
 	onSelect: (stageId: string) => void;
+	onStageCreated?: () => void;
 }
 
 const defaultIcon = 'new';
 const defaultColor = '#0098E8';
 
-// Convert hex color to a tinted background (lighter version)
 function hexToTintedBg(hex: string): string {
 	const r = parseInt(hex.slice(1, 3), 16);
 	const g = parseInt(hex.slice(3, 5), 16);
@@ -43,10 +43,13 @@ export function StageDropdown({
 	currentStage,
 	stages,
 	onSelect,
+	onStageCreated,
 }: StageDropdownProps) {
 	const [open, setOpen] = useState(false);
 	const ref = useRef<HTMLDivElement>(null);
+	const dropdownRef = useRef<HTMLDivElement>(null);
 	const [createModalOpen, setCreateModalOpen] = useState(false);
+	const [dropUp, setDropUp] = useState(false);
 
 	useEffect(() => {
 		function handleClick(e: MouseEvent) {
@@ -57,17 +60,30 @@ export function StageDropdown({
 		return () => document.removeEventListener('mousedown', handleClick);
 	}, []);
 
+	useEffect(() => {
+		if (open && dropdownRef.current) {
+			const rect = dropdownRef.current.getBoundingClientRect();
+			const spaceBelow = window.innerHeight - rect.bottom;
+			setDropUp(spaceBelow < 220 && rect.top > 220);
+		}
+	}, [open]);
+
 	const currentOption = stages.find((s) => s.value === currentStage);
 	const currentColor = currentOption?.color || defaultColor;
 	const iconName = currentOption ? getIconName(currentOption) : defaultIcon;
 	const tintedBg = hexToTintedBg(currentColor);
+
+	const handleCreated = () => {
+		setCreateModalOpen(false);
+		if (onStageCreated) onStageCreated();
+	};
 
 	return (
 		<div ref={ref} className='relative inline-block'>
 			<Button
 				variant='icon'
 				onClick={() => setOpen(!open)}
-				className='inline-flex py-[6px] pl-2 pr-1 justify-center items-center gap-1 rounded text-sm capitalize cursor-pointer'
+				className='inline-flex py-1.5 pl-2 pr-1 justify-center items-center gap-1 rounded text-sm capitalize cursor-pointer'
 				style={{ backgroundColor: tintedBg, color: currentColor }}
 			>
 				<Icon name={iconName} width={14} height={14} color={currentColor} />
@@ -76,7 +92,12 @@ export function StageDropdown({
 			</Button>
 
 			{open && (
-				<div className='absolute top-full left-0 mt-1 w-44 bg-white rounded-lg border border-[#E8E8E9] shadow-lg z-20 overflow-hidden'>
+				<div
+					ref={dropdownRef}
+					className={`absolute left-0 w-44 bg-white rounded-lg border border-[#E8E8E9] shadow-lg z-20 overflow-hidden ${
+						dropUp ? 'bottom-full mb-1' : 'top-full mt-1'
+					}`}
+				>
 					{stages.map((stage) => (
 						<Button
 							key={stage.stageId}
@@ -85,7 +106,7 @@ export function StageDropdown({
 								onSelect(stage.stageId);
 								setOpen(false);
 							}}
-							className={`flex w-full py-[10px] px-4 items-center gap-2 text-sm capitalize cursor-pointer transition-colors ${
+							className={`flex w-full py-2.5 px-4 items-center gap-2 text-sm capitalize cursor-pointer transition-colors ${
 								stage.value === currentStage
 									? 'bg-[#0098E8] text-white'
 									: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
@@ -106,7 +127,7 @@ export function StageDropdown({
 					))}
 					<Button
 						variant='icon'
-						className='flex w-full py-[10px] px-4 items-center justify-center text-[#0098E8] font-inter text-sm border-t border-[#E8E8E9] hover:bg-[#F0F8FF] cursor-pointer'
+						className='flex w-full py-2.5 px-4 items-center justify-center text-[#0098E8] font-inter text-sm border-t border-[#E8E8E9] hover:bg-[#F0F8FF] cursor-pointer'
 						onClick={() => {
 							setOpen(false);
 							setCreateModalOpen(true);
@@ -120,7 +141,7 @@ export function StageDropdown({
 			<CreateStageModal
 				isOpen={createModalOpen}
 				onClose={() => setCreateModalOpen(false)}
-				onCreated={() => {}}
+				onCreated={handleCreated}
 			/>
 		</div>
 	);

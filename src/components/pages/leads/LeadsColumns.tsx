@@ -21,11 +21,11 @@ interface LeadsColumnsParams {
 	selectedIds: Set<string>;
 	router: { push: (url: string) => void };
 	stages: StageOption[];
+	onStageCreated?: () => void;
 }
 
 export function createLeadsColumns({
 	onStageChange,
-	onView,
 	onDelete,
 	onSelectRow,
 	onSelectAll,
@@ -33,6 +33,7 @@ export function createLeadsColumns({
 	selectedIds,
 	router,
 	stages,
+	onStageCreated,
 }: LeadsColumnsParams): Column<Lead>[] {
 	return [
 		{
@@ -68,7 +69,7 @@ export function createLeadsColumns({
 							className='object-cover'
 						/>
 					</div>
-					<span className='text-[#1B1B1B] font-inter text-sm font-normal leading-[150%] truncate max-w-[120px]'>
+					<span className='text-[#1B1B1B] font-inter text-sm font-normal leading-[150%] truncate max-w-30'>
 						{row.name}
 					</span>
 				</div>
@@ -100,7 +101,7 @@ export function createLeadsColumns({
 			header: 'Deposit',
 			render: (row) => (
 				<span
-					className={`inline-flex py-[6px] px-2 justify-center items-center gap-1 rounded border text-sm capitalize ${depositStatusStyles[row.depositStatus] || depositStatusStyles.NONE}`}
+					className={`inline-flex py-1.5 px-2 justify-center items-center gap-1 rounded border text-sm capitalize ${depositStatusStyles[row.depositStatus] || depositStatusStyles.NONE}`}
 				>
 					{row.depositStatus}
 				</span>
@@ -114,6 +115,7 @@ export function createLeadsColumns({
 					currentStage={row.stage}
 					stages={stages}
 					onSelect={(stageId) => onStageChange(row.id, stageId)}
+					onStageCreated={onStageCreated}
 				/>
 			),
 		},

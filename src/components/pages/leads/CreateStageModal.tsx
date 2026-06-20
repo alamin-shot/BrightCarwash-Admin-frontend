@@ -6,6 +6,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { createStage } from '@/services/stage.service';
 import { toast } from 'react-toastify';
+import Image from 'next/image';
 
 interface CreateStageModalProps {
 	isOpen: boolean;
@@ -60,7 +61,7 @@ export function CreateStageModal({
 		try {
 			await createStage({
 				name: name.trim(),
-				color: hexToRgba(color, opacity),
+				color: color, 
 				sort_order: sortOrder,
 				file,
 			});
@@ -221,10 +222,13 @@ export function CreateStageModal({
 					) : (
 						<div className='flex items-center gap-3 p-4 rounded-xl border border-[#DFE1E7] bg-[#F8FAFB]'>
 							<div className='w-12 h-12 rounded-lg border border-[#DFE1E7] bg-white flex items-center justify-center overflow-hidden'>
-								<img
+								<Image
 									src={filePreview}
 									alt='Preview'
+									width={48}
+									height={48}
 									className='max-w-full max-h-full object-contain'
+									unoptimized
 								/>
 							</div>
 							<span className='flex-1 text-sm text-[#1B1B1B] font-inter truncate'>

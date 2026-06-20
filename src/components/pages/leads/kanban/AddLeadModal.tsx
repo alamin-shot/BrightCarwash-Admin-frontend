@@ -5,7 +5,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { FilterDropdown } from '@/components/ui/FilterDropdown';
 import { useCreateLeadMutation } from '@/services/leads.api';
-import type { LeadStage, LeadDepositStatus } from '@/types/leads';
+import type { LeadDepositStatus } from '@/types/leads';
 import { toast } from 'react-toastify';
 
 interface AddLeadModalProps {
@@ -59,6 +59,7 @@ export function AddLeadModal({
 				priority: 'MEDIUM',
 				deposit_status: depositStatus,
 				stage_id: leadStageId,
+				stage: leadStage, // ← new field
 			}).unwrap();
 			toast.success(`${name} added`);
 			setName('');
@@ -87,11 +88,11 @@ export function AddLeadModal({
 		</div>
 	);
 
-	const glassInputClass =
-		'adm-glass-input w-full px-4 py-2.5 text-sm font-inter';
+	const inputClass =
+		'w-full px-4 py-2.5 text-sm font-inter border border-[#DFE1E7] rounded-lg bg-white text-[#1B1B1B] placeholder-[#777980] outline-none focus:border-[#0098E8] focus:ring-2 focus:ring-[#0098E8]/10 transition-all';
 
 	return (
-		<Modal isOpen={isOpen} onClose={onClose} title={modalTitle} glass size='lg'>
+		<Modal isOpen={isOpen} onClose={onClose} title={modalTitle} size='lg'>
 			<form onSubmit={handleSubmit} className='flex flex-col gap-4'>
 				<div>
 					<label
@@ -107,7 +108,7 @@ export function AddLeadModal({
 						onChange={(e) => setName(e.target.value)}
 						required
 						placeholder='Full name'
-						className={glassInputClass}
+						className={inputClass}
 					/>
 				</div>
 				<div className='grid grid-cols-2 gap-3'>
@@ -125,7 +126,7 @@ export function AddLeadModal({
 							onChange={(e) => setPhone(e.target.value)}
 							required
 							placeholder='+1 555-0000'
-							className={glassInputClass}
+							className={inputClass}
 						/>
 					</div>
 					<div>
@@ -142,7 +143,7 @@ export function AddLeadModal({
 							onChange={(e) => setEmail(e.target.value)}
 							required
 							placeholder='email@example.com'
-							className={glassInputClass}
+							className={inputClass}
 						/>
 					</div>
 				</div>
@@ -161,7 +162,7 @@ export function AddLeadModal({
 							onChange={(e) => setService(e.target.value)}
 							required
 							placeholder='Service type'
-							className={glassInputClass}
+							className={inputClass}
 						/>
 					</div>
 					<div>
@@ -178,7 +179,7 @@ export function AddLeadModal({
 							onChange={(e) => setVehicle(e.target.value)}
 							required
 							placeholder='Vehicle model'
-							className={glassInputClass}
+							className={inputClass}
 						/>
 					</div>
 				</div>
@@ -193,7 +194,7 @@ export function AddLeadModal({
 							onChange={(e) => setSource(e.target.value)}
 							required
 							placeholder='Website etc.'
-							className={glassInputClass}
+							className={inputClass}
 						/>
 					</div>
 					<div>
@@ -211,7 +212,7 @@ export function AddLeadModal({
 							value={deposit}
 							onChange={(e) => setDeposit(Number(e.target.value))}
 							placeholder='0'
-							className={glassInputClass}
+							className={inputClass}
 						/>
 					</div>
 					<div>
@@ -231,7 +232,6 @@ export function AddLeadModal({
 								setDepositStatus(val as LeadDepositStatus)
 							}
 							fullWidth
-							buttonClassName='adm-glass-dropdown'
 						/>
 					</div>
 					<div>
@@ -252,16 +252,15 @@ export function AddLeadModal({
 								setLeadStageId(stageIdMap[val] || val);
 							}}
 							fullWidth
-							buttonClassName='adm-glass-dropdown'
 						/>
 					</div>
 				</div>
-				<div className='flex gap-3 justify-end mt-2 pt-4 border-t border-white/20'>
+				<div className='flex gap-3 justify-end mt-2 pt-4 border-t border-[#E8E8E9]'>
 					<Button
 						type='button'
 						variant='outline'
 						onClick={onClose}
-						className='px-6 bg-white/20 backdrop-blur-sm border-white/30 text-[#1B1B1B] hover:bg-white/40'
+						className='px-6'
 					>
 						Cancel
 					</Button>

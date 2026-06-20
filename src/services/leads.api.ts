@@ -77,21 +77,24 @@ export const leadsApi = createApi({
 			},
 			providesTags: ['Leads'],
 		}),
-		updateLeadStage: builder.mutation<Lead, { id: string; stageId: string }>({
-			queryFn: async ({ id, stageId }) => {
+		updateLeadStage: builder.mutation<
+			Lead,
+			{ id: string; stageId: string; stageName?: string }
+		>({
+			queryFn: async ({ id, stageId, stageName }) => {
 				try {
 					if (APP_CONFIG.MOCK_MODE || APP_CONFIG.DASHBOARD_MOCK) {
 						await delay(APP_CONFIG.MOCK_DELAY_MS);
 						const lead = mockLeads.find((l) => l.id === id);
 						if (!lead) throw new Error('Lead not found');
 						lead.stageId = stageId;
-						const stageMap: Record<string, string> = {
-							stage_new: 'new',
-							stage_contracted: 'contracted',
-							stage_converted: 'converted',
-							stage_lost: 'lost',
-						};
-						lead.stage = stageMap[stageId] || lead.stage;
+						// const stageMap: Record<string, string> = {
+						// 	stage_new: 'new',
+						// 	stage_contracted: 'contracted',
+						// 	stage_converted: 'converted',
+						// 	stage_lost: 'lost',
+						// };
+						lead.stage = stageName || lead.stage;
 						return { data: { ...lead } };
 					}
 					const json = await fetchFromBackend<{
@@ -114,19 +117,16 @@ export const leadsApi = createApi({
 					};
 				}
 			},
-			async onQueryStarted({ id, stageId }, { dispatch, queryFulfilled }) {
+			async onQueryStarted(
+				{ id, stageId, stageName },
+				{ dispatch, queryFulfilled },
+			) {
 				const patchResult = dispatch(
 					leadsApi.util.updateQueryData('getLeads', undefined, (draft) => {
 						const lead = draft.find((l) => l.id === id);
 						if (lead) {
 							lead.stageId = stageId;
-							const stageMap: Record<string, string> = {
-								stage_new: 'new',
-								stage_contracted: 'contracted',
-								stage_converted: 'converted',
-								stage_lost: 'lost',
-							};
-							lead.stage = stageMap[stageId] || lead.stage;
+							lead.stage = stageName || lead.stage;
 						}
 					}),
 				);
@@ -149,7 +149,7 @@ export const leadsApi = createApi({
 							date: new Date().toISOString().split('T')[0],
 							priority: body.priority || 'MEDIUM',
 							deposit: 0,
-							stage: 'new',
+							stage: body.stage || 'new',
 							stageId: body.stage_id,
 							assignedToId: null,
 							notes: body.notes || [],
@@ -185,6 +185,18 @@ export const leadsApi = createApi({
 				}
 			},
 			invalidatesTags: ['Leads'],
+			async onQueryStarted(_body, { dispatch, queryFulfilled }) {
+				try {
+					const { data: newLead } = await queryFulfilled;
+					dispatch(
+						leadsApi.util.updateQueryData('getLeads', undefined, (draft) => {
+							draft.push(newLead);
+						}),
+					);
+				} catch {
+					// undo not needed for failed create
+				}
+			},
 		}),
 	}),
 });

@@ -17,6 +17,7 @@ export const paymentsColumns: Column<Payment>[] = [
 				className='w-5 h-5 rounded-md border border-[#E8E8E9] bg-white cursor-pointer accent-[#0098E8]'
 			/>
 		),
+		className: 'w-12',
 		render: () => (
 			<input
 				type='checkbox'

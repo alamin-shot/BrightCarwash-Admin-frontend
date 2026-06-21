@@ -12,7 +12,7 @@ const pageTitles: Record<string, string> = {
 	'/dashboard': 'Welcome back',
 	'/leads': 'Comprehensive Lead Insights',
 	'/payments': 'Overview of All Transactions',
-	'/campaigns': 'Campaigns',
+	'/campaigns': 'Ready to dive into your E-mail Campaigns?',
 	'/staffs': 'Team Management and Access Control',
 	'/website-cms': 'Website CMS',
 	'/reports': 'Reports',

@@ -6,6 +6,7 @@ import { leadsApi } from '@/services/leads.api';
 import authReducer from '@/store/slices/authSlice';
 import { paymentApi } from '@/services/payment.api';
 import { staffApi } from '@/services/staff.api';
+import { campaignApi } from '@/services/campaign.api';
 export const store = configureStore({
 	reducer: {
 		auth: authReducer,
@@ -14,6 +15,7 @@ export const store = configureStore({
 		[leadsApi.reducerPath]: leadsApi.reducer,
 		[paymentApi.reducerPath]: paymentApi.reducer,
 		[staffApi.reducerPath]: staffApi.reducer,
+		[campaignApi.reducerPath]: campaignApi.reducer,
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware().concat(
@@ -22,6 +24,7 @@ export const store = configureStore({
 			leadsApi.middleware,
 			paymentApi.middleware,
 			staffApi.middleware,
+			campaignApi.middleware,
 		),
 });
 

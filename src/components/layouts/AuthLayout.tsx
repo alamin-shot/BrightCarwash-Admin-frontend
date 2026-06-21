@@ -53,7 +53,7 @@ export function AuthLayout({
 
 			{/* Right panel — video with gradient overlay */}
 			<div className='flex-1 relative hidden lg:block'>
-				<div className='absolute top-6 sm:top-8 left-6 sm:left-8 right-6 sm:right-8 bottom-6 sm:bottom-8 rounded-tl-2xl overflow-hidden'>
+				<div className='absolute top-6 sm:top-8 left-6 sm:left-8 right-0 sm:right-0 bottom-0 sm:bottom-0 rounded-tl-2xl overflow-hidden'>
 					{!videoError && videoSrc ? (
 						<video
 							autoPlay

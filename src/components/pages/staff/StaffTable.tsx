@@ -11,7 +11,7 @@ interface Props {
 	staff: Staff[];
 }
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 8;
 
 export function StaffTable({ staff }: Props) {
 	const [currentPage, setCurrentPage] = useState(1);

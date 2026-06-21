@@ -6,7 +6,7 @@ export function ForgotPasswordLayout() {
 		<AuthLayout
 			title='Forgot Password'
 			subtitle="Enter your email address and we'll send you a one-time password to reset your password."
-			videoSrc='/video/video1.mp4'
+			videoSrc='/video/video3.mp4'
 		>
 			<ForgotPasswordForm />
 		</AuthLayout>

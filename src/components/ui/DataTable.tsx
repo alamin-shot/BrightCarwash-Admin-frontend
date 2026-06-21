@@ -29,7 +29,7 @@ export function DataTable<T>({ columns, data, rowKey, className = "" }: DataTabl
 
   return (
     <div className={`w-full overflow-x-auto rounded-lg border border-[#E8E8E9] ${className}`}>
-      <table className="w-full border-collapse min-w-[700px]">
+      <table className="w-full border-collapse min-w-175">
         <thead>
           <tr className="bg-[#F1F1F1]">
             {columns.map((col, index) => (

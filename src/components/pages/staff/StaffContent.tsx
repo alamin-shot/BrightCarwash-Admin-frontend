@@ -56,10 +56,10 @@ export function StaffContent() {
 					Staff & Permissions
 				</h2>
 				<Button
-					className='flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto'
+					className='flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto!'
 					onClick={() => toast.info('Invite Staff — coming soon')}
 				>
-					<Icon name='plus' width={14} height={14} /> + Invite Staff
+					<Icon name='plus' width={14} height={14} /> Invite Staff
 				</Button>
 			</div>
 

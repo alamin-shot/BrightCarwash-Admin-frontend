@@ -88,6 +88,7 @@ export function createStaffColumns({
 		{
 			key: 'actions',
 			header: '',
+			className: 'w-12',
 			render: (row) => {
 				const items = [
 					{ label: 'Edit Role', onClick: () => onEditRole(row) },

@@ -46,6 +46,7 @@ export function createLeadsColumns({
 					onChange={onSelectAll}
 				/>
 			),
+			className: 'w-12',
 			render: (row) => (
 				<input
 					type='checkbox'
@@ -129,6 +130,7 @@ export function createLeadsColumns({
 		{
 			key: 'actions',
 			header: '',
+			className: 'w-12',
 			render: (row) => (
 				<ActionsDropdown
 					items={[

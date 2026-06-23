@@ -1,16 +1,22 @@
 "use client";
 
+import { useEffect } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/Button";
-import { MetricsRow } from "@/components/pages/dashboard/MetricsRow";
-import { InquiriesChart } from "@/components/pages/dashboard/InquiriesChart";
-import { ServiceMixChart } from "@/components/pages/dashboard/ServiceMixChart";
+import { DashboardMetrics } from "@/components/pages/dashboard/DashboardMetrics";
+import { DashboardCharts } from "@/components/pages/dashboard/DashboardCharts";
 import { RecentInquiriesTable } from "@/components/pages/dashboard/RecentInquiriesTable";
-import { useGetDashboardDataQuery } from "@/services/dashboard.api";
+import { useGetDashboardMetricsQuery } from "@/services/dashboard.api";
+import { useGetLeadsQuery } from "@/services/leads.api";
 import Link from "next/link";
 
 export function DashboardContent() {
-  const { data, isLoading, error } = useGetDashboardDataQuery();
+  const { data: metricsData, isLoading: metricsLoading, error: metricsError } = useGetDashboardMetricsQuery();
+  const { data: leadsData, isLoading: leadsLoading, refetch: refetchLeads } = useGetLeadsQuery();
+
+  useEffect(() => { refetchLeads(); }, [refetchLeads]);
+
+  const isLoading = metricsLoading || leadsLoading;
 
   if (isLoading) {
     return (
@@ -20,20 +26,18 @@ export function DashboardContent() {
           <div className="h-8 sm:h-9 w-24 sm:w-28 bg-gray-200 rounded animate-pulse" />
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-[100px] sm:h-[140px] bg-gray-100 rounded-lg animate-pulse" />
-          ))}
+          {[...Array(4)].map((_, i) => <div key={i} className="h-[100px] sm:h-[140px] bg-gray-100 rounded-lg animate-pulse" />)}
         </div>
         <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
-          <div className="w-full lg:w-2/3 h-[250px] sm:h-[300px] bg-gray-100 rounded-lg animate-pulse" />
-          <div className="w-full lg:w-1/3 h-[250px] sm:h-[300px] bg-gray-100 rounded-lg animate-pulse" />
+          <div className="w-full lg:w-3/4 h-[350px] bg-gray-100 rounded-lg animate-pulse" />
+          <div className="w-full lg:w-1/4 h-[350px] bg-gray-100 rounded-lg animate-pulse" />
         </div>
         <div className="h-[250px] sm:h-[300px] bg-gray-100 rounded-lg animate-pulse" />
       </div>
     );
   }
 
-  if (error || !data) {
+  if (metricsError || !metricsData?.data) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
         <div className="w-14 h-14 rounded-full bg-[#FFE6E6] flex items-center justify-center mb-4">
@@ -45,32 +49,21 @@ export function DashboardContent() {
     );
   }
 
+  const recentLeads = (leadsData || []).slice(0, 4).map((lead) => ({
+    id: lead.id, name: lead.name, avatar: lead.avatar,
+    service: lead.service, vehicle: lead.vehicle, source: lead.source,
+    deposit: lead.depositStatus?.toLowerCase() || "none", stage: lead.stage, date: lead.date,
+  }));
+
   return (
     <div className="w-full max-w-full flex flex-col gap-3 sm:gap-4">
       <div className="flex justify-between items-end gap-3">
-        <h2 className="text-[#0B1220] font-lora text-lg sm:text-xl font-bold leading-[100%]">
-          Key Metrics
-        </h2>
-        <Link href="/leads" className="shrink-0">
-          <Button className="flex py-2 sm:py-[10px] px-3 sm:px-4 justify-center items-center gap-1.5 sm:gap-2 rounded bg-[#0098E8] text-white font-inter text-xs sm:text-sm font-normal hover:bg-[#0088D8] transition-colors">
-            <Icon name="plus" width={14} height={14} className="sm:w-4 sm:h-4" />
-            <span>New Lead</span>
-          </Button>
-        </Link>
+        <h2 className="text-[#0B1220] font-lora text-lg sm:text-xl font-bold leading-[100%]">Key Metrics</h2>
       </div>
 
-      <MetricsRow metrics={data.metrics} />
-
-      <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 w-full items-stretch">
-        <div className="w-full lg:w-2/3">
-          <InquiriesChart data={data.chartData} />
-        </div>
-        <div className="w-full lg:w-1/3">
-          <ServiceMixChart data={data.serviceMix} />
-        </div>
-      </div>
-
-      <RecentInquiriesTable data={data.recentInquiries} />
+      <DashboardMetrics data={metricsData.data} />
+      <DashboardCharts data={metricsData.data} />
+      <RecentInquiriesTable data={recentLeads as any} />
     </div>
   );
 }

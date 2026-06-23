@@ -83,10 +83,10 @@ export function InquiriesChart({ data }: InquiriesChartProps) {
   }
 
   return (
-    <div className="w-full h-full p-3 sm:p-4 rounded-lg border border-[#DFE1E7] bg-white flex flex-col gap-2 sm:gap-3">
+    <div className="w-full h-full p-3 sm:p-4 rounded-lg border border-[#DFE1E7] bg-white flex flex-col gap-2 sm:gap-3 h-full">
       <div className="flex justify-between items-end flex-wrap gap-2 shrink-0">
         <h3 className="text-[#1A1C21] font-inter text-base sm:text-lg font-semibold leading-[130%] tracking-[0.09px]">
-          Inquiries & deposits
+          Performance Trend
         </h3>
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-1.5 sm:gap-2">

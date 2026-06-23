@@ -16,7 +16,7 @@ export interface StageOption {
 interface StageDropdownProps {
 	currentStage: string;
 	stages: StageOption[];
-	onSelect: (stageId: string) => void;
+	onSelect: (stageName: string) => void;
 	onStageCreated?: () => void;
 }
 
@@ -32,11 +32,12 @@ function hexToTintedBg(hex: string): string {
 
 function getIconName(stage: StageOption): string {
 	const label = stage.label.toLowerCase();
-	if (label.includes('new')) return 'new';
-	if (label.includes('contract')) return 'contract';
-	if (label.includes('convert')) return 'convert';
-	if (label.includes('lost')) return 'lost';
-	return 'new';
+	if (label.includes("new")) return "new";
+	if (label.includes("contract")) return "contract";
+	if (label.includes("convert")) return "convert";
+	if (label.includes("lost")) return "lost";
+	// Default fallback — never return undefined
+	return "new";
 }
 
 export function StageDropdown({
@@ -94,23 +95,18 @@ export function StageDropdown({
 			{open && (
 				<div
 					ref={dropdownRef}
-					className={`absolute left-0 w-44 bg-white rounded-lg border border-[#E8E8E9] shadow-lg z-20 overflow-hidden ${
-						dropUp ? 'bottom-full mb-1' : 'top-full mt-1'
-					}`}
+					className={`absolute left-0 w-44 bg-white rounded-lg border border-[#E8E8E9] shadow-lg z-20 overflow-hidden ${dropUp ? 'bottom-full mb-1' : 'top-full mt-1'
+						}`}
 				>
 					{stages.map((stage) => (
 						<Button
 							key={stage.stageId}
 							variant='icon'
-							onClick={() => {
-								onSelect(stage.stageId);
-								setOpen(false);
-							}}
-							className={`flex w-full py-2.5 px-4 items-center gap-2 text-sm capitalize cursor-pointer transition-colors ${
-								stage.value === currentStage
-									? 'bg-[#0098E8] text-white'
-									: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
-							}`}
+							onClick={() => { onSelect(stage.label); setOpen(false); }}
+							className={`flex w-full py-2.5 px-4 items-center gap-2 text-sm capitalize cursor-pointer transition-colors ${stage.value === currentStage
+								? 'bg-[#0098E8] text-white'
+								: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
+								}`}
 						>
 							<Icon
 								name={getIconName(stage)}

@@ -1,37 +1,107 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import type { ServiceMixItem } from "@/types/dashboard";
+
+const Chart = dynamic(() => import("react-apexcharts"), {
+  ssr: false,
+  loading: () => <div className="h-full min-h-[350px] bg-gray-100 animate-pulse rounded-lg w-full" />,
+});
 
 interface ServiceMixChartProps {
   data: ServiceMixItem[];
 }
 
-export function ServiceMixChart({ data }: ServiceMixChartProps) {
-  return (
-    <div className="w-full h-full p-3 sm:p-4 flex flex-col gap-3 sm:gap-4 rounded-lg border border-[#DFE1E7] bg-white">
-      <h3 className="shrink-0 text-[#1A1C21] font-inter text-base sm:text-lg font-semibold leading-[130%] tracking-[0.09px]">
-        Service mix
-      </h3>
+const donutColors = ["#0098E8", "#B23730", "#777980", "#1B1B1B", "#DFE1E7"];
 
-      <div className="flex flex-col gap-2 sm:gap-3 flex-1 justify-center">
-        {data.map((item) => (
-          <div key={item.name} className="flex flex-col gap-0.5 sm:gap-1">
-            <div className="flex justify-between items-center">
-              <span className="text-[#1E1E1E] font-inter text-[10px] sm:text-xs font-normal leading-[120%] truncate mr-2">
-                {item.name}
-              </span>
-              <span className="text-[#1E1E1E] font-inter text-[10px] sm:text-xs font-normal leading-[120%] shrink-0">
-                {item.percentage}%
-              </span>
-            </div>
-            <div className="flex h-[24px] sm:h-[30px] flex-col justify-center items-start w-full rounded-lg border border-[#DFE1E7]/20 bg-[#F8FAFB] relative">
-              <div
-                className="h-full rounded-lg bg-[#0098E8] relative flex items-center min-w-[4px]"
-                style={{ width: `${item.percentage}%` }}
-              >
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[#0098E8] border-2 border-white shadow-sm z-10" />
-              </div>
-            </div>
-          </div>
-        ))}
+export function ServiceMixChart({ data }: ServiceMixChartProps) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  const labels = data.map((d) => d.name);
+  const series = data.map((d) => d.percentage);
+
+  const options: ApexCharts.ApexOptions = {
+    chart: {
+      type: "donut",
+      fontFamily: "Inter, sans-serif",
+      toolbar: { show: false },
+    },
+    labels,
+    colors: donutColors,
+    fill: {
+      type: "gradient",
+      gradient: {
+        shade: "dark",
+        type: "vertical",
+        shadeIntensity: 0.5,
+        opacityFrom: 1,
+        opacityTo: 0.6,
+        stops: [0, 100],
+      },
+    },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: "55%",
+          labels: {
+            show: true,
+            total: {
+              show: true,
+              label: "Services",
+              fontSize: "14px",
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 400,
+              color: "#777980",
+              formatter: () => `${series.reduce((a, b) => a + b, 0)}%`,
+            },
+            value: {
+              fontSize: "24px",
+              fontFamily: "Lora, serif",
+              fontWeight: 500,
+              color: "#0B1220",
+              formatter: (val: string) => `${val}%`,
+            },
+            name: {
+              fontSize: "12px",
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 400,
+              color: "#777980",
+            },
+          },
+        },
+      },
+    },
+    stroke: { width: 0 },
+    dataLabels: { enabled: false },
+    legend: {
+      show: true,
+      position: "right",
+      fontSize: "12px",
+      fontFamily: "Inter, sans-serif",
+      fontWeight: 400,
+      labels: { colors: "#1B1B1B", useSeriesColors: false },
+      markers: { size: 8, shape: "circle", offsetX: -2, offsetY: 0 },
+      itemMargin: { horizontal: 0, vertical: 6 },
+    },
+    tooltip: {
+      enabled: true,
+      y: { formatter: (val: number) => `${val}%` },
+    },
+  };
+
+  if (!mounted) {
+    return <div className="h-full min-h-[350px] bg-gray-100 animate-pulse rounded-lg w-full" />;
+  }
+
+  return (
+    <div className="w-full h-auto p-3 sm:p-4 flex flex-col gap-3 sm:gap-4 rounded-lg border border-[#DFE1E7] bg-white">
+      <h3 className="shrink-0 text-[#1A1C21] font-inter text-base sm:text-lg font-semibold leading-[130%] tracking-[0.09px]">
+        Status Distribution
+      </h3>
+      <div className="flex-1 w-full min-h-0" style={{ maxWidth: "400px" }}>
+        <Chart options={options} series={series} type="donut" height={200} width="100%" />
       </div>
     </div>
   );

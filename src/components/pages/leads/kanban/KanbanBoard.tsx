@@ -38,7 +38,7 @@ export function KanbanBoard({
 		const lead = leads.find((l) => l.id === draggableId);
 		if (!lead || lead.stage === targetStage) return;
 		const stageOption = stages.find((s) => s.value === targetStage);
-		onStageChange(draggableId, stageOption?.stageId || targetStage);
+		onStageChange(draggableId, stageOption?.label || targetStage);
 	};
 
 	const handleWheel = useCallback((e: React.WheelEvent) => {

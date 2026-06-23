@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 
 export function useLeadSelection() {
 	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -16,7 +16,7 @@ export function useLeadSelection() {
 
 	const handleSelectAll = useCallback((allIds: string[]) => {
 		setSelectedIds((prev) =>
-			prev.size === allIds.length ? new Set() : new Set(allIds),
+			prev.size === allIds.length ? new Set() : new Set(allIds)
 		);
 	}, []);
 

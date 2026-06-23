@@ -13,7 +13,7 @@ const pageTitles: Record<string, string> = {
 	'/leads': 'Comprehensive Lead Insights',
 	'/payments': 'Overview of All Transactions',
 	'/campaigns': 'Ready to dive into your E-mail Campaigns?',
-	'/staffs': 'Team Management and Access Control',
+	"/staffs": "Team Management and Access Control",
 	'/website-cms': 'Website CMS',
 	'/reports': 'Reports',
 	'/activity-log': 'Activity Log',
@@ -45,26 +45,6 @@ export function Navbar({ onMenuClick }: NavbarProps) {
 			</div>
 
 			<div className='flex items-center gap-1 sm:gap-2 shrink-0'>
-				<Button
-					variant='icon'
-					className='hidden sm:flex p-2 items-center rounded-lg border border-[#E8E8E9] bg-white cursor-pointer'
-					aria-label='Search'
-				>
-					<Icon
-						name='search'
-						width={20}
-						height={20}
-						className='lg:w-6 lg:h-6'
-					/>
-				</Button>
-
-				<Button
-					variant='icon'
-					className='flex p-2 items-center rounded-lg border border-[#E8E8E9] bg-white cursor-pointer'
-					aria-label='Notifications'
-				>
-					<Icon name='bell' width={20} height={20} className='lg:w-6 lg:h-6' />
-				</Button>
 
 				<div className='flex py-1.5 px-1.5 lg:py-1.5 lg:px-1.5 items-center gap-2 lg:gap-4 rounded-lg border border-[#E8E8E9] bg-white'>
 					<div className='flex items-center gap-2'>

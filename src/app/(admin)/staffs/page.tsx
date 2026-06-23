@@ -1,5 +1,5 @@
-import { StaffContent } from '@/components/pages/staff/StaffContent';
+import { TeamsContent } from "@/components/pages/teams/TeamsContent";
 
-export default function StaffPage() {
-	return <StaffContent />;
+export default function TeamsPage() {
+	return <TeamsContent />;
 }

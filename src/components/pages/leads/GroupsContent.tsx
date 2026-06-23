@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { Search } from "lucide-react";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/Button";
-import { Search } from "lucide-react";
-import { LeadsTable, type LeadsTableHandle } from "@/components/pages/leads/LeadsTable";
+import { GroupAccordion } from "@/components/pages/leads/GroupAccordion";
 import { CreateGroupModal } from "@/components/pages/leads/CreateGroupModal";
-import { GroupDropdown } from "@/components/pages/leads/GroupDropdown";
+import { AddLeadModal } from "@/components/pages/leads/kanban/AddLeadModal";
+import { useGetLeadsQuery, useUpdateLeadStageMutation } from "@/services/leads.api";
+import { getStages } from "@/services/stage.service";
+import { useExportExcel } from "@/hooks/useExportExcel";
+import type { StageOption } from "@/components/ui/StageDropdown";
+import type { Stage } from "@/types/stage";
+import type { Lead } from "@/types/leads";
+import { toast } from "react-toastify";
 
 interface Group {
     id: string;
@@ -14,88 +22,108 @@ interface Group {
     leadIds: string[];
 }
 
-export function GroupsContent() {
-    const tableRef = useRef<LeadsTableHandle>(null);
-    const [groupModalOpen, setGroupModalOpen] = useState(false);
-    const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
-    const [searchQuery, setSearchQuery] = useState("");
+function mapStagesToOptions(stages: Stage[]): StageOption[] {
+    const nameToValue: Record<string, string> = { "new lead": "new", contracted: "contracted", converted: "converted", lost: "lost" };
+    return stages.map((s) => ({
+        value: nameToValue[s.name.toLowerCase()] ?? s.name.toLowerCase().replace(/\s+/g, "_"),
+        label: s.name, color: s.color, stageId: s.id,
+    }));
+}
 
-    const handleGroupSelect = useCallback((group: Group | null) => {
-        setSelectedGroup(group);
+interface GroupsContentProps {
+    groupModalOpen: boolean;
+    onGroupModalClose: () => void;
+}
+
+export function GroupsContent({ groupModalOpen, onGroupModalClose }: GroupsContentProps) {
+    const router = useRouter();
+    const { data: leads = [] } = useGetLeadsQuery();
+    const [updateStage] = useUpdateLeadStageMutation();
+    const [groups, setGroups] = useState<Group[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [stages, setStages] = useState<StageOption[]>([]);
+    const [leadModalOpen, setLeadModalOpen] = useState(false);
+    const [targetGroupId, setTargetGroupId] = useState<string | null>(null);
+
+    const loadGroups = useCallback(() => {
+        setGroups(JSON.parse(localStorage.getItem("leadGroups") || "[]"));
     }, []);
 
+    useEffect(() => { loadGroups(); }, [loadGroups]);
+    useEffect(() => { if (!groupModalOpen) loadGroups(); }, [groupModalOpen, loadGroups]);
+    useEffect(() => { getStages().then((s) => setStages(mapStagesToOptions(s))); }, []);
+
+    const handleStageChange = useCallback(async (id: string, stageName: string) => {
+        try {
+            await updateStage({ id, stageName }).unwrap();
+            toast.success("Stage updated");
+        } catch {
+            toast.error("Failed to update stage");
+        }
+    }, [updateStage]);
+
+    const handleDelete = useCallback(async (_lead: Lead) => { toast.info("Delete coming soon"); }, []);
+
+    const handleAddLeadToGroup = useCallback((groupId: string) => {
+        setTargetGroupId(groupId);
+        setLeadModalOpen(true);
+    }, []);
+    const handleDeleteGroup = useCallback((groupId: string) => {
+        const stored = JSON.parse(localStorage.getItem("leadGroups") || "[]");
+        const updated = stored.filter((g: Group) => g.id !== groupId);
+        localStorage.setItem("leadGroups", JSON.stringify(updated));
+        loadGroups();
+        toast.success("Group deleted");
+    }, [loadGroups]);
+
+    const handleLeadAdded = useCallback((leadId: string) => {
+        if (!targetGroupId) return;
+        const stored = JSON.parse(localStorage.getItem("leadGroups") || "[]");
+        const updated = stored.map((g: Group) =>
+            g.id === targetGroupId && !g.leadIds.includes(leadId)
+                ? { ...g, leadIds: [...g.leadIds, leadId] }
+                : g
+        );
+        localStorage.setItem("leadGroups", JSON.stringify(updated));
+        loadGroups();
+        setTargetGroupId(null);
+    }, [targetGroupId, loadGroups]);
+
+    const allGroupLeadIds = useMemo(() => {
+        const ids = new Set<string>();
+        groups.forEach((g) => g.leadIds.forEach((id) => ids.add(id)));
+        return ids;
+    }, [groups]);
+
+    const exportableLeads = useMemo(() => leads.filter((l) => allGroupLeadIds.has(l.id)), [leads, allGroupLeadIds]);
+
+    const exportColumns = useMemo(() => [
+        { key: "name", header: "Lead Name" }, { key: "service", header: "Service" },
+        { key: "vehicle", header: "Vehicle" }, { key: "source", header: "Source" },
+        { key: "depositStatus", header: "Deposit" }, { key: "stage", header: "Stage" }, { key: "date", header: "Date" },
+    ], []);
+
+    const { handleExport } = useExportExcel({ data: exportableLeads, columns: exportColumns, filename: "group-leads-export" });
+
+    const filteredGroups = groups.filter((g) => g.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
     return (
-        <div className="w-full h-full flex flex-col gap-3 sm:gap-4 p-3 sm:p-4">
-            {/* Header */}
-            <div className="flex justify-between items-end gap-3 self-stretch">
-                <h2 className="text-[#0B1220] font-lora text-lg sm:text-xl font-bold leading-[100%]">
-                    Lead Groups
-                </h2>
-                <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-                    <Button
-                        variant="outline"
-                        className="flex py-2 sm:py-2.5 px-3 sm:px-4 justify-center items-center gap-1.5 sm:gap-2 rounded border border-[#DFE1E7] text-[#1B1B1B] font-inter text-xs sm:text-sm font-normal"
-                        onClick={() => tableRef.current?.exportCSV()}
-                    >
-                        <Icon name="export" width={14} height={14} className="sm:w-4 sm:h-4" />
-                        Export
-                    </Button>
-                    <Button
-                        className="flex py-2 sm:py-2.5 px-3 sm:px-4 justify-center items-center gap-1.5 sm:gap-2 rounded bg-[#0098E8] text-white font-inter text-xs sm:text-sm font-normal hover:bg-[#0088D8] transition-colors whitespace-nowrap"
-                        onClick={() => setGroupModalOpen(true)}
-                    >
-                        <Icon name="plus" width={14} height={14} className="sm:w-4 sm:h-4" />
-                        New Group
-                    </Button>
-                </div>
-            </div>
-
-            {/* Filters row */}
+        <div className="flex flex-col gap-3 w-full">
             <div className="flex items-center gap-3">
-                <div className="flex-1">
-                    <GroupDropdown onSelect={handleGroupSelect} />
-                </div>
-                <div className="flex px-4 py-3 items-center gap-3 rounded-lg border border-[#E8E8E9] bg-white flex-1 max-w-[400px]">
+                <div className="flex px-4 py-3 items-center gap-3 rounded-lg border border-[#E8E8E9] bg-white max-w-[400px] flex-1">
                     <Search size={20} className="text-[#777980] shrink-0" />
-                    <input
-                        type="text"
-                        placeholder="Search leads in group..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="flex-1 border-none outline-none text-sm text-[#1B1B1B] placeholder-[#777980] font-inter bg-transparent"
-                    />
+                    <input type="text" placeholder="Search groups..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                        className="flex-1 border-none outline-none text-sm text-[#1B1B1B] placeholder-[#777980] font-inter bg-transparent" />
                 </div>
+                <Button variant="outline" onClick={() => handleExport()} className="flex py-2.5 px-4 items-center gap-2 rounded border border-[#DFE1E7] text-[#1B1B1B] font-inter text-sm w-auto!">
+                    <Icon name="export" width={14} height={14} /> Export
+                </Button>
             </div>
 
-            {/* Group info bar */}
-            {selectedGroup && (
-                <div className="flex items-center gap-3 p-3 rounded-lg border border-[#DFE1E7] bg-[#F8FAFB]">
-                    <div className="flex items-center gap-2">
-                        <span className="w-8 h-8 rounded-lg bg-[#0098E8] flex items-center justify-center text-white font-inter text-sm font-semibold">
-                            {selectedGroup.name.charAt(0)}
-                        </span>
-                        <div>
-                            <span className="text-[#1B1B1B] font-inter text-sm font-medium">{selectedGroup.name}</span>
-                            <span className="text-[#777980] font-inter text-xs ml-2">{selectedGroup.leadIds.length} leads</span>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <GroupAccordion groups={filteredGroups} leads={leads} stages={stages} onStageChange={handleStageChange} onDelete={handleDelete} router={router} onAddLead={handleAddLeadToGroup} onDeleteGroup={handleDeleteGroup} />
 
-            {/* Table */}
-            <LeadsTable
-                ref={tableRef}
-                viewMode="list"
-                groupMode="groups"
-                groupFilter={selectedGroup?.leadIds}
-                searchQuery={searchQuery}
-            />
-
-            <CreateGroupModal
-                isOpen={groupModalOpen}
-                onClose={() => setGroupModalOpen(false)}
-                selectedLeads={[]}
-            />
+            <CreateGroupModal isOpen={groupModalOpen} onClose={onGroupModalClose} selectedLeads={[]} onGroupCreated={loadGroups} />
+            <AddLeadModal isOpen={leadModalOpen} onClose={() => { setLeadModalOpen(false); setTargetGroupId(null); }} onLeadCreated={handleLeadAdded} />
         </div>
     );
 }

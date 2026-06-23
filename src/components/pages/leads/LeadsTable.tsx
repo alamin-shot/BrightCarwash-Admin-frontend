@@ -7,7 +7,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { createLeadsColumns } from "@/components/pages/leads/LeadsColumns";
 import { LeadsFilters } from "@/components/pages/leads/LeadsFilters";
 import { KanbanBoard } from "@/components/pages/leads/kanban/KanbanBoard";
-import { useGetLeadsQuery, useUpdateLeadStageMutation } from "@/services/leads.api";
+import { useGetLeadsQuery, useUpdateLeadStageMutation, useDeleteLeadMutation } from "@/services/leads.api";
 import { getStages } from "@/services/stage.service";
 import { useExportExcel } from "@/hooks/useExportExcel";
 import { useLeadFilters } from "@/hooks/useLeadFilters";
@@ -55,17 +55,19 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 		const { data: leads = [], isLoading, error } = useGetLeadsQuery();
 		const [updateStage] = useUpdateLeadStageMutation();
 		const { searchQuery, setSearchQuery, sourceFilter, setSourceFilter, depositFilter, setDepositFilter, filteredLeads, uniqueSources } = useLeadFilters(leads);
-		const { selectedIds, handleSelectRow, handleSelectAll } = useLeadSelection();
+		const { selectedIds, handleSelectRow, handleSelectAll, setSelectedIds } = useLeadSelection();
 		const [currentPage, setCurrentPage] = useState(1);
 		const [stages, setStages] = useState<StageOption[]>([]);
-
+		const [deleteLead] = useDeleteLeadMutation();
 		const effectiveSearch = externalSearch !== undefined ? externalSearch : searchQuery;
 
 		const groupedLeads = useMemo(() => {
 			if (groupFilter) return filteredLeads.filter((l) => groupFilter.includes(l.id));
 			return filteredLeads;
 		}, [filteredLeads, groupFilter]);
-
+		useEffect(() => {
+			setSelectedIds(new Set());
+		}, [currentPage, setSelectedIds]);
 		useEffect(() => {
 			onSelectionChange?.(selectedIds.size, Array.from(selectedIds));
 		}, [selectedIds, onSelectionChange]);
@@ -74,20 +76,23 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 
 		const refreshStages = useCallback(async () => { setStages(mapStagesToOptions(await getStages())); }, []);
 
-		const handleStageChange = useCallback(async (id: string, stageId: string) => {
-			const stageOption = stages.find((s) => s.stageId === stageId);
-			const stageName = stageOption?.label.toLowerCase().replace(/\s+/g, "_") || undefined;
-			try { await updateStage({ id, stageId, stageName }).unwrap(); toast.success("Stage updated"); }
-			catch { toast.error("Failed to update stage"); }
-		}, [updateStage, stages]);
+		const handleStageChange = useCallback(async (id: string, stageName: string) => {
+			try {
+				await updateStage({ id, stageName }).unwrap();
+				toast.success("Stage updated");
+			} catch {
+				toast.error("Failed to update stage");
+			}
+		}, [updateStage]);
 
 		const handleDelete = useCallback(async (lead: Lead) => {
 			try {
-				if (APP_CONFIG.MOCK_MODE || APP_CONFIG.DASHBOARD_MOCK) { toast.success(`${lead.name} deleted (mock)`); return; }
-				await deleteLeadFromBackend(lead.id);
+				await deleteLead(lead.id).unwrap();
 				toast.success(`${lead.name} deleted`);
-			} catch { toast.error("Failed to delete lead"); }
-		}, []);
+			} catch {
+				toast.error("Failed to delete lead");
+			}
+		}, [deleteLead]);
 
 		const totalPages = Math.max(1, Math.ceil(groupedLeads.length / ITEMS_PER_PAGE));
 		useEffect(() => { if (currentPage > totalPages) setCurrentPage(1); }, [totalPages, currentPage]);
@@ -107,7 +112,7 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 			onStageChange: handleStageChange, onView: (lead) => router.push(`/leads/${lead.id}`),
 			onDelete: handleDelete, onSelectRow: handleSelectRow,
 			onSelectAll: () => handleSelectAll(paginatedLeads.map((l) => l.id)),
-			allSelected: paginatedLeads.length > 0 && selectedIds.size === paginatedLeads.length,
+			allSelected: paginatedLeads.length > 0 && paginatedLeads.every((l) => selectedIds.has(l.id)),
 			selectedIds, router, stages, onStageCreated: refreshStages,
 		}), [handleStageChange, handleDelete, handleSelectRow, handleSelectAll, selectedIds, paginatedLeads, router, stages, refreshStages]);
 

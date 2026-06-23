@@ -1,5 +1,15 @@
+"use client";
+
+import { useState } from "react";
 import { GroupsContent } from "@/components/pages/leads/GroupsContent";
 
 export default function GroupsPage() {
-    return <GroupsContent />;
+    const [groupModalOpen, setGroupModalOpen] = useState(false);
+
+    return (
+        <GroupsContent
+            groupModalOpen={groupModalOpen}
+            onGroupModalClose={() => setGroupModalOpen(false)}
+        />
+    );
 }

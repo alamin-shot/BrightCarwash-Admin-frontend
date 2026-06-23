@@ -14,6 +14,7 @@ interface AddLeadModalProps {
 	stage?: string;
 	stageId?: string;
 	borderColor?: string;
+	onLeadCreated?: (leadId: string) => void;
 }
 
 const stageIdMap: Record<string, string> = {
@@ -29,6 +30,7 @@ export function AddLeadModal({
 	stage = 'new',
 	stageId = 'stage_new',
 	borderColor = '#0098E8',
+	onLeadCreated
 }: AddLeadModalProps) {
 	const [createLead, { isLoading }] = useCreateLeadMutation();
 	const [name, setName] = useState('');
@@ -49,17 +51,12 @@ export function AddLeadModal({
 			return;
 		}
 		try {
-			await createLead({
-				name,
-				email,
-				phone,
-				service,
-				vehicle,
-				source,
-				priority: 'MEDIUM',
+			const result = await createLead({
+				name, email, phone, service, vehicle, source,
+				priority: "MEDIUM",
 				deposit_status: depositStatus,
-				stage_id: leadStageId,
-				stage: leadStage, // ← new field
+				stage_name: leadStage, // send the label
+				stage: leadStage.toLowerCase().replace(/\s+/g, "_"),
 			}).unwrap();
 			toast.success(`${name} added`);
 			setName('');
@@ -73,6 +70,7 @@ export function AddLeadModal({
 			setLeadStage(stage);
 			setLeadStageId(stageId);
 			onClose();
+			onLeadCreated?.(result.id);
 		} catch {
 			toast.error('Failed to add lead');
 		}
@@ -239,18 +237,15 @@ export function AddLeadModal({
 							Stage
 						</label>
 						<FilterDropdown
-							label='New'
+							label="New Lead"
 							options={[
-								{ value: 'new', label: 'New' },
-								{ value: 'contracted', label: 'Contracted' },
-								{ value: 'converted', label: 'Converted' },
-								{ value: 'lost', label: 'Lost' },
+								{ value: "New Lead", label: "New Lead" },
+								{ value: "Contracted", label: "Contracted" },
+								{ value: "Converted", label: "Converted" },
+								{ value: "Lost", label: "Lost" },
 							]}
 							value={leadStage}
-							onChange={(val: string) => {
-								setLeadStage(val);
-								setLeadStageId(stageIdMap[val] || val);
-							}}
+							onChange={(val: string) => setLeadStage(val)}
 							fullWidth
 						/>
 					</div>

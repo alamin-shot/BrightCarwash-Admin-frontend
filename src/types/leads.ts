@@ -24,12 +24,11 @@ export interface CreateLeadRequest {
 	service: string;
 	vehicle: string;
 	source: string;
-	priority: Lead['priority'];
-	deposit_status: Lead['depositStatus'];
-	stage_id: string;
-	notes?: string[];
-	stage?: string;
+	priority: Lead["priority"];
+	deposit_status: Lead["depositStatus"];
 	stage_name?: string;
+	stage?: string;
+	notes?: string[];
 }
 
 export interface UpdateLeadRequest extends Partial<CreateLeadRequest> {

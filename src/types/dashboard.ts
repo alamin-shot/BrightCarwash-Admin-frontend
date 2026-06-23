@@ -25,14 +25,22 @@ export interface RecentInquiry {
   service: string;
   vehicle: string;
   source: string;
-  deposit: "paid" | "pending" | "refunded" | "none";
-  stage: "converted" | "contracted" | "lost" | "new";
+  deposit: string;
+  stage: string;
   date: string;
 }
 
-export interface DashboardData {
-  metrics: MetricCard[];
-  chartData: ChartDataPoint[];
-  serviceMix: ServiceMixItem[];
-  recentInquiries: RecentInquiry[];
+export interface DashboardMetricsResponse {
+  success: boolean;
+  message: string;
+  data: {
+    keyMetrics: {
+      totalLeads: { current: number; percentageChange: number };
+      newThisWeek: { current: number; percentageChange: number };
+      conversionSuccessRate: { current: number; percentageChange: number };
+      depositRevenueCollected: { current: number; percentageChange: number };
+    };
+    performanceTrend: { month: string; total: number; converted: number }[];
+    statusDistribution: { stageName: string; count: number; color: string }[];
+  };
 }

@@ -9,9 +9,10 @@ interface CreateGroupModalProps {
     isOpen: boolean;
     onClose: () => void;
     selectedLeads: string[];
+    onGroupCreated?: () => void;
 }
 
-export function CreateGroupModal({ isOpen, onClose, selectedLeads }: CreateGroupModalProps) {
+export function CreateGroupModal({ isOpen, onClose, selectedLeads, onGroupCreated }: CreateGroupModalProps) {
     const [groupName, setGroupName] = useState("");
 
     const handleCreate = () => {
@@ -24,15 +25,16 @@ export function CreateGroupModal({ isOpen, onClose, selectedLeads }: CreateGroup
             createdAt: new Date().toISOString(),
         });
         localStorage.setItem("leadGroups", JSON.stringify(groups));
-        toast.success(`Group "${groupName}" created with ${selectedLeads.length} leads`);
+        toast.success(`Group "${groupName}" created`);
         setGroupName("");
         onClose();
+        onGroupCreated?.();
     };
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="New Group" size="sm">
             <div className="flex flex-col gap-3">
-
+                <div className="w-full h-px bg-[#DFE1E7]" />
                 <div>
                     <label className="block text-[#777980] font-inter text-base font-normal leading-[130%] mb-1.5">Group Name</label>
                     <input type="text" value={groupName} onChange={(e) => setGroupName(e.target.value)} placeholder="Enter group name"

@@ -1,5 +1,5 @@
-import { CampaignContent } from '@/components/pages/campaigns/CampaignContent';
+import { CampaignsContent } from "./CampaignsContent";
 
 export default function CampaignsRootPage() {
-	return <CampaignContent />;
+	return <CampaignsContent />;
 }

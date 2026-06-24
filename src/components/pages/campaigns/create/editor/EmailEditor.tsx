@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import type { EditorRef } from 'react-email-editor';
 import { toast } from 'react-toastify';
+import { useCreateTemplateMutation } from '@/services/template.api';
 
 const EmailEditorComponent = dynamic(() => import('react-email-editor'), {
 	ssr: false,
@@ -19,27 +20,38 @@ export function EmailEditor() {
 	const [saving, setSaving] = useState(false);
 	const [templateName, setTemplateName] = useState('');
 	const router = useRouter();
+	const [createTemplate] = useCreateTemplateMutation();
 
 	const handleSave = () => {
 		const name =
 			templateName.trim() || `Template ${new Date().toLocaleDateString()}`;
 		if (emailEditorRef.current?.editor) {
 			setSaving(true);
-			emailEditorRef.current.editor.exportHtml((data) => {
-				const saved = JSON.parse(
-					localStorage.getItem('savedTemplates') || '[]',
-				);
-				saved.push({
-					id: `tmp_${Date.now()}`,
-					name,
-					html: data.html,
-					createdAt: new Date().toISOString().split('T')[0],
-					type: 'saved',
-				});
-				localStorage.setItem('savedTemplates', JSON.stringify(saved));
-				toast.success(`Template "${name}" saved!`);
-				setSaving(false);
-				router.push('/campaigns/create?step=3');
+			emailEditorRef.current.editor.exportHtml(async (data) => {
+				try {
+					// ✅ Ensure htmlContent has valid content
+					const htmlContent = data.html || '<p>Empty template</p>';
+
+					await createTemplate({
+						name: name,
+						description: `Created on ${new Date().toLocaleDateString()}`,
+						type: 'EMAIL',
+						editorType: 'VISUAL_DRAG_DROP',
+						emailBody: {
+							subject: name,
+							htmlContent: htmlContent,
+							designJson: { design: data.design || {} },
+						},
+					}).unwrap();
+
+					toast.success(`Template "${name}" saved!`);
+					router.push('/campaigns/create?step=3');
+				} catch (error) {
+					toast.error('Failed to save template');
+					console.error(error);
+				} finally {
+					setSaving(false);
+				}
 			});
 		}
 	};

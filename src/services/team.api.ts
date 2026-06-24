@@ -15,6 +15,7 @@ import {
 } from "@/mocks/team.mock";
 import axiosInstance from "@/lib/axios-instance";
 import { getAccessToken } from "@/lib/auth-client";
+import { Template } from "@/types/template";
 
 function delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -33,7 +34,15 @@ function mapMember(data: MembersApiResponse["data"][0]): TeamMember {
         createdAt: data.created_at?.split("T")[0] || "",
     };
 }
-
+function transformTemplate(apiTemplate: any): Template {
+    return {
+        ...apiTemplate,
+        // For TemplateCard component - uses html prop
+        html: apiTemplate.emailBody?.htmlContent || '<p>No content</p>',
+        // For backward compatibility
+        subject: apiTemplate.emailBody?.subject || '',
+    };
+}
 function mapPermissions(data: PermissionsMap): Permission[] {
     const result: Permission[] = [];
     for (const [module, items] of Object.entries(data)) {
@@ -69,14 +78,13 @@ export const teamApi = createApi({
                         error: {
                             status: 500,
                             data:
-                                error instanceof Error
-                                    ? error.message
-                                    : "Failed to fetch members",
+                                error instanceof Error ? error.message : "Failed to fetch members",
                         },
                     };
                 }
             },
             providesTags: ["TeamMembers"],
+            keepUnusedDataFor: 60, // cache for 1 minute (members change rarely)
         }),
 
         getTeamRoles: builder.query<TeamRole[], void>({
@@ -96,16 +104,16 @@ export const teamApi = createApi({
                         error: {
                             status: 500,
                             data:
-                                error instanceof Error
-                                    ? error.message
-                                    : "Failed to fetch roles",
+                                error instanceof Error ? error.message : "Failed to fetch roles",
                         },
                     };
                 }
             },
             providesTags: ["TeamRoles"],
+            keepUnusedDataFor: 300, // cache 5 minutes (roles are semi‑static)
         }),
 
+        // ✅ Permissions list – cached for 1 hour (they rarely change)
         getPermissions: builder.query<Permission[], void>({
             queryFn: async () => {
                 try {
@@ -130,8 +138,10 @@ export const teamApi = createApi({
                     };
                 }
             },
+            keepUnusedDataFor: 3600, // 1 hour – permissions rarely change
         }),
 
+        // ✅ Role permissions – cached per role name for 5 minutes
         getRoleById: builder.query<string[], string>({
             queryFn: async (name) => {
                 try {
@@ -152,17 +162,16 @@ export const teamApi = createApi({
                         error: {
                             status: 500,
                             data:
-                                error instanceof Error
-                                    ? error.message
-                                    : "Failed to fetch role",
+                                error instanceof Error ? error.message : "Failed to fetch role",
                         },
                     };
                 }
             },
-            providesTags: (_result, _error, name) =>
-                name ? [{ type: "TeamRoles", id: name }] : [],
+            providesTags: (_result, _error, name) => [{ type: "TeamRoles", id: name }],
+            keepUnusedDataFor: 300, // 5 minutes
         }),
 
+        // ✅ Update mutation – invalidates only the specific role’s cache
         updateRolePermissions: builder.mutation<
             { success: boolean; message: string; data?: any },
             { id: string; permissions: string[] }
@@ -174,7 +183,7 @@ export const teamApi = createApi({
                         return {
                             data: {
                                 success: true,
-                                message: "Role updated successfully",
+                                message: "Role updated successfully (mock)",
                                 data: { id, permissions },
                             },
                         };
@@ -183,10 +192,7 @@ export const teamApi = createApi({
                     const token = getAccessToken();
                     if (!token) {
                         return {
-                            error: {
-                                status: 401,
-                                data: "No access token found",
-                            },
+                            error: { status: 401, data: "No access token found" },
                         };
                     }
 
@@ -219,15 +225,13 @@ export const teamApi = createApi({
                         error: {
                             status: 500,
                             data:
-                                error instanceof Error
-                                    ? error.message
-                                    : "Failed to update permissions",
+                                error instanceof Error ? error.message : "Failed to update permissions",
                         },
                     };
                 }
             },
-            // ✅ Fix: invalidate all TeamRoles queries so the role permissions are refetched
-            invalidatesTags: ["TeamRoles"],
+            // Invalidate only the specific role’s permissions, not the whole list
+            invalidatesTags: (_result, _error, { id }) => [{ type: "TeamRoles", id }],
         }),
 
         updateMemberRole: builder.mutation<
@@ -242,18 +246,14 @@ export const teamApi = createApi({
                         if (member) member.role = roleNames[0] || member.role;
                         return { data: undefined };
                     }
-                    await axiosInstance.put(`/admin/members/${id}/roles`, {
-                        roleNames,
-                    });
+                    await axiosInstance.put(`/admin/members/${id}/roles`, { roleNames });
                     return { data: undefined };
                 } catch (error) {
                     return {
                         error: {
                             status: 500,
                             data:
-                                error instanceof Error
-                                    ? error.message
-                                    : "Failed to update role",
+                                error instanceof Error ? error.message : "Failed to update role",
                         },
                     };
                 }
@@ -277,9 +277,7 @@ export const teamApi = createApi({
                         error: {
                             status: 500,
                             data:
-                                error instanceof Error
-                                    ? error.message
-                                    : "Failed to block member",
+                                error instanceof Error ? error.message : "Failed to block member",
                         },
                     };
                 }
@@ -303,9 +301,7 @@ export const teamApi = createApi({
                         error: {
                             status: 500,
                             data:
-                                error instanceof Error
-                                    ? error.message
-                                    : "Failed to unblock member",
+                                error instanceof Error ? error.message : "Failed to unblock member",
                         },
                     };
                 }
@@ -320,6 +316,7 @@ export const {
     useGetTeamRolesQuery,
     useGetPermissionsQuery,
     useGetRoleByIdQuery,
+    useLazyGetRoleByIdQuery,
     useUpdateRolePermissionsMutation,
     useUpdateMemberRoleMutation,
     useBlockMemberMutation,

@@ -17,7 +17,10 @@ export function StepThreeCards({ onTemplateSelect }: StepThreeCardsProps) {
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 
 	useEffect(() => {
-		getSavedTemplates().then(setSavedTemplates).finally(() => setLoading(false));
+		getSavedTemplates()
+			.then(setSavedTemplates)
+			.catch(() => toast.error("Failed to load templates"))
+			.finally(() => setLoading(false));
 	}, []);
 
 	const handleUse = (template: Template) => {

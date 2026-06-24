@@ -4,9 +4,9 @@ import { useMemo } from "react";
 import { Pencil, Users, Key } from "lucide-react";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/Button";
+import { useLazyGetRoleByIdQuery } from "@/services/team.api";
 import type { TeamRole, TeamMember } from "@/types/team";
 
-// Role colors for visual enhancement
 const roleColors: Record<string, string> = {
     Admin: "#FF4345",
     Manager: "#006F1F",
@@ -27,6 +27,8 @@ export function TeamsRolesSection({
     onEditPermissions,
     onCreateRole,
 }: TeamsRolesSectionProps) {
+    const [prefetchRole] = useLazyGetRoleByIdQuery();
+
     const roleMemberCounts = useMemo(() => {
         const counts: Record<string, number> = {};
         for (const m of members) {
@@ -49,7 +51,6 @@ export function TeamsRolesSection({
                 </Button>
             </div>
 
-            {/* Scrollable roles table – max 4 rows visible */}
             <div className="max-h-56 overflow-y-auto rounded-lg border border-[#E8E8E9]">
                 <table className="w-full border-collapse">
                     <thead>
@@ -106,6 +107,7 @@ export function TeamsRolesSection({
                                             <Button
                                                 variant="icon"
                                                 onClick={() => onEditPermissions(role)}
+                                                onMouseEnter={() => prefetchRole(role.name)} // 👈 pre‑fetch on hover
                                                 className="flex p-1.5 items-center rounded text-[#777980] hover:text-[#1B1B1B] hover:bg-gray-100 transition-colors"
                                             >
                                                 <Pencil size={15} />

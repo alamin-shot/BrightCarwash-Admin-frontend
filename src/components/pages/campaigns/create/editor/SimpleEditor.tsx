@@ -12,6 +12,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import UnderlineExtension from "@tiptap/extension-underline";
 import { toast } from "react-toastify";
+import { useCreateTemplateMutation } from "@/services/template.api";
 
 const ToolbarButton = ({
 	active, onClick, children,
@@ -25,6 +26,7 @@ const ToolbarButton = ({
 export function SimpleEditor() {
 	const [saving, setSaving] = useState(false);
 	const router = useRouter();
+	const [createTemplate] = useCreateTemplateMutation();
 
 	const editor = useEditor({
 		immediatelyRender: false,
@@ -37,21 +39,35 @@ export function SimpleEditor() {
 		},
 	});
 
-	const handleSave = () => {
+	const handleSave = async () => {
+		if (!editor) return;
+
 		setSaving(true);
-		const html = editor?.getHTML();
-		const saved = JSON.parse(localStorage.getItem("savedTemplates") || "[]");
-		saved.push({
-			id: `tmp_${Date.now()}`,
-			name: `Simple Template ${new Date().toLocaleDateString()}`,
-			html: html,
-			createdAt: new Date().toISOString().split("T")[0],
-			type: "saved",
-		});
-		localStorage.setItem("savedTemplates", JSON.stringify(saved));
-		toast.success("Template saved! Design step complete.");
-		setSaving(false);
-		router.push("/campaigns/create?step=2");
+		const html = editor.getHTML();
+		const name = `Simple Template ${new Date().toLocaleDateString()}`;
+
+		try {
+			// ✅ Fix: Use PLAIN_TEXT instead of SIMPLE_EDITOR
+			await createTemplate({
+				name: name,
+				description: `Created on ${new Date().toLocaleDateString()}`,
+				type: "EMAIL",
+				editorType: "PLAIN_TEXT", // ✅ Changed from SIMPLE_EDITOR to PLAIN_TEXT
+				emailBody: {
+					subject: name,
+					htmlContent: html || "",
+					designJson: {},
+				},
+			}).unwrap();
+
+			toast.success("Template saved! Design step complete.");
+			router.push("/campaigns/create?step=2");
+		} catch (error) {
+			toast.error("Failed to save template");
+			console.error(error);
+		} finally {
+			setSaving(false);
+		}
 	};
 
 	if (!editor) return null;

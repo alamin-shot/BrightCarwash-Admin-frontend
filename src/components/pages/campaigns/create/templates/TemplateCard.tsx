@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TemplatePreviewModal } from "@/components/pages/campaigns/create/templates/TemplatePreviewModal";
@@ -15,6 +15,16 @@ interface TemplateCardProps {
 export function TemplateCard({ template, onUse, isSelected }: TemplateCardProps) {
 	const [previewOpen, setPreviewOpen] = useState(false);
 	const [iframeLoaded, setIframeLoaded] = useState(false);
+	const [iframeError, setIframeError] = useState(false);
+
+	// Reset iframe state when template changes
+	useEffect(() => {
+		setIframeLoaded(false);
+		setIframeError(false);
+	}, [template.id]);
+
+	// ✅ Ensure we have valid HTML content
+	const htmlContent = template.html || template.emailBody?.htmlContent || '<div style="padding:20px;color:#999;">No preview available</div>';
 
 	return (
 		<>
@@ -22,19 +32,29 @@ export function TemplateCard({ template, onUse, isSelected }: TemplateCardProps)
 				}`}>
 				{/* Preview Image */}
 				<div className="h-[212px] self-stretch rounded-xl border border-[#DFE1E7] relative overflow-hidden bg-[#F8FAFB]">
-					{!iframeLoaded && (
+					{!iframeLoaded && !iframeError && (
 						<div className="absolute inset-0 flex items-center justify-center">
 							<div className="w-8 h-8 border-2 border-[#0098E8] border-t-transparent rounded-full animate-spin" />
 						</div>
 					)}
-					<iframe
-						srcDoc={template.html}
-						title={template.name}
-						className="w-full h-full pointer-events-none"
-						sandbox="allow-same-origin"
-						style={{ transform: "scale(0.3)", transformOrigin: "0 0", width: "333%", height: "333%" }}
-						onLoad={() => setIframeLoaded(true)}
-					/>
+					{iframeError ? (
+						<div className="absolute inset-0 flex items-center justify-center text-[#777980] font-inter text-sm">
+							Preview unavailable
+						</div>
+					) : (
+						<iframe
+							srcDoc={htmlContent}
+							title={template.name}
+							className="w-full h-full pointer-events-none"
+							sandbox="allow-same-origin"
+							style={{ transform: "scale(0.3)", transformOrigin: "0 0", width: "333%", height: "333%" }}
+							onLoad={() => setIframeLoaded(true)}
+							onError={() => {
+								setIframeError(true);
+								setIframeLoaded(true);
+							}}
+						/>
+					)}
 					<button
 						onClick={() => setPreviewOpen(true)}
 						className="flex p-2 items-center gap-3 absolute right-2.5 top-2.5 rounded-lg bg-[#B23730] hover:bg-[#9A2E28] transition-colors z-10"

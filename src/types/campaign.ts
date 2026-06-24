@@ -1,18 +1,83 @@
-export type CampaignType = 'All Campaign' | 'E-mail Template';
-export type CampaignStatus = 'Active' | 'Completed' | 'Draft' | 'Scheduled';
+export type CampaignType = "All Campaign" | "E-mail Template";
+export type CampaignStatus = "DRAFT" | "SCHEDULED" | "ACTIVE" | "COMPLETED" | "SUSPENDED";
+export type CampaignChannelType = "EMAIL" | "SMS" | "PUSH";
 
+// ✅ Constants for filters
+export const TYPE_FILTERS: CampaignType[] = ["All Campaign", "E-mail Template"];
+export const STATUS_FILTERS: CampaignStatus[] = ["ACTIVE", "COMPLETED", "DRAFT", "SCHEDULED", "SUSPENDED"];
+
+// ✅ Map channel type to display type
+export const CHANNEL_TO_TYPE: Record<CampaignChannelType, "E-mail Template"> = {
+	EMAIL: "E-mail Template",
+	SMS: "E-mail Template",
+	PUSH: "E-mail Template",
+};
+
+export interface CampaignAnalytics {
+	PENDING: number;
+	SENT: number;
+	DELIVERED: number;
+	OPENED: number;
+	CLICKED: number;
+	BOUNCED: number;
+	FAILED: number;
+}
+
+export interface CampaignEmailConfig {
+	subject: string;
+	senderName?: string;
+	senderEmail: string;
+	leadGroup: {
+		name: string;
+	};
+}
+
+// ✅ Only ONE Campaign interface
 export interface Campaign {
 	id: string;
 	name: string;
-	subject: string;
-	recipients: number;
-	clicks: number;
+	tags: string[];
 	status: CampaignStatus;
-	type: CampaignType;
-	date: string;
+	channelType: CampaignChannelType;
+	scheduledAt: string | null;
+	emailConfig: CampaignEmailConfig;
+	analytics: CampaignAnalytics;
+	createdAt: string;
+	updatedAt: string;
 }
 
-export interface CampaignFormData {
+export interface CreateCampaignRequest {
 	name: string;
 	tags: string[];
+	subject: string;
+	templateId?: string;
+	senderName?: string;
+	senderEmail: string;
+	leadGroupId: string;
+	scheduledAt?: string;
+}
+
+export interface UpdateCampaignRequest extends Partial<CreateCampaignRequest> { }
+
+export interface CampaignListResponse {
+	success: boolean;
+	message: string;
+	data: {
+		campaigns: Campaign[];
+		meta: {
+			totalItems: number;
+			itemCount: number;
+			itemsPerPage: number;
+			totalPages: number;
+			currentPage: number;
+			hasNextPage: boolean;
+			hasPreviousPage: boolean;
+		};
+	};
+}
+
+export interface CampaignResponse {
+	success: boolean;
+	message: string;
+	data: Campaign;
 }

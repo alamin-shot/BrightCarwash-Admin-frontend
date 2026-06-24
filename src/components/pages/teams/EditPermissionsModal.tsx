@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import type { Permission, TeamRole } from "@/types/team";
@@ -16,10 +16,20 @@ interface EditPermissionsModalProps {
 }
 
 export function EditPermissionsModal({ isOpen, onClose, role, allPermissions, selectedPermissions, onSave }: EditPermissionsModalProps) {
-    const [selected, setSelected] = useState<Set<string>>(new Set(selectedPermissions));
+    const [selected, setSelected] = useState<Set<string>>(() => new Set(selectedPermissions));
+    const prevPermissionsRef = useRef<string[]>(selectedPermissions);
 
     useEffect(() => {
-        setSelected(new Set(selectedPermissions));
+        const prev = prevPermissionsRef.current;
+        const next = selectedPermissions;
+
+        if (
+            prev.length !== next.length ||
+            !prev.every((id) => next.includes(id))
+        ) {
+            setSelected(new Set(next));
+            prevPermissionsRef.current = next;
+        }
     }, [selectedPermissions]);
 
     const grouped = useMemo(() => {
@@ -66,13 +76,11 @@ export function EditPermissionsModal({ isOpen, onClose, role, allPermissions, se
             <div className="flex flex-col gap-4">
                 <div className="w-full h-px bg-[#DFE1E7]" />
 
-                {/* Select All */}
                 <label className="flex items-center gap-2.5 cursor-pointer">
                     <input type="checkbox" checked={isAllSelected} onChange={toggleAll} className="w-4 h-4 rounded accent-[#0098E8]" />
                     <span className="text-sm font-medium text-[#1B1B1B]">Select All Permissions</span>
                 </label>
 
-                {/* Permission Groups */}
                 <div className="flex flex-col gap-4 max-h-[50vh] overflow-y-auto">
                     {Object.entries(grouped).map(([module, perms]) => {
                         const moduleIds = perms.map((p) => p.id);

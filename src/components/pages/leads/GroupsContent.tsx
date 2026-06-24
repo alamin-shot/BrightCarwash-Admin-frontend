@@ -15,6 +15,8 @@ import type { StageOption } from "@/components/ui/StageDropdown";
 import type { Stage } from "@/types/stage";
 import type { Lead } from "@/types/leads";
 import { toast } from "react-toastify";
+import { useDeleteLeadMutation } from "@/services/leads.api";
+
 
 interface Group {
     id: string;
@@ -44,7 +46,7 @@ export function GroupsContent({ groupModalOpen, onGroupModalClose }: GroupsConte
     const [stages, setStages] = useState<StageOption[]>([]);
     const [leadModalOpen, setLeadModalOpen] = useState(false);
     const [targetGroupId, setTargetGroupId] = useState<string | null>(null);
-
+    const [deleteLead] = useDeleteLeadMutation();
     const loadGroups = useCallback(() => {
         setGroups(JSON.parse(localStorage.getItem("leadGroups") || "[]"));
     }, []);
@@ -62,7 +64,14 @@ export function GroupsContent({ groupModalOpen, onGroupModalClose }: GroupsConte
         }
     }, [updateStage]);
 
-    const handleDelete = useCallback(async (_lead: Lead) => { toast.info("Delete coming soon"); }, []);
+    const handleDelete = useCallback(async (lead: Lead) => {
+        try {
+            await deleteLead(lead.id).unwrap();
+            toast.success(`${lead.name || lead.email} deleted`);
+        } catch {
+            toast.error("Failed to delete lead");
+        }
+    }, [deleteLead]);
 
     const handleAddLeadToGroup = useCallback((groupId: string) => {
         setTargetGroupId(groupId);
@@ -123,7 +132,7 @@ export function GroupsContent({ groupModalOpen, onGroupModalClose }: GroupsConte
             <GroupAccordion groups={filteredGroups} leads={leads} stages={stages} onStageChange={handleStageChange} onDelete={handleDelete} router={router} onAddLead={handleAddLeadToGroup} onDeleteGroup={handleDeleteGroup} />
 
             <CreateGroupModal isOpen={groupModalOpen} onClose={onGroupModalClose} selectedLeads={[]} onGroupCreated={loadGroups} />
-            <AddLeadModal isOpen={leadModalOpen} onClose={() => { setLeadModalOpen(false); setTargetGroupId(null); }} onLeadCreated={handleLeadAdded} />
+            <AddLeadModal isOpen={leadModalOpen} onClose={() => { setLeadModalOpen(false); setTargetGroupId(null); }} onLeadCreated={handleLeadAdded} stages={stages} />
         </div>
     );
 }

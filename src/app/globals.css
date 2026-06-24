@@ -35,9 +35,11 @@ body {
 	.xs\:inline {
 		display: inline;
 	}
+
 	.xs\:flex {
 		display: flex;
 	}
+
 	.xs\:hidden {
 		display: none;
 	}
@@ -109,6 +111,7 @@ body {
 		opacity: 0;
 		transform: translateX(20px);
 	}
+
 	to {
 		opacity: 1;
 		transform: translateX(0);
@@ -137,12 +140,10 @@ body {
 	left: 0;
 	right: 0;
 	height: 1px;
-	background: linear-gradient(
-		90deg,
-		transparent,
-		rgba(255, 255, 255, 0.8),
-		transparent
-	);
+	background: linear-gradient(90deg,
+			transparent,
+			rgba(255, 255, 255, 0.8),
+			transparent);
 	z-index: 1;
 	pointer-events: none;
 }
@@ -154,12 +155,10 @@ body {
 	left: 0;
 	width: 1px;
 	height: 100%;
-	background: linear-gradient(
-		180deg,
-		rgba(255, 255, 255, 0.8),
-		transparent,
-		rgba(255, 255, 255, 0.3)
-	);
+	background: linear-gradient(180deg,
+			rgba(255, 255, 255, 0.8),
+			transparent,
+			rgba(255, 255, 255, 0.3));
 	z-index: 1;
 	pointer-events: none;
 }
@@ -226,37 +225,44 @@ body {
 	margin: 1rem 0;
 	color: #1b1b1b;
 }
+
 .prose h2 {
 	font-size: 1.5rem;
 	font-weight: 700;
 	margin: 0.75rem 0;
 	color: #1b1b1b;
 }
+
 .prose h3 {
 	font-size: 1.25rem;
 	font-weight: 600;
 	margin: 0.5rem 0;
 	color: #1b1b1b;
 }
+
 .prose ul {
 	list-style-type: disc;
 	padding-left: 1.5rem;
 	margin: 0.5rem 0;
 }
+
 .prose ol {
 	list-style-type: decimal;
 	padding-left: 1.5rem;
 	margin: 0.5rem 0;
 }
+
 .prose li {
 	margin: 0.25rem 0;
 }
+
 .prose blockquote {
 	border-left: 3px solid #dfe1e7;
 	padding-left: 1rem;
 	color: #777980;
 	margin: 0.5rem 0;
 }
+
 .prose code {
 	background: #f1f1f1;
 	padding: 0.1rem 0.3rem;
@@ -264,9 +270,34 @@ body {
 	font-size: 0.875em;
 	font-family: monospace;
 }
+
 .prose strong {
 	font-weight: 700;
 }
+
 .prose em {
 	font-style: italic;
+}
+
+
+/* Notes & Timeline scrollbar */
+.adm-notes-scroll::-webkit-scrollbar,
+.adm-timeline-scroll::-webkit-scrollbar {
+	width: 4px;
+}
+
+.adm-notes-scroll::-webkit-scrollbar-track,
+.adm-timeline-scroll::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.adm-notes-scroll::-webkit-scrollbar-thumb,
+.adm-timeline-scroll::-webkit-scrollbar-thumb {
+	background: #DFE1E7;
+	border-radius: 4px;
+}
+
+.adm-notes-scroll::-webkit-scrollbar-thumb:hover,
+.adm-timeline-scroll::-webkit-scrollbar-thumb:hover {
+	background: #B0B3BC;
 }

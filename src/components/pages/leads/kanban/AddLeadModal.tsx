@@ -1,85 +1,110 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Modal } from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
-import { FilterDropdown } from '@/components/ui/FilterDropdown';
-import { useCreateLeadMutation } from '@/services/leads.api';
-import type { LeadDepositStatus } from '@/types/leads';
-import { toast } from 'react-toastify';
+import { useState } from "react";
+import { Modal } from "@/components/ui/Modal";
+import { Button } from "@/components/ui/Button";
+import { FilterDropdown } from "@/components/ui/FilterDropdown";
+import { useCreateLeadMutation } from "@/services/leads.api";
+import type { LeadDepositStatus } from "@/types/leads";
+import { toast } from "react-toastify";
+import type { StageOption } from "@/components/ui/StageDropdown";
 
 interface AddLeadModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	stage?: string;
-	stageId?: string;
+	stage?: string;               // display name (e.g., "New Lead")
+	stageId?: string;             // real stage ID (for the dropdown value)
 	borderColor?: string;
 	onLeadCreated?: (leadId: string) => void;
+	stages?: StageOption[];       // all available stages from backend
 }
-
-const stageIdMap: Record<string, string> = {
-	new: 'stage_new',
-	contracted: 'stage_contracted',
-	converted: 'stage_converted',
-	lost: 'stage_lost',
-};
 
 export function AddLeadModal({
 	isOpen,
 	onClose,
-	stage = 'new',
-	stageId = 'stage_new',
-	borderColor = '#0098E8',
-	onLeadCreated
+	stage = "New Lead",
+	stageId = "cmqhw9c130002q4tmw3f71hpt",
+	borderColor = "#0098E8",
+	onLeadCreated,
+	stages = [],
 }: AddLeadModalProps) {
 	const [createLead, { isLoading }] = useCreateLeadMutation();
-	const [name, setName] = useState('');
-	const [phone, setPhone] = useState('');
-	const [email, setEmail] = useState('');
-	const [service, setService] = useState('');
-	const [vehicle, setVehicle] = useState('');
-	const [source, setSource] = useState('');
+	const [name, setName] = useState("");
+	const [phone, setPhone] = useState("");
+	const [email, setEmail] = useState("");
+	const [service, setService] = useState("");
+	const [vehicle, setVehicle] = useState("");
+	const [source, setSource] = useState("");
 	const [deposit, setDeposit] = useState<number>(0);
-	const [depositStatus, setDepositStatus] = useState<LeadDepositStatus>('NONE');
-	const [leadStage, setLeadStage] = useState(stage);
-	const [leadStageId, setLeadStageId] = useState(stageId);
+	const [depositStatus, setDepositStatus] = useState<LeadDepositStatus>("NONE");
+
+	// Stage state: store both ID and label
+	const [currentStageId, setCurrentStageId] = useState(stageId);
+	const [currentStageLabel, setCurrentStageLabel] = useState(stage);
+
+	// Build dropdown options from real stages
+	const stageOptions = stages.length > 0
+		? stages.map((s) => ({
+			value: s.stageId,
+			label: s.label,
+		}))
+		: [{ value: stageId, label: stage }];
+
+	// Ensure the current stage is in the options
+	if (!stageOptions.some((o) => o.value === currentStageId)) {
+		stageOptions.unshift({ value: currentStageId, label: currentStageLabel });
+	}
+
+	const handleStageChange = (selectedValue: string) => {
+		const selected = stageOptions.find((o) => o.value === selectedValue);
+		if (selected) {
+			setCurrentStageId(selected.value);
+			setCurrentStageLabel(selected.label);
+		}
+	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		if (!name || !phone || !email || !service || !vehicle || !source) {
-			toast.warning('Please fill all required fields');
+			toast.warning("Please fill all required fields");
 			return;
 		}
+
+		// Format phone number: ensure it has +880 prefix
+		const formattedPhone = phone.startsWith("+")
+			? phone
+			: `+880${phone.trim()}`;
+
 		try {
 			const result = await createLead({
-				name, email, phone, service, vehicle, source,
+				name,
+				email,
+				phone: formattedPhone,
+				service,
+				vehicle,
+				source,
 				priority: "MEDIUM",
 				deposit_status: depositStatus,
-				stage_name: leadStage, // send the label
-				stage: leadStage.toLowerCase().replace(/\s+/g, "_"),
+				stage_name: currentStageLabel,                         // ← send the label, not the ID
+				stage: currentStageLabel.toLowerCase().replace(/\s+/g, "_"),
 			}).unwrap();
+
 			toast.success(`${name} added`);
-			setName('');
-			setPhone('');
-			setEmail('');
-			setService('');
-			setVehicle('');
-			setSource('');
-			setDeposit(0);
-			setDepositStatus('NONE');
-			setLeadStage(stage);
-			setLeadStageId(stageId);
+			setName(""); setPhone(""); setEmail(""); setService(""); setVehicle(""); setSource("");
+			setDeposit(0); setDepositStatus("NONE");
+			setCurrentStageId(stageId);
+			setCurrentStageLabel(stage);
 			onClose();
 			onLeadCreated?.(result.id);
 		} catch {
-			toast.error('Failed to add lead');
+			toast.error("Failed to add lead");
 		}
 	};
 
 	const modalTitle = (
-		<div className='flex items-center gap-2'>
+		<div className="flex items-center gap-2">
 			<span
-				className='w-3 h-3 rounded-full shrink-0'
+				className="w-3 h-3 rounded-full shrink-0"
 				style={{ backgroundColor: borderColor }}
 			/>
 			<span>Add New Lead</span>
@@ -87,185 +112,73 @@ export function AddLeadModal({
 	);
 
 	const inputClass =
-		'w-full px-4 py-2.5 text-sm font-inter border border-[#DFE1E7] rounded-lg bg-white text-[#1B1B1B] placeholder-[#777980] outline-none focus:border-[#0098E8] focus:ring-2 focus:ring-[#0098E8]/10 transition-all';
+		"w-full px-4 py-2.5 text-sm font-inter border border-[#DFE1E7] rounded-lg bg-white text-[#1B1B1B] placeholder-[#777980] outline-none focus:border-[#0098E8] focus:ring-2 focus:ring-[#0098E8]/10 transition-all";
 
 	return (
-		<Modal isOpen={isOpen} onClose={onClose} title={modalTitle} size='lg'>
-			<form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+		<Modal isOpen={isOpen} onClose={onClose} title={modalTitle} size="lg">
+			<form onSubmit={handleSubmit} className="flex flex-col gap-4">
 				<div>
-					<label
-						htmlFor='name'
-						className='block text-sm font-medium text-[#1B1B1B] mb-1.5'
-					>
-						Name *
-					</label>
-					<input
-						id='name'
-						type='text'
-						value={name}
-						onChange={(e) => setName(e.target.value)}
-						required
-						placeholder='Full name'
-						className={inputClass}
-					/>
+					<label htmlFor="name" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Name *</label>
+					<input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Full name" className={inputClass} />
 				</div>
-				<div className='grid grid-cols-2 gap-3'>
+				<div className="grid grid-cols-2 gap-3">
 					<div>
-						<label
-							htmlFor='phone'
-							className='block text-sm font-medium text-[#1B1B1B] mb-1.5'
-						>
-							Phone *
-						</label>
-						<input
-							id='phone'
-							type='tel'
-							value={phone}
-							onChange={(e) => setPhone(e.target.value)}
-							required
-							placeholder='+1 555-0000'
-							className={inputClass}
-						/>
+						<label htmlFor="phone" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Phone *</label>
+						<input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required placeholder="01328908206" className={inputClass} />
 					</div>
 					<div>
-						<label
-							htmlFor='email'
-							className='block text-sm font-medium text-[#1B1B1B] mb-1.5'
-						>
-							Email *
-						</label>
-						<input
-							id='email'
-							type='email'
-							value={email}
-							onChange={(e) => setEmail(e.target.value)}
-							required
-							placeholder='email@example.com'
-							className={inputClass}
-						/>
+						<label htmlFor="email" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Email *</label>
+						<input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="email@example.com" className={inputClass} />
 					</div>
 				</div>
-				<div className='grid grid-cols-2 gap-3'>
+				<div className="grid grid-cols-2 gap-3">
 					<div>
-						<label
-							htmlFor='service'
-							className='block text-sm font-medium text-[#1B1B1B] mb-1.5'
-						>
-							Service *
-						</label>
-						<input
-							id='service'
-							type='text'
-							value={service}
-							onChange={(e) => setService(e.target.value)}
-							required
-							placeholder='Service type'
-							className={inputClass}
-						/>
+						<label htmlFor="service" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Service *</label>
+						<input id="service" type="text" value={service} onChange={(e) => setService(e.target.value)} required placeholder="Service type" className={inputClass} />
 					</div>
 					<div>
-						<label
-							htmlFor='vehicle'
-							className='block text-sm font-medium text-[#1B1B1B] mb-1.5'
-						>
-							Vehicle *
-						</label>
-						<input
-							id='vehicle'
-							type='text'
-							value={vehicle}
-							onChange={(e) => setVehicle(e.target.value)}
-							required
-							placeholder='Vehicle model'
-							className={inputClass}
-						/>
+						<label htmlFor="vehicle" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Vehicle *</label>
+						<input id="vehicle" type="text" value={vehicle} onChange={(e) => setVehicle(e.target.value)} required placeholder="Vehicle model" className={inputClass} />
 					</div>
 				</div>
-				<div className='grid grid-cols-4 gap-3'>
+				<div className="grid grid-cols-4 gap-3">
 					<div>
-						<label className='block text-sm font-medium text-[#1B1B1B] mb-1.5'>
-							Source *
-						</label>
-						<input
-							type='text'
-							value={source}
-							onChange={(e) => setSource(e.target.value)}
-							required
-							placeholder='Website etc.'
-							className={inputClass}
-						/>
+						<label className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Source *</label>
+						<input type="text" value={source} onChange={(e) => setSource(e.target.value)} required placeholder="Website etc." className={inputClass} />
 					</div>
 					<div>
-						<label
-							htmlFor='deposit'
-							className='block text-sm font-medium text-[#1B1B1B] mb-1.5'
-						>
-							Deposit ($)
-						</label>
-						<input
-							id='deposit'
-							type='number'
-							min='0'
-							step='1'
-							value={deposit}
-							onChange={(e) => setDeposit(Number(e.target.value))}
-							placeholder='0'
-							className={inputClass}
-						/>
+						<label htmlFor="deposit" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Deposit ($)</label>
+						<input id="deposit" type="number" min="0" step="1" value={deposit} onChange={(e) => setDeposit(Number(e.target.value))} placeholder="0" className={inputClass} />
 					</div>
 					<div>
-						<label className='block text-sm font-medium text-[#1B1B1B] mb-1.5'>
-							Status
-						</label>
+						<label className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Status</label>
 						<FilterDropdown
-							label='None'
+							label="None"
 							options={[
-								{ value: 'PAID', label: 'Paid' },
-								{ value: 'PENDING', label: 'Pending' },
-								{ value: 'REFUNDED', label: 'Refunded' },
-								{ value: 'NONE', label: 'None' },
+								{ value: "PAID", label: "Paid" },
+								{ value: "PENDING", label: "Pending" },
+								{ value: "REFUNDED", label: "Refunded" },
+								{ value: "NONE", label: "None" },
 							]}
 							value={depositStatus}
-							onChange={(val: string) =>
-								setDepositStatus(val as LeadDepositStatus)
-							}
+							onChange={(val: string) => setDepositStatus(val as LeadDepositStatus)}
 							fullWidth
 						/>
 					</div>
 					<div>
-						<label className='block text-sm font-medium text-[#1B1B1B] mb-1.5'>
-							Stage
-						</label>
+						<label className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Stage</label>
 						<FilterDropdown
-							label="New Lead"
-							options={[
-								{ value: "New Lead", label: "New Lead" },
-								{ value: "Contracted", label: "Contracted" },
-								{ value: "Converted", label: "Converted" },
-								{ value: "Lost", label: "Lost" },
-							]}
-							value={leadStage}
-							onChange={(val: string) => setLeadStage(val)}
+							label="Select stage"
+							options={stageOptions}
+							value={currentStageId}
+							onChange={handleStageChange}
 							fullWidth
 						/>
 					</div>
 				</div>
-				<div className='flex gap-3 justify-end mt-2 pt-4 border-t border-[#E8E8E9]'>
-					<Button
-						type='button'
-						variant='outline'
-						onClick={onClose}
-						className='px-6'
-					>
-						Cancel
-					</Button>
-					<Button
-						type='submit'
-						isLoading={isLoading}
-						loadingText='Adding…'
-						className='px-6 text-white shadow-lg'
-						style={{ backgroundColor: borderColor }}
-					>
+				<div className="flex gap-3 justify-end mt-2 pt-4 border-t border-[#E8E8E9]">
+					<Button type="button" variant="outline" onClick={onClose} className="px-6">Cancel</Button>
+					<Button type="submit" isLoading={isLoading} loadingText="Adding…" className="px-6 text-white shadow-lg" style={{ backgroundColor: borderColor }}>
 						Add Lead
 					</Button>
 				</div>

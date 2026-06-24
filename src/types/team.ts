@@ -27,7 +27,7 @@ export interface PermissionItem {
     action: string;
 }
 
-export type PermissionsMap = Record<string, PermissionItem[]>;
+export type PermissionsMap = Record<string, { id?: string; action: string }[]>;
 
 export interface PermissionsApiResponse {
     success: boolean;

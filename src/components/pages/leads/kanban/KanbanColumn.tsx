@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { KanbanCard } from '@/components/pages/leads/kanban/KanbanCard';
 import { AddLeadModal } from '@/components/pages/leads/kanban/AddLeadModal';
 import type { Lead } from '@/types/leads';
+import { StageOption } from '@/components/ui/StageDropdown';
 
 interface KanbanColumnProps {
 	id: string;
@@ -17,6 +18,7 @@ interface KanbanColumnProps {
 	stageColor: string;
 	icon: string;
 	items: Lead[];
+	stages: StageOption[];
 }
 
 export function KanbanColumn({
@@ -26,6 +28,7 @@ export function KanbanColumn({
 	icon,
 	items,
 	stageId,
+	stages,
 }: KanbanColumnProps) {
 	const [modalOpen, setModalOpen] = useState(false);
 	const badgeTint = borderColor + '26';
@@ -73,11 +76,10 @@ export function KanbanColumn({
 						<div
 							ref={provided.innerRef}
 							{...provided.droppableProps}
-							className={`flex-1 w-full overflow-hidden rounded-xl min-h-0 transition-colors ${
-								snapshot.isDraggingOver
-									? 'bg-[#EBF5FF] shadow-[inset_0_0_0_2px_rgba(0,152,232,0.2)]'
-									: ''
-							}`}
+							className={`flex-1 w-full overflow-hidden rounded-xl min-h-0 transition-colors ${snapshot.isDraggingOver
+								? 'bg-[#EBF5FF] shadow-[inset_0_0_0_2px_rgba(0,152,232,0.2)]'
+								: ''
+								}`}
 						>
 							<div className='flex flex-col items-center gap-3 w-full h-full overflow-y-auto adm-kanban-scroll py-1'>
 								{items.map((lead, index) => (
@@ -87,11 +89,10 @@ export function KanbanColumn({
 												ref={provided.innerRef}
 												{...provided.draggableProps}
 												{...provided.dragHandleProps}
-												className={`w-full transition-all duration-200 ${
-													snapshot.isDragging
-														? 'z-50 scale-105 rotate-1 shadow-2xl'
-														: ''
-												}`}
+												className={`w-full transition-all duration-200 ${snapshot.isDragging
+													? 'z-50 scale-105 rotate-1 shadow-2xl'
+													: ''
+													}`}
 												style={provided.draggableProps.style}
 											>
 												<KanbanCard lead={lead} index={index} />
@@ -109,9 +110,10 @@ export function KanbanColumn({
 			<AddLeadModal
 				isOpen={modalOpen}
 				onClose={() => setModalOpen(false)}
-				stage={id}
+				stage={title}
 				stageId={stageId}
 				borderColor={borderColor}
+				stages={stages}
 			/>
 		</>
 	);

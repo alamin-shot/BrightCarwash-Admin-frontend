@@ -66,6 +66,7 @@ export function KanbanBoard({
 						stageColor={stage.color}
 						icon={getIconForStage(stage)}
 						items={getLeadsByStage(stage.value)}
+						stages={stages}
 					/>
 				))}
 			</div>

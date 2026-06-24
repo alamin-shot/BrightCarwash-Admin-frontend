@@ -65,9 +65,7 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 			if (groupFilter) return filteredLeads.filter((l) => groupFilter.includes(l.id));
 			return filteredLeads;
 		}, [filteredLeads, groupFilter]);
-		useEffect(() => {
-			setSelectedIds(new Set());
-		}, [currentPage, setSelectedIds]);
+
 		useEffect(() => {
 			onSelectionChange?.(selectedIds.size, Array.from(selectedIds));
 		}, [selectedIds, onSelectionChange]);
@@ -109,12 +107,14 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 		useImperativeHandle(ref, () => ({ exportCSV: () => handleExport(selectedIds) }), [handleExport, selectedIds]);
 
 		const columns = useMemo(() => createLeadsColumns({
-			onStageChange: handleStageChange, onView: (lead) => router.push(`/leads/${lead.id}`),
-			onDelete: handleDelete, onSelectRow: handleSelectRow,
-			onSelectAll: () => handleSelectAll(paginatedLeads.map((l) => l.id)),
-			allSelected: paginatedLeads.length > 0 && paginatedLeads.every((l) => selectedIds.has(l.id)),
+			onStageChange: handleStageChange,
+			onView: (lead) => router.push(`/leads/${lead.id}`),
+			onDelete: handleDelete,
+			onSelectRow: handleSelectRow,
+			onSelectAll: () => handleSelectAll(groupedLeads.map((l) => l.id)),   // ← was paginatedLeads
+			allSelected: groupedLeads.length > 0 && selectedIds.size === groupedLeads.length, // ← was paginatedLeads
 			selectedIds, router, stages, onStageCreated: refreshStages,
-		}), [handleStageChange, handleDelete, handleSelectRow, handleSelectAll, selectedIds, paginatedLeads, router, stages, refreshStages]);
+		}), [handleStageChange, handleDelete, handleSelectRow, handleSelectAll, selectedIds, groupedLeads, router, stages, refreshStages]);
 
 		if (isLoading) return <div className="h-75 bg-gray-100 rounded-lg animate-pulse w-full" />;
 		if (error) return <div className="flex items-center justify-center py-12 text-[#FF4345] font-inter">Failed to load leads.</div>;

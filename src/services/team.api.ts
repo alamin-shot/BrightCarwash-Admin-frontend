@@ -1,8 +1,20 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import type { TeamMember, TeamRole, Permission, MembersApiResponse, PermissionsApiResponse, PermissionsMap, RoleDetailResponse } from "@/types/team";
+import type {
+    TeamMember,
+    TeamRole,
+    Permission,
+    MembersApiResponse,
+    PermissionsMap,
+    RoleDetailResponse,
+} from "@/types/team";
 import { APP_CONFIG } from "@/configs/app.config";
-import { mockTeamMembers, mockTeamRoles, mockPermissions } from "@/mocks/team.mock";
+import {
+    mockTeamMembers,
+    mockTeamRoles,
+    mockPermissions,
+} from "@/mocks/team.mock";
 import axiosInstance from "@/lib/axios-instance";
+import { getAccessToken } from "@/lib/auth-client";
 
 function delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -27,7 +39,7 @@ function mapPermissions(data: PermissionsMap): Permission[] {
     for (const [module, items] of Object.entries(data)) {
         for (const item of items) {
             result.push({
-                id: `${module}:${item.action}`,
+                id: (item as any).id || `${module}:${item.action}`,
                 name: `${module}:${item.action}`,
                 module,
             });
@@ -48,10 +60,20 @@ export const teamApi = createApi({
                         await delay(APP_CONFIG.MOCK_DELAY_MS);
                         return { data: [...mockTeamMembers] };
                     }
-                    const { data } = await axiosInstance.get<MembersApiResponse>("/admin/members");
+                    const { data } = await axiosInstance.get<MembersApiResponse>(
+                        "/admin/members"
+                    );
                     return { data: data.data.map(mapMember) };
                 } catch (error) {
-                    return { error: { status: 500, data: error instanceof Error ? error.message : "Failed to fetch members" } };
+                    return {
+                        error: {
+                            status: 500,
+                            data:
+                                error instanceof Error
+                                    ? error.message
+                                    : "Failed to fetch members",
+                        },
+                    };
                 }
             },
             providesTags: ["TeamMembers"],
@@ -64,10 +86,21 @@ export const teamApi = createApi({
                         await delay(APP_CONFIG.MOCK_DELAY_MS);
                         return { data: [...mockTeamRoles] };
                     }
-                    const res = await axiosInstance.get<{ success: boolean; data: TeamRole[] }>("/admin/role");
+                    const res = await axiosInstance.get<{
+                        success: boolean;
+                        data: TeamRole[];
+                    }>("/admin/role");
                     return { data: res.data.data };
                 } catch (error) {
-                    return { error: { status: 500, data: error instanceof Error ? error.message : "Failed to fetch roles" } };
+                    return {
+                        error: {
+                            status: 500,
+                            data:
+                                error instanceof Error
+                                    ? error.message
+                                    : "Failed to fetch roles",
+                        },
+                    };
                 }
             },
             providesTags: ["TeamRoles"],
@@ -80,10 +113,21 @@ export const teamApi = createApi({
                         await delay(APP_CONFIG.MOCK_DELAY_MS);
                         return { data: [...mockPermissions] };
                     }
-                    const res = await axiosInstance.get<PermissionsApiResponse>("/admin/role/permissions");
+                    const res = await axiosInstance.get<{
+                        success: boolean;
+                        data: PermissionsMap;
+                    }>("/admin/role/permissions");
                     return { data: mapPermissions(res.data.data) };
                 } catch (error) {
-                    return { error: { status: 500, data: error instanceof Error ? error.message : "Failed to fetch permissions" } };
+                    return {
+                        error: {
+                            status: 500,
+                            data:
+                                error instanceof Error
+                                    ? error.message
+                                    : "Failed to fetch permissions",
+                        },
+                    };
                 }
             },
         }),
@@ -93,18 +137,103 @@ export const teamApi = createApi({
                 try {
                     if (APP_CONFIG.MOCK_MODE) {
                         await delay(APP_CONFIG.MOCK_DELAY_MS);
-                        return { data: [] };
+                        const mockPermIds = mockPermissions.slice(0, 5).map((p) => p.id);
+                        return { data: mockPermIds };
                     }
-                    const res = await axiosInstance.get<RoleDetailResponse>(`/admin/role/${name}`);
-                    const permIds = res.data.data.permissions.map((p) => p.permission.name);
+                    const res = await axiosInstance.get<RoleDetailResponse>(
+                        `/admin/role/${name}`
+                    );
+                    const permIds = res.data.data.permissions.map(
+                        (p) => p.permission.id
+                    );
                     return { data: permIds };
                 } catch (error) {
-                    return { error: { status: 500, data: error instanceof Error ? error.message : "Failed to fetch role" } };
+                    return {
+                        error: {
+                            status: 500,
+                            data:
+                                error instanceof Error
+                                    ? error.message
+                                    : "Failed to fetch role",
+                        },
+                    };
                 }
             },
+            providesTags: (_result, _error, name) =>
+                name ? [{ type: "TeamRoles", id: name }] : [],
         }),
 
-        updateMemberRole: builder.mutation<void, { id: string; roleNames: string[] }>({
+        updateRolePermissions: builder.mutation<
+            { success: boolean; message: string; data?: any },
+            { id: string; permissions: string[] }
+        >({
+            queryFn: async ({ id, permissions }) => {
+                try {
+                    if (APP_CONFIG.MOCK_MODE) {
+                        await delay(APP_CONFIG.MOCK_DELAY_MS);
+                        return {
+                            data: {
+                                success: true,
+                                message: "Role updated successfully",
+                                data: { id, permissions },
+                            },
+                        };
+                    }
+
+                    const token = getAccessToken();
+                    if (!token) {
+                        return {
+                            error: {
+                                status: 401,
+                                data: "No access token found",
+                            },
+                        };
+                    }
+
+                    const response = await fetch(
+                        `${APP_CONFIG.API_BASE_URL}/admin/role/${id}`,
+                        {
+                            method: "PATCH",
+                            headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${token}`,
+                            },
+                            body: JSON.stringify({ permissionIds: permissions }),
+                        }
+                    );
+
+                    const responseData = await response.json();
+
+                    if (!response.ok) {
+                        return {
+                            error: {
+                                status: response.status,
+                                data: responseData.message || "Failed to update permissions",
+                            },
+                        };
+                    }
+
+                    return { data: responseData };
+                } catch (error) {
+                    return {
+                        error: {
+                            status: 500,
+                            data:
+                                error instanceof Error
+                                    ? error.message
+                                    : "Failed to update permissions",
+                        },
+                    };
+                }
+            },
+            // ✅ Fix: invalidate all TeamRoles queries so the role permissions are refetched
+            invalidatesTags: ["TeamRoles"],
+        }),
+
+        updateMemberRole: builder.mutation<
+            void,
+            { id: string; roleNames: string[] }
+        >({
             queryFn: async ({ id, roleNames }) => {
                 try {
                     if (APP_CONFIG.MOCK_MODE) {
@@ -113,10 +242,20 @@ export const teamApi = createApi({
                         if (member) member.role = roleNames[0] || member.role;
                         return { data: undefined };
                     }
-                    await axiosInstance.put(`/admin/members/${id}/roles`, { roleNames });
+                    await axiosInstance.put(`/admin/members/${id}/roles`, {
+                        roleNames,
+                    });
                     return { data: undefined };
                 } catch (error) {
-                    return { error: { status: 500, data: error instanceof Error ? error.message : "Failed to update role" } };
+                    return {
+                        error: {
+                            status: 500,
+                            data:
+                                error instanceof Error
+                                    ? error.message
+                                    : "Failed to update role",
+                        },
+                    };
                 }
             },
             invalidatesTags: ["TeamMembers"],
@@ -134,7 +273,15 @@ export const teamApi = createApi({
                     await axiosInstance.put(`/admin/members/${id}/block`);
                     return { data: undefined };
                 } catch (error) {
-                    return { error: { status: 500, data: error instanceof Error ? error.message : "Failed to block member" } };
+                    return {
+                        error: {
+                            status: 500,
+                            data:
+                                error instanceof Error
+                                    ? error.message
+                                    : "Failed to block member",
+                        },
+                    };
                 }
             },
             invalidatesTags: ["TeamMembers"],
@@ -152,7 +299,15 @@ export const teamApi = createApi({
                     await axiosInstance.put(`/admin/members/${id}/unblock`);
                     return { data: undefined };
                 } catch (error) {
-                    return { error: { status: 500, data: error instanceof Error ? error.message : "Failed to unblock member" } };
+                    return {
+                        error: {
+                            status: 500,
+                            data:
+                                error instanceof Error
+                                    ? error.message
+                                    : "Failed to unblock member",
+                        },
+                    };
                 }
             },
             invalidatesTags: ["TeamMembers"],
@@ -165,6 +320,7 @@ export const {
     useGetTeamRolesQuery,
     useGetPermissionsQuery,
     useGetRoleByIdQuery,
+    useUpdateRolePermissionsMutation,
     useUpdateMemberRoleMutation,
     useBlockMemberMutation,
     useUnblockMemberMutation,

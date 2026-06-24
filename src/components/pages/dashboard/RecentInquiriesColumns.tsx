@@ -10,26 +10,36 @@ const depositStyles: Record<string, string> = {
   none: "text-[#777980] border-[#E8E8E9] bg-white",
 };
 
-const stageStyles: Record<string, string> = {
-  converted: "bg-[#DCF7EA] text-[#006F1F]",
-  contracted: "bg-[#FFF7E6] text-[#FFAF00]",
-  lost: "bg-[#FFE6E6] text-[#FF4345]",
-  new: "bg-[#8ad7ff] text-[#0098E8]",
-};
+// ── Dynamic stage helpers ────────────────────────────────────────────
+function getStageStyle(stage: string): string {
+  const s = stage.toLowerCase();
+  if (s.includes("new")) return "bg-[#8ad7ff] text-[#0098E8]";
+  if (s.includes("contact")) return "bg-[#DCF7EA] text-[#006F1F]";
+  if (s.includes("convert")) return "bg-[#DCF7EA] text-[#006F1F]";
+  if (s.includes("contract")) return "bg-[#FFF7E6] text-[#FFAF00]";
+  if (s.includes("lost")) return "bg-[#FFE6E6] text-[#FF4345]";
+  return "bg-[#F8FAFB] text-[#777980]";
+}
 
-const stageIcons: Record<string, string> = {
-  converted: "convert",
-  contracted: "contract",
-  lost: "lost",
-  new: "new",
-};
+function getStageIcon(stage: string): string {
+  const s = stage.toLowerCase();
+  if (s.includes("new")) return "new";
+  if (s.includes("contact")) return "convert";
+  if (s.includes("convert")) return "convert";
+  if (s.includes("contract")) return "contract";
+  if (s.includes("lost")) return "lost";
+  return "new";
+}
 
-const stageColors: Record<string, string> = {
-  converted: "#006F1F",
-  contracted: "#FFAF00",
-  lost: "#FF4345",
-  new: "#0098E8",
-};
+function getStageColor(stage: string): string {
+  const s = stage.toLowerCase();
+  if (s.includes("new")) return "#0098E8";
+  if (s.includes("contact")) return "#006F1F";
+  if (s.includes("convert")) return "#006F1F";
+  if (s.includes("contract")) return "#FFAF00";
+  if (s.includes("lost")) return "#FF4345";
+  return "#777980";
+}
 
 export const recentInquiriesColumns: Column<RecentInquiry>[] = [
   {
@@ -38,48 +48,32 @@ export const recentInquiriesColumns: Column<RecentInquiry>[] = [
     render: (row) => (
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded-full overflow-hidden border border-white">
-          <Image
-            src={row.avatar}
-            alt={row.name}
-            width={24}
-            height={24}
-            className="object-cover"
-          />
+          <Image src={row.avatar} alt={row.name} width={24} height={24} className="object-cover" />
         </div>
-        <span className="text-[#1B1B1B] font-inter text-sm font-normal leading-[150%] truncate max-w-[120px]">
-          {row.name}
-        </span>
+        <span className="text-[#1B1B1B] font-inter text-sm font-normal leading-[150%] truncate max-w-[120px]">{row.name}</span>
       </div>
     ),
   },
   {
     key: "service",
     header: "Service",
-    render: (row) => (
-      <span className="text-[#1B1B1B] font-inter text-sm">{row.service}</span>
-    ),
+    render: (row) => <span className="text-[#1B1B1B] font-inter text-sm">{row.service}</span>,
   },
   {
     key: "vehicle",
     header: "Vehicle",
-    render: (row) => (
-      <span className="text-[#1B1B1B] font-inter text-sm">{row.vehicle}</span>
-    ),
+    render: (row) => <span className="text-[#1B1B1B] font-inter text-sm">{row.vehicle}</span>,
   },
   {
     key: "source",
     header: "Source",
-    render: (row) => (
-      <span className="text-[#1B1B1B] font-inter text-sm">{row.source}</span>
-    ),
+    render: (row) => <span className="text-[#1B1B1B] font-inter text-sm">{row.source}</span>,
   },
   {
     key: "deposit",
     header: "Deposit",
     render: (row) => (
-      <span
-        className={`inline-flex py-[6px] px-2 justify-center items-center gap-1 rounded border text-sm capitalize ${depositStyles[row.deposit]}`}
-      >
+      <span className={`inline-flex py-[6px] px-2 justify-center items-center gap-1 rounded border text-sm capitalize ${depositStyles[row.deposit]}`}>
         {row.deposit}
       </span>
     ),
@@ -88,10 +82,8 @@ export const recentInquiriesColumns: Column<RecentInquiry>[] = [
     key: "stage",
     header: "Stage",
     render: (row) => (
-      <span
-        className={`inline-flex py-[6px] px-2 justify-center items-center gap-1 rounded text-sm capitalize ${stageStyles[row.stage]}`}
-      >
-        <Icon name={stageIcons[row.stage]} width={14} height={14} color={stageColors[row.stage]} />
+      <span className={`inline-flex py-[6px] px-2 justify-center items-center gap-1 rounded text-sm capitalize ${getStageStyle(row.stage)}`}>
+        <Icon name={getStageIcon(row.stage)} width={14} height={14} color={getStageColor(row.stage)} />
         {row.stage}
       </span>
     ),
@@ -99,8 +91,6 @@ export const recentInquiriesColumns: Column<RecentInquiry>[] = [
   {
     key: "date",
     header: "Date",
-    render: (row) => (
-      <span className="text-[#1B1B1B] font-inter text-sm">{row.date}</span>
-    ),
+    render: (row) => <span className="text-[#1B1B1B] font-inter text-sm">{row.date}</span>,
   },
 ];

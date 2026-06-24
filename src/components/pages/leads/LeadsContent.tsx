@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/Button";
 import { LeadsTable, type LeadsTableHandle } from "@/components/pages/leads/LeadsTable";
@@ -9,6 +9,19 @@ import { AddLeadModal } from "@/components/pages/leads/kanban/AddLeadModal";
 import { ViewToggle } from "@/components/pages/leads/ViewToggle";
 import { GroupToggle } from "@/components/pages/leads/GroupToggle";
 import { CreateGroupModal } from "@/components/pages/leads/CreateGroupModal";
+import { getStages } from "@/services/stage.service";
+import type { StageOption } from "@/components/ui/StageDropdown";
+import type { Stage } from "@/types/stage";
+
+function mapStagesToOptions(stages: Stage[]): StageOption[] {
+	const nameToValue: Record<string, string> = {
+		"new lead": "new", contracted: "contracted", converted: "converted", lost: "lost",
+	};
+	return stages.map((s) => ({
+		value: nameToValue[s.name.toLowerCase()] ?? s.name.toLowerCase().replace(/\s+/g, "_"),
+		label: s.name, color: s.color, stageId: s.id,
+	}));
+}
 
 export function LeadsContent() {
 	const tableRef = useRef<LeadsTableHandle>(null);
@@ -18,6 +31,11 @@ export function LeadsContent() {
 	const [groupMode, setGroupMode] = useState<"all" | "groups">("all");
 	const [selectedCount, setSelectedCount] = useState(0);
 	const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
+	const [stages, setStages] = useState<StageOption[]>([]);
+
+	useEffect(() => {
+		getStages().then((s) => setStages(mapStagesToOptions(s)));
+	}, []);
 
 	const handleSelectionChange = useCallback((count: number, ids: string[]) => {
 		setSelectedCount(count);
@@ -87,7 +105,11 @@ export function LeadsContent() {
 				<GroupsContent groupModalOpen={groupModalOpen} onGroupModalClose={() => setGroupModalOpen(false)} />
 			)}
 
-			<AddLeadModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+			<AddLeadModal
+				isOpen={modalOpen}
+				onClose={() => setModalOpen(false)}
+				stages={stages}                     // ← pass the stage list
+			/>
 			{groupMode === "all" && (
 				<CreateGroupModal isOpen={groupModalOpen} onClose={() => setGroupModalOpen(false)} selectedLeads={selectedLeads} onGroupCreated={() => { }} />
 			)}

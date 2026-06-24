@@ -9,6 +9,15 @@ function delay(ms: number): Promise<void> {
 }
 
 function mapApiToLead(data: LeadApiResponse): Lead {
+	const nameToValue: Record<string, string> = {
+		"new lead": "new",
+		contracted: "contracted",
+		converted: "converted",
+		lost: "lost",
+	};
+	const rawStage = data.stage?.name?.toLowerCase() || "";
+	const stageSlug = nameToValue[rawStage] ?? rawStage.replace(/\s+/g, "_");
+
 	return {
 		id: data.id,
 		name: data.name,
@@ -21,7 +30,7 @@ function mapApiToLead(data: LeadApiResponse): Lead {
 		priority: (data.priority as Lead["priority"]) || "MEDIUM",
 		deposit: 0,
 		depositStatus: (data.deposit_status as Lead["depositStatus"]) || "NONE",
-		stage: data.stage?.name?.toLowerCase().replace(/\s+/g, "_") || "new",
+		stage: stageSlug,
 		stageId: data.stage_id,
 		assignedToId: data.assigned_to_id || null,
 		notes: data.notes || [],

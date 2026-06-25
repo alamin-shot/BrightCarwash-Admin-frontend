@@ -41,23 +41,42 @@ function mapUser(data: UserResponse['data']): User {
 export async function login(
 	credentials: LoginCredentials,
 ): Promise<LoginResponse> {
-	// Debug logging for Vercel deployment
+	// ✅ Debug logging
 	console.log('[AUTH] MOCK_MODE value:', APP_CONFIG.MOCK_MODE);
-	console.log(
-		'[AUTH] NEXT_PUBLIC_MOCK_MODE env:',
-		process.env.NEXT_PUBLIC_MOCK_MODE,
-	);
-	console.log('[AUTH] Full APP_CONFIG:', APP_CONFIG);
 
 	if (APP_CONFIG.MOCK_MODE) {
 		await delay(APP_CONFIG.MOCK_DELAY_MS);
-		return mockLogin(credentials.email, credentials.password);
+		try {
+			const result = mockLogin(credentials.email, credentials.password);
+			return result;
+		} catch (error) {
+			// ✅ Re-throw with clean message
+			const message = error instanceof Error ? error.message : 'Login failed';
+			throw new Error(message);
+		}
 	}
-	const { data } = await axiosInstance.post<LoginResponse>(
-		'/auth/login',
-		credentials,
-	);
-	return data;
+
+	try {
+		const { data } = await axiosInstance.post<LoginResponse>(
+			'/auth/login',
+			credentials,
+		);
+		return data;
+	} catch (error: any) {
+		// ✅ Extract meaningful error message
+		let message = 'Login failed. Please check your credentials.';
+
+		if (error.response?.data?.message) {
+			message = error.response.data.message;
+		} else if (error.response?.data?.error) {
+			message = error.response.data.error;
+		} else if (error.message) {
+			message = error.message;
+		}
+
+		console.error('[AUTH] Login error:', message);
+		throw new Error(message);
+	}
 }
 
 export async function getProfile(): Promise<User> {
@@ -148,7 +167,6 @@ export async function refreshAccessToken(): Promise<{
 }> {
 	if (APP_CONFIG.MOCK_MODE) {
 		await delay(APP_CONFIG.MOCK_DELAY_MS);
-		// In mock mode, just return the same tokens (mock doesn't expire)
 		return { access_token: 'mock_access', refresh_token: 'mock_refresh' };
 	}
 	const refreshToken = getRefreshToken();

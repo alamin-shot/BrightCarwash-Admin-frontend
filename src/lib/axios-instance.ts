@@ -45,7 +45,14 @@ axiosInstance.interceptors.response.use(
 			_retry?: boolean;
 		};
 
-		if (error.response?.status === 401 && !originalRequest._retry) {
+		// ✅ Skip token refresh for auth endpoints — wrong credentials on /auth/login
+		// should NOT trigger a token refresh or hard page redirect
+		const isAuthRoute =
+			originalRequest?.url?.includes('/auth/login') ||
+			originalRequest?.url?.includes('/auth/refresh-tokens') ||
+			originalRequest?.url?.includes('/auth/logout');
+
+		if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
 			if (isRefreshing) {
 				return new Promise((resolve, reject) => {
 					failedQueue.push({

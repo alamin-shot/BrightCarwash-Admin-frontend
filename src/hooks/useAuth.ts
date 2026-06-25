@@ -56,11 +56,18 @@ export function useAuth() {
 				console.log('[useAuth] Profile fetched:', profile);
 				dispatch(setUser(profile));
 				toast.success('Login successful');
-				router.push('/dashboard');
+				router.replace('/dashboard');
+				return true;
 			} catch (error) {
 				console.error('[useAuth] Login error:', error);
-				toast.error(error instanceof Error ? error.message : 'Login failed');
-				throw error;
+				// ✅ Clear any existing tokens
+				clearTokens();
+				dispatch(clearAuth());
+				// ✅ Show error toast - this will NOT cause a refresh
+				const errorMessage = error instanceof Error ? error.message : 'Login failed. Please check your credentials.';
+				toast.error(errorMessage);
+				// ✅ Return false, DO NOT throw
+				return false;
 			}
 		},
 		[dispatch, router],

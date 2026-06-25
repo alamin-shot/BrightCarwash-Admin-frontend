@@ -3,6 +3,8 @@ import type { Lead, CreateLeadRequest, LeadApiResponse } from "@/types/leads";
 import { APP_CONFIG } from "@/configs/app.config";
 import { mockLeads } from "@/mocks/leads.mock";
 import { getAccessToken } from "@/lib/auth-client";
+import type { LeadGroup, LeadGroupsListResponse } from "@/types/campaign";
+
 
 function delay(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -55,7 +57,8 @@ async function fetchFromBackend<T>(url: string, options?: RequestInit): Promise<
 export const leadsApi = createApi({
 	reducerPath: "leadsApi",
 	baseQuery: async () => ({ data: null }),
-	tagTypes: ["Leads"],
+	// ✅ Add LeadGroups to tagTypes
+	tagTypes: ["Leads", "LeadGroups"],
 	endpoints: (builder) => ({
 		getLeads: builder.query<Lead[], void>({
 			queryFn: async () => {
@@ -161,6 +164,34 @@ export const leadsApi = createApi({
 			},
 		}),
 
+		getLeadGroups: builder.query<LeadGroup[], { search?: string; page?: number; limit?: number }>({
+			queryFn: async (params = {}) => {
+				try {
+					if (APP_CONFIG.MOCK_MODE) {
+						await delay(APP_CONFIG.MOCK_DELAY_MS);
+						return { data: [] };
+					}
+					const queryParams = new URLSearchParams();
+					if (params.search) queryParams.append('search', params.search);
+					if (params.page) queryParams.append('page', String(params.page || 1));
+					if (params.limit) queryParams.append('limit', String(params.limit || 50));
+
+					const url = `/admin/lead-groups${queryParams.toString() ? `?${queryParams}` : ''}`;
+					const json = await fetchFromBackend<LeadGroupsListResponse>(url);
+					return { data: json.data.groups };
+				} catch (error) {
+					return {
+						error: {
+							status: 500,
+							data: error instanceof Error ? error.message : 'Failed to fetch lead groups',
+						},
+					};
+				}
+			},
+			providesTags: ['LeadGroups'],
+			keepUnusedDataFor: 300,
+		}),
+
 		deleteLead: builder.mutation<void, string>({
 			queryFn: async (id) => {
 				try {
@@ -190,4 +221,10 @@ export const leadsApi = createApi({
 	}),
 });
 
-export const { useGetLeadsQuery, useUpdateLeadStageMutation, useCreateLeadMutation, useDeleteLeadMutation } = leadsApi;
+export const {
+	useGetLeadsQuery,
+	useUpdateLeadStageMutation,
+	useCreateLeadMutation,
+	useGetLeadGroupsQuery,
+	useDeleteLeadMutation
+} = leadsApi;

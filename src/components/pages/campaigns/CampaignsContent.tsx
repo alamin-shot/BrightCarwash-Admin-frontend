@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useGetCampaignsQuery } from "@/services/campaign.api";
 import { useCampaignFilters } from "@/hooks/useCampaignFilters";
 import { useCampaignActions } from "@/hooks/useCampaignActions";
@@ -8,17 +9,29 @@ import { CampaignsFilters } from "./CampaignsFilters";
 import { CampaignsTable } from "./CampaignsTable";
 
 export function CampaignsContent() {
-	const { data: campaigns = [], isLoading, error } = useGetCampaignsQuery();
-	const filters = useCampaignFilters(campaigns);
-	const actions = useCampaignActions();
+	// ✅ Debug: Log when component renders
+	console.log("CampaignsContent render");
 
-	// Loading state
+	// ✅ All hooks called in the same order every time
+	const query = useGetCampaignsQuery();
+	console.log("Query state:", { isLoading: query.isLoading, error: query.error, dataLength: query.data?.length });
+
+	const { data: campaigns = [], isLoading, error } = query;
+
+	const filters = useCampaignFilters(campaigns);
+	console.log("Filters:", { searchQuery: filters.searchQuery, typeFilter: filters.typeFilter });
+
+	const actions = useCampaignActions();
+	console.log("Actions:", { hasActions: !!actions });
+
+	// ✅ Conditional returns AFTER all hooks
 	if (isLoading) {
+		console.log("Showing skeleton");
 		return <CampaignsSkeleton />;
 	}
 
-	// Error state
 	if (error) {
+		console.log("Showing error");
 		return (
 			<div className="flex items-center justify-center py-12 text-[#FF4345] font-inter">
 				Failed to load campaigns.
@@ -26,6 +39,7 @@ export function CampaignsContent() {
 		);
 	}
 
+	console.log("Showing main content, campaigns:", campaigns.length);
 	return (
 		<div className="flex flex-col gap-6 w-full">
 			<CampaignsHeader />

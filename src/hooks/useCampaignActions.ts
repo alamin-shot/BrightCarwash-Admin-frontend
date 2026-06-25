@@ -11,14 +11,19 @@ import {
 import type { Campaign } from "@/types/campaign";
 
 export function useCampaignActions() {
+    // ✅ All hooks called in the same order every time
     const router = useRouter();
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [deleteCampaign] = useDeleteCampaignMutation();
     const [launchCampaign] = useLaunchCampaignMutation();
     const [statusAction] = useCampaignStatusActionMutation();
 
+    // ✅ No conditional returns here
     const handleEdit = useCallback(
-        (campaign: Campaign) => router.push(`/campaigns/edit/${campaign.id}`),
+        (campaign: Campaign) => {
+            console.log("Edit campaign:", campaign.id);
+            router.push(`/campaigns/edit/${campaign.id}`);
+        },
         [router]
     );
 
@@ -29,7 +34,8 @@ export function useCampaignActions() {
             try {
                 await deleteCampaign(campaign.id).unwrap();
                 toast.success(`"${campaign.name}" deleted`);
-            } catch {
+            } catch (error) {
+                console.error("Delete error:", error);
                 toast.error("Failed to delete campaign");
             } finally {
                 setDeletingId(null);
@@ -45,6 +51,7 @@ export function useCampaignActions() {
                 await launchCampaign(campaign.id).unwrap();
                 toast.success(`"${campaign.name}" launched`);
             } catch (error: any) {
+                console.error("Launch error:", error);
                 toast.error(error?.data || "Failed to launch campaign");
             }
         },
@@ -59,6 +66,7 @@ export function useCampaignActions() {
                 await statusAction({ id: campaign.id, action }).unwrap();
                 toast.success(`"${campaign.name}" ${label.toLowerCase()}ed`);
             } catch (error: any) {
+                console.error("Status action error:", error);
                 toast.error(error?.data || `Failed to ${label.toLowerCase()} campaign`);
             }
         },

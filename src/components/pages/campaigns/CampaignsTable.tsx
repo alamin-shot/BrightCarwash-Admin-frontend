@@ -26,15 +26,18 @@ export const CampaignsTable = memo(function CampaignsTable({
     deletingId,
 }: CampaignsTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = Math.max(1, Math.ceil(campaigns.length / ITEMS_PER_PAGE));
+
+    // ✅ Ensure campaigns is always an array
+    const safeCampaigns = campaigns || [];
+    const totalPages = Math.max(1, Math.ceil(safeCampaigns.length / ITEMS_PER_PAGE));
 
     const paginated = useMemo(
         () =>
-            campaigns.slice(
+            safeCampaigns.slice(
                 (currentPage - 1) * ITEMS_PER_PAGE,
                 currentPage * ITEMS_PER_PAGE
             ),
-        [campaigns, currentPage]
+        [safeCampaigns, currentPage]
     );
 
     const columns = useMemo(
@@ -60,7 +63,7 @@ export const CampaignsTable = memo(function CampaignsTable({
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={setCurrentPage}
-                totalItems={campaigns.length}
+                totalItems={safeCampaigns.length}
                 itemsPerPage={ITEMS_PER_PAGE}
             />
         </div>

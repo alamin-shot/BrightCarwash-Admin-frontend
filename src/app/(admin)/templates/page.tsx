@@ -1,4 +1,4 @@
-import { TemplatesList } from "@/components/pages/templates/TemplatesList";
+import { TemplatesList } from "@/components/pages/campaigns/create/templates/TemplatesList";
 
 export default function TemplatesPage() {
     return (

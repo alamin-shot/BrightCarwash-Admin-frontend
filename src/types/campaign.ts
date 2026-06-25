@@ -81,3 +81,32 @@ export interface CampaignResponse {
 	message: string;
 	data: Campaign;
 }
+
+export interface LeadGroup {
+	id: string;
+	name: string;
+	description: string | null;
+	brevoListId: number | null;
+	createdAt: string;
+	updatedAt: string;
+	_count?: {
+		leads: number;
+	};
+}
+
+export interface LeadGroupsListResponse {
+	success: boolean;
+	message: string;
+	data: {
+		groups: LeadGroup[];
+		meta: {
+			totalItems: number;
+			itemCount: number;
+			itemsPerPage: number;
+			totalPages: number;
+			currentPage: number;
+			hasNextPage: boolean;
+			hasPreviousPage: boolean;
+		};
+	};
+}

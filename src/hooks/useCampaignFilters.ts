@@ -5,13 +5,16 @@ import type { Campaign, CampaignType, CampaignStatus } from "@/types/campaign";
 import { CHANNEL_TO_TYPE } from "@/types/campaign";
 
 export function useCampaignFilters(campaigns: Campaign[]) {
+	// ✅ All hooks called in the same order every time
 	const [searchQuery, setSearchQuery] = useState("");
 	const [typeFilter, setTypeFilter] = useState<CampaignType>("All Campaign");
 	const [statusFilter, setStatusFilter] = useState<CampaignStatus | "All">("All");
 
+	// ✅ No conditional returns here
 	const filtered = useMemo(
-		() =>
-			campaigns.filter((campaign) => {
+		() => {
+			console.log("Filtering campaigns:", campaigns.length);
+			return campaigns.filter((campaign) => {
 				// Search
 				if (searchQuery) {
 					const q = searchQuery.toLowerCase();
@@ -33,14 +36,26 @@ export function useCampaignFilters(campaigns: Campaign[]) {
 				}
 
 				return true;
-			}),
+			});
+		},
 		[campaigns, searchQuery, typeFilter, statusFilter]
 	);
 
-	const setSearchQueryMemo = useCallback((value: string) => setSearchQuery(value), []);
-	const setTypeFilterMemo = useCallback((value: CampaignType) => setTypeFilter(value), []);
+	const setSearchQueryMemo = useCallback((value: string) => {
+		console.log("Set search query:", value);
+		setSearchQuery(value);
+	}, []);
+
+	const setTypeFilterMemo = useCallback((value: CampaignType) => {
+		console.log("Set type filter:", value);
+		setTypeFilter(value);
+	}, []);
+
 	const setStatusFilterMemo = useCallback(
-		(value: CampaignStatus | "All") => setStatusFilter(value),
+		(value: CampaignStatus | "All") => {
+			console.log("Set status filter:", value);
+			setStatusFilter(value);
+		},
 		[]
 	);
 

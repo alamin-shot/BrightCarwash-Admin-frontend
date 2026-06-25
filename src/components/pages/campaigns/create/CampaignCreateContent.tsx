@@ -30,6 +30,10 @@ export function CampaignCreateContent() {
 	const [selectedTemplateName, setSelectedTemplateName] = useState<string>("");
 	const [designFilled, setDesignFilled] = useState(stepFromUrl === "2" || stepFromUrl === "3");
 
+	// ✅ Recipients state
+	const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+	const [selectedGroupName, setSelectedGroupName] = useState<string | null>(null);
+
 	const addTag = () => {
 		const trimmed = tagInput.trim();
 		if (trimmed && !tags.includes(trimmed)) { setTags([...tags, trimmed]); setTagInput(""); }
@@ -37,6 +41,11 @@ export function CampaignCreateContent() {
 	const removeTag = (tag: string) => setTags(tags.filter((t) => t !== tag));
 	const handleTagKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === "Enter") { e.preventDefault(); addTag(); }
+	};
+
+	const handleRecipientsSave = (groupId: string, groupName: string) => {
+		setSelectedGroupId(groupId);
+		setSelectedGroupName(groupName);
 	};
 
 	return (
@@ -84,6 +93,9 @@ export function CampaignCreateContent() {
 					designFilled={designFilled}
 					selectedTemplateName={selectedTemplateName}
 					onDesignClick={() => setCurrentStep(3)}
+					selectedGroupId={selectedGroupId}
+					selectedGroupName={selectedGroupName}
+					onRecipientsSave={handleRecipientsSave}
 				/>
 			)}
 			{currentStep === 3 && (

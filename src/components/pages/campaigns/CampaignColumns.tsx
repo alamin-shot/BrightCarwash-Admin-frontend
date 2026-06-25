@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { ActionsDropdown } from "@/components/ui/ActionsDropdown";
 import type { Column } from "@/components/ui/DataTable";
 import type { Campaign } from "@/types/campaign";
@@ -24,78 +23,77 @@ export function createCampaignColumns({
 	onLaunch,
 	onStatusAction,
 }: CampaignColumnsParams): Column<Campaign>[] {
-	return useMemo(
-		() => [
-			{
-				key: "checkbox",
-				header: <Checkbox />,
-				className: "w-12",
-				render: () => <Checkbox />,
+	// ✅ NO hooks here - this is a pure function
+	// ✅ All hooks are in the parent component (CampaignsTable)
+
+	return [
+		{
+			key: "checkbox",
+			header: <Checkbox />,
+			className: "w-12",
+			render: () => <Checkbox />,
+		},
+		{
+			key: "name",
+			header: "Campaign Name",
+			render: (row) => (
+				<span className="text-[#1B1B1B] font-inter text-sm font-medium">
+					{row.name}
+				</span>
+			),
+		},
+		{
+			key: "subject",
+			header: "Subject",
+			render: (row) => (
+				<span className="text-[#1B1B1B] font-inter text-sm truncate max-w-50 block">
+					{row.emailConfig.subject}
+				</span>
+			),
+		},
+		{
+			key: "recipients",
+			header: "Recipients",
+			render: (row) => (
+				<span className="text-[#1B1B1B] font-inter text-sm">
+					{row.analytics.SENT.toLocaleString()}
+				</span>
+			),
+		},
+		{
+			key: "clicks",
+			header: "Clicks",
+			render: (row) => (
+				<span className="text-[#1B1B1B] font-inter text-sm">
+					{row.analytics.CLICKED.toLocaleString()}
+				</span>
+			),
+		},
+		{
+			key: "status",
+			header: "Status",
+			render: (row) => (
+				<span
+					className={`inline-flex py-1.5 px-3 justify-center items-center gap-1 rounded-md text-sm font-medium ${STATUS_STYLES[row.status] || STATUS_STYLES.DRAFT
+						}`}
+				>
+					{row.status}
+				</span>
+			),
+		},
+		{
+			key: "actions",
+			header: "",
+			className: "w-12",
+			render: (row) => {
+				const items = buildActions(row, { onEdit, onDelete, onLaunch, onStatusAction });
+				return <ActionsDropdown items={items} />;
 			},
-			{
-				key: "name",
-				header: "Campaign Name",
-				render: (row) => (
-					<span className="text-[#1B1B1B] font-inter text-sm font-medium">
-						{row.name}
-					</span>
-				),
-			},
-			{
-				key: "subject",
-				header: "Subject",
-				render: (row) => (
-					<span className="text-[#1B1B1B] font-inter text-sm truncate max-w-50 block">
-						{row.emailConfig.subject}
-					</span>
-				),
-			},
-			{
-				key: "recipients",
-				header: "Recipients",
-				render: (row) => (
-					<span className="text-[#1B1B1B] font-inter text-sm">
-						{row.analytics.SENT.toLocaleString()}
-					</span>
-				),
-			},
-			{
-				key: "clicks",
-				header: "Clicks",
-				render: (row) => (
-					<span className="text-[#1B1B1B] font-inter text-sm">
-						{row.analytics.CLICKED.toLocaleString()}
-					</span>
-				),
-			},
-			{
-				key: "status",
-				header: "Status",
-				render: (row) => (
-					<span
-						className={`inline-flex py-1.5 px-3 justify-center items-center gap-1 rounded-md text-sm font-medium ${STATUS_STYLES[row.status] || STATUS_STYLES.DRAFT
-							}`}
-					>
-						{row.status}
-					</span>
-				),
-			},
-			{
-				key: "actions",
-				header: "",
-				className: "w-12",
-				render: (row) => (
-					<ActionsDropdown
-						items={buildActions(row, { onEdit, onDelete, onLaunch, onStatusAction })}
-					/>
-				),
-			},
-		],
-		[onEdit, onDelete, onLaunch, onStatusAction]
-	);
+		},
+	];
 }
 
-// Extracted helper components
+// Helper components - no hooks
 function Checkbox() {
 	return (
 		<input

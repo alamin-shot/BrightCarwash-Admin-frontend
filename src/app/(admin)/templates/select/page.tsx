@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { TemplatesList } from "@/components/pages/templates/TemplatesList";
+import { TemplatesList } from "@/components/pages/campaigns/create/templates/TemplatesList";
 import type { Template } from "@/types/template";
 
 export default function SelectTemplatePage() {

@@ -1,8 +1,8 @@
 "use client";
 
+import { GroupAccordion } from "./GroupAccordion";
 import type { Lead } from "@/types/leads";
 import type { StageOption } from "@/components/ui/StageDropdown";
-import { GroupAccordion } from "./GroupAccordion";
 
 interface Group {
     id: string;
@@ -19,8 +19,7 @@ interface GroupsListProps {
     onDelete: (lead: Lead) => void;
     onAddLead: (groupId: string) => void;
     onDeleteGroup: (groupId: string) => void;
-    onGroupExpand: (groupId: string, isExpanded: boolean) => void;
-    router: any;
+    router: { push: (url: string) => void };
 }
 
 export function GroupsList({
@@ -31,7 +30,6 @@ export function GroupsList({
     onDelete,
     onAddLead,
     onDeleteGroup,
-    onGroupExpand,
     router,
 }: GroupsListProps) {
     if (groups.length === 0) {
@@ -52,7 +50,6 @@ export function GroupsList({
             router={router}
             onAddLead={onAddLead}
             onDeleteGroup={onDeleteGroup}
-            onGroupExpand={onGroupExpand}
         />
     );
 }

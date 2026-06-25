@@ -1,118 +1,174 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
 import { useRouter } from "next/navigation";
-import { useGetLeadsQuery, useUpdateLeadStageMutation, useDeleteLeadMutation } from "@/services/leads.api";
+import { useGetLeadsQuery } from "@/services/leads.api";
+import { useGroupsData } from "@/hooks/useGroupsData";
+import { useGroupActions } from "@/hooks/useGroupActions";
 import { getStages } from "@/services/stage.service";
 import { useExportExcel } from "@/hooks/useExportExcel";
-import { useGroupsData } from "@/hooks/useGroupsData";
 import { GroupsHeader } from "./GroupsHeader";
 import { GroupsList } from "./GroupsList";
-import { AddLeadModal } from "@/components/pages/leads/kanban/AddLeadModal";
-import { getAccessToken } from "@/lib/auth-client";
-import { APP_CONFIG } from "@/configs/app.config";
+import { AddLeadModal } from "../kanban/AddLeadModal";
 import type { StageOption } from "@/components/ui/StageDropdown";
 import type { Stage } from "@/types/stage";
-import type { Lead } from "@/types/leads";
 import { toast } from "react-toastify";
 import { CreateGroupModal } from "./CreateGroupModal";
+import { getAccessToken } from "@/lib/auth-client";
+import { APP_CONFIG } from "@/configs/app.config";
+
+export interface GroupsContentRef {
+    exportData: () => void;
+}
 
 function mapStagesToOptions(stages: Stage[]): StageOption[] {
-    const nameToValue: Record<string, string> = { "new lead": "new", contracted: "contracted", converted: "converted", lost: "lost" };
+    const nameToValue: Record<string, string> = {
+        "new lead": "new", contracted: "contracted",
+        converted: "converted", lost: "lost"
+    };
     return stages.map((s) => ({
         value: nameToValue[s.name.toLowerCase()] ?? s.name.toLowerCase().replace(/\s+/g, "_"),
         label: s.name, color: s.color, stageId: s.id,
     }));
 }
 
-interface GroupsContentProps {
-    groupModalOpen: boolean;
-    onGroupModalClose: () => void;
-}
+export const GroupsContent = forwardRef<GroupsContentRef, { groupModalOpen: boolean; onGroupModalClose: () => void }>(
+    function GroupsContent({ groupModalOpen, onGroupModalClose }, ref) {
+        const router = useRouter();
+        const { data: leads = [], refetch: refetchLeads } = useGetLeadsQuery();
+        const {
+            groups,
+            leads: groupLeads,
+            isLoading,
+            refetch,
+            fetchGroupLeads,
+            addGroupOptimistic,
+            removeOptimisticGroup,
+            addLeadToGroupOptimistic,
+            updateLeadStageOptimistic,
+        } = useGroupsData();
+        const [searchQuery, setSearchQuery] = useState("");
+        const [stages, setStages] = useState<StageOption[]>([]);
+        const [leadModalOpen, setLeadModalOpen] = useState(false);
+        const [targetGroupId, setTargetGroupId] = useState<string | null>(null);
 
-export function GroupsContent({ groupModalOpen, onGroupModalClose }: GroupsContentProps) {
-    const router = useRouter();
-    const { data: leads = [], refetch: refetchLeads } = useGetLeadsQuery();
-    const { groups, leads: groupLeads, isLoading, refetch, fetchGroupLeads, addLeadToGroup } = useGroupsData();
-    const [updateStage] = useUpdateLeadStageMutation();
-    const [deleteLead] = useDeleteLeadMutation();
-    const [searchQuery, setSearchQuery] = useState("");
-    const [stages, setStages] = useState<StageOption[]>([]);
-    const [leadModalOpen, setLeadModalOpen] = useState(false);
-    const [targetGroupId, setTargetGroupId] = useState<string | null>(null);
+        const { handleStageChange, handleDeleteLead, handleDeleteGroup, handleAddLeadToGroup } = useGroupActions({
+            refetch,
+            refetchLeads,
+            fetchGroupLeads,
+            addLeadToGroupOptimistic,
+            updateLeadStageOptimistic,
+        });
 
-    console.log("🎯 GroupsContent - groups:", groups);
-    console.log("🎯 GroupsContent - groupLeads:", groupLeads);
+        const exportColumns = [
+            { key: "name", header: "Lead Name" }, { key: "service", header: "Service" },
+            { key: "vehicle", header: "Vehicle" }, { key: "source", header: "Source" },
+            { key: "depositStatus", header: "Deposit" }, { key: "stage", header: "Stage" }, { key: "date", header: "Date" },
+        ];
+        const { handleExport } = useExportExcel({ data: groupLeads, columns: exportColumns, filename: "group-leads-export" });
 
-    useEffect(() => { getStages().then((s) => setStages(mapStagesToOptions(s))); }, []);
-    useEffect(() => { if (!groupModalOpen) { refetch(); refetchLeads(); } }, [groupModalOpen, refetch, refetchLeads]);
+        useImperativeHandle(ref, () => ({
+            exportData: () => {
+                handleExport();
+            },
+        }), [handleExport]);
 
-    const handleStageChange = useCallback(async (id: string, stageName: string) => {
-        try { await updateStage({ id, stageName }).unwrap(); toast.success("Stage updated"); } catch { toast.error("Failed"); }
-    }, [updateStage]);
+        useEffect(() => {
+            getStages().then((s) => setStages(mapStagesToOptions(s)));
+        }, []);
 
-    const handleDelete = useCallback(async (lead: Lead) => {
-        try { await deleteLead(lead.id).unwrap(); toast.success(`${lead.name} deleted`); refetchLeads(); } catch { toast.error("Failed"); }
-    }, [deleteLead, refetchLeads]);
+        useEffect(() => {
+            if (!groupModalOpen) {
+                refetch();
+                refetchLeads();
+            }
+        }, [groupModalOpen, refetch, refetchLeads]);
 
-    const handleDeleteGroup = useCallback(async (groupId: string) => {
-        try {
-            const token = getAccessToken();
-            const res = await fetch(`${APP_CONFIG.API_BASE_URL}/admin/lead-groups/${groupId}`, {
-                method: "DELETE", headers: { Authorization: `Bearer ${token}` },
-            });
-            if (!res.ok) throw new Error("Failed");
-            toast.success("Group deleted");
-            refetch();
-        } catch { toast.error("Failed to delete group"); }
-    }, [refetch]);
+        const handleLeadAdded = useCallback(async (leadId: string) => {
+            if (!targetGroupId) return;
 
-    const handleLeadAdded = useCallback((leadId: string) => {
-        if (!targetGroupId) return;
-        const lead = leads.find(l => l.id === leadId);
-        if (lead) {
-            addLeadToGroup(targetGroupId, leadId);
-            toast.success("Lead added to group");
+            const leadData = leads.find(l => l.id === leadId);
+            const success = await handleAddLeadToGroup(targetGroupId, leadId, leadData);
+
+            if (success) {
+                setTargetGroupId(null);
+                setLeadModalOpen(false);
+            }
+        }, [targetGroupId, leads, handleAddLeadToGroup]);
+
+        // ✅ Optimistic group creation
+        const handleGroupCreated = useCallback(async (newGroup: any) => {
+            // ✅ Immediately add group to UI
+            const optimisticGroup: any = {
+                id: newGroup.id || `temp_${Date.now()}`,
+                name: newGroup.name,
+                description: newGroup.description || '',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                brevoListId: newGroup.brevoListId || null,
+                _count: { leads: 0 },
+            };
+
+            addGroupOptimistic(optimisticGroup);
+
+            // ✅ Close modal immediately
+            onGroupModalClose();
+            toast.success(`Group "${newGroup.name}" created`);
+
+            // ✅ Refetch in background to get real ID and sync
+            try {
+                await refetch();
+                await refetchLeads();
+                // ✅ Remove optimistic version if API returned real one
+                if (newGroup.id && !newGroup.id.startsWith('temp_')) {
+                    removeOptimisticGroup(optimisticGroup.id);
+                }
+            } catch (error) {
+                console.error('Error syncing groups after creation:', error);
+            }
+        }, [addGroupOptimistic, removeOptimisticGroup, refetch, refetchLeads, onGroupModalClose]);
+
+        const filteredGroups = groups.filter((g) => g.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+        if (isLoading) {
+            return <div className="flex items-center justify-center py-12"><div className="w-8 h-8 border-2 border-[#0098E8] border-t-transparent rounded-full animate-spin" /></div>;
         }
-        setTargetGroupId(null);
-    }, [targetGroupId, leads, addLeadToGroup]);
 
-    const filteredGroups = groups.filter((g) => g.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    console.log("🎯 Filtered groups:", filteredGroups);
-
-    const exportableLeads = groupLeads;
-    const exportColumns = [
-        { key: "name", header: "Lead Name" }, { key: "service", header: "Service" },
-        { key: "vehicle", header: "Vehicle" }, { key: "source", header: "Source" },
-        { key: "depositStatus", header: "Deposit" }, { key: "stage", header: "Stage" }, { key: "date", header: "Date" },
-    ];
-    const { handleExport } = useExportExcel({ data: exportableLeads, columns: exportColumns, filename: "group-leads-export" });
-
-    if (isLoading) {
-        return <div className="flex items-center justify-center py-12"><div className="w-8 h-8 border-2 border-[#0098E8] border-t-transparent rounded-full animate-spin" /></div>;
+        return (
+            <div className="flex flex-col gap-3 w-full">
+                <GroupsHeader
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    onExport={handleExport}
+                    exportDisabled={groupLeads.length === 0}
+                    onAddGroup={() => onGroupModalClose()}
+                />
+                <GroupsList
+                    groups={filteredGroups}
+                    leads={groupLeads}
+                    stages={stages}
+                    onStageChange={handleStageChange}
+                    onDelete={handleDeleteLead}
+                    onAddLead={(gid: string) => {
+                        setTargetGroupId(gid);
+                        setLeadModalOpen(true);
+                    }}
+                    onDeleteGroup={handleDeleteGroup}
+                    router={router}
+                />
+                <CreateGroupModal
+                    isOpen={groupModalOpen}
+                    onClose={() => { }}
+                    selectedLeads={[]}
+                    onGroupCreated={handleGroupCreated}
+                />
+                <AddLeadModal
+                    isOpen={leadModalOpen}
+                    onClose={() => { setLeadModalOpen(false); setTargetGroupId(null); }}
+                    onLeadCreated={handleLeadAdded}
+                    stages={stages}
+                />
+            </div>
+        );
     }
-
-    return (
-        <div className="flex flex-col gap-3 w-full">
-            <GroupsHeader
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                onExport={handleExport}
-                exportDisabled={exportableLeads.length === 0}
-            />
-            <GroupsList
-                groups={filteredGroups}
-                leads={groupLeads}
-                stages={stages}
-                onStageChange={handleStageChange}
-                onDelete={handleDelete}
-                onAddLead={(gid) => { setTargetGroupId(gid); setLeadModalOpen(true); }}
-                onDeleteGroup={handleDeleteGroup}
-                onGroupExpand={fetchGroupLeads}
-                router={router}
-            />
-            <CreateGroupModal isOpen={groupModalOpen} onClose={onGroupModalClose} selectedLeads={[]} onGroupCreated={() => { refetch(); onGroupModalClose(); }} />
-            <AddLeadModal isOpen={leadModalOpen} onClose={() => { setLeadModalOpen(false); setTargetGroupId(null); }} onLeadCreated={handleLeadAdded} stages={stages} />
-        </div>
-    );
-}
+);

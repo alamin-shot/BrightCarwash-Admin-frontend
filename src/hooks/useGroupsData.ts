@@ -1,15 +1,18 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useGetLeadGroupsQuery } from "@/services/leads.api";
 import { getAccessToken } from "@/lib/auth-client";
 import { APP_CONFIG } from "@/configs/app.config";
 import type { LeadGroup } from "@/types/campaign";
 import type { Lead } from "@/types/leads";
 import { toast } from "react-toastify";
+import axiosInstance from "@/lib/axios-instance";
 
-// ✅ Transform API lead to Lead type
 function mapApiLeadToLead(apiLead: any): Lead {
+    const rawStage = apiLead.stage?.name?.toLowerCase() || "";
+    const stageSlug = rawStage ? rawStage.replace(/\s+/g, "_") : "new";
+
     return {
         id: apiLead.id,
         name: apiLead.name || '',
@@ -22,7 +25,7 @@ function mapApiLeadToLead(apiLead: any): Lead {
         priority: (apiLead.priority as Lead['priority']) || 'MEDIUM',
         deposit: 0,
         depositStatus: (apiLead.deposit_status as Lead['depositStatus']) || 'NONE',
-        stage: apiLead.stage?.name?.toLowerCase().replace(/\s+/g, '_') || 'new',
+        stage: stageSlug,
         stageId: apiLead.stage_id || '',
         assignedToId: apiLead.assigned_to_id || null,
         notes: apiLead.notes || [],
@@ -38,131 +41,151 @@ interface GroupWithLeads {
 }
 
 export function useGroupsData() {
-    const { data: apiGroups = [], refetch: refetchGroups, isLoading } = useGetLeadGroupsQuery({ limit: 100 });
+    const { data: apiGroups = [], refetch: refetchGroups, isLoading: groupsLoading } = useGetLeadGroupsQuery({
+        limit: 100
+    });
     const [groupLeadsMap, setGroupLeadsMap] = useState<Record<string, Lead[]>>({});
-    const [fetchedGroups, setFetchedGroups] = useState<Set<string>>(new Set());
+    const [isLoadingLeads, setIsLoadingLeads] = useState(true);
+    const [optimisticGroups, setOptimisticGroups] = useState<LeadGroup[]>([]);
 
-    console.log("📦 API Groups:", apiGroups);
-    console.log("📦 groupLeadsMap:", groupLeadsMap);
+    // ✅ Combine API groups with optimistic groups
+    const allGroups = [...apiGroups, ...optimisticGroups];
 
     const fetchGroupLeads = useCallback(async (groupId: string) => {
-        console.log("🔍 fetchGroupLeads called for group:", groupId);
-
-        if (fetchedGroups.has(groupId)) {
-            console.log("⏭️ Group already fetched, skipping:", groupId);
-            return;
-        }
-
         try {
             const token = getAccessToken();
             if (!token) {
                 toast.error("Please login");
-                return;
+                return [];
             }
 
-            const url = `${APP_CONFIG.API_BASE_URL}/admin/lead-groups/${groupId}/leads?limit=100`;
-            console.log("📡 Fetching from URL:", url);
-
-            const res = await fetch(url, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            console.log("📡 Response status:", res.status);
-
-            if (!res.ok) {
-                console.error("❌ Failed to fetch group leads:", res.status);
-                return;
-            }
-
-            const data = await res.json();
-            console.log("📡 API Response:", data);
-
-            const leadsData = data.data?.leads || [];
-            console.log("📊 Raw leads data:", leadsData);
-
+            const url = `/admin/lead-groups/${groupId}/leads?page=1&limit=100`;
+            const res = await axiosInstance.get(url);
+            const leadsData = res.data?.data?.leads || [];
             const mappedLeads = leadsData.map(mapApiLeadToLead);
-            console.log("✅ Mapped leads:", mappedLeads);
 
-            setGroupLeadsMap(prev => {
-                const updated = { ...prev, [groupId]: mappedLeads };
-                console.log("📦 Updated groupLeadsMap:", updated);
-                return updated;
-            });
+            setGroupLeadsMap(prev => ({
+                ...prev,
+                [groupId]: mappedLeads,
+            }));
 
-            setFetchedGroups(prev => {
-                const updated = new Set(prev).add(groupId);
-                console.log("📦 Updated fetchedGroups:", updated);
-                return updated;
-            });
-
-            if (mappedLeads.length > 0) {
-                toast.success(`Loaded ${mappedLeads.length} leads`);
-            } else {
-                toast.info("No leads found in this group");
-            }
-        } catch (error) {
-            console.error("❌ Failed to fetch group leads:", error);
-            toast.error("Failed to load group leads");
+            return mappedLeads;
+        } catch (error: any) {
+            console.error(`Failed to fetch leads for group ${groupId}:`, error);
+            return [];
         }
-    }, [fetchedGroups]);
+    }, []);
 
-    const groups: GroupWithLeads[] = apiGroups.map((group: LeadGroup) => ({
+    // ✅ Fetch ALL groups' leads in parallel on page load
+    useEffect(() => {
+        const fetchAllGroupLeads = async () => {
+            if (apiGroups.length === 0) {
+                setIsLoadingLeads(false);
+                return;
+            }
+
+            setIsLoadingLeads(true);
+
+            try {
+                const token = getAccessToken();
+                if (!token) {
+                    setIsLoadingLeads(false);
+                    return;
+                }
+
+                const fetchPromises = apiGroups.map(async (group: LeadGroup) => {
+                    try {
+                        const url = `/admin/lead-groups/${group.id}/leads?page=1&limit=100`;
+                        const res = await axiosInstance.get(url);
+                        const leadsData = res.data?.data?.leads || [];
+                        const mappedLeads = leadsData.map(mapApiLeadToLead);
+                        return { groupId: group.id, leads: mappedLeads };
+                    } catch (error: any) {
+                        console.error(`Failed to fetch leads for group ${group.id}:`, error);
+                        return { groupId: group.id, leads: [] };
+                    }
+                });
+
+                const results = await Promise.all(fetchPromises);
+
+                const newMap: Record<string, Lead[]> = {};
+                results.forEach(({ groupId, leads }) => {
+                    newMap[groupId] = leads;
+                });
+
+                setGroupLeadsMap(newMap);
+            } catch (error) {
+                console.error('Failed to fetch group leads:', error);
+            } finally {
+                setIsLoadingLeads(false);
+            }
+        };
+
+        fetchAllGroupLeads();
+    }, [apiGroups]);
+
+    // ✅ Optimistic add group
+    const addGroupOptimistic = useCallback((group: LeadGroup) => {
+        setOptimisticGroups(prev => [...prev, group]);
+    }, []);
+
+    // ✅ Remove optimistic group (when API confirms or on error)
+    const removeOptimisticGroup = useCallback((groupId: string) => {
+        setOptimisticGroups(prev => prev.filter(g => g.id !== groupId));
+    }, []);
+
+    // ✅ Optimistic add lead to group
+    const addLeadToGroupOptimistic = useCallback((groupId: string, lead: Lead) => {
+        setGroupLeadsMap(prev => {
+            const currentLeads = prev[groupId] || [];
+            if (currentLeads.some(l => l.id === lead.id)) {
+                return prev;
+            }
+            return {
+                ...prev,
+                [groupId]: [...currentLeads, lead],
+            };
+        });
+    }, []);
+
+    // ✅ Optimistic update lead stage
+    const updateLeadStageOptimistic = useCallback((leadId: string, newStage: string) => {
+        setGroupLeadsMap(prev => {
+            const next = { ...prev };
+            Object.keys(next).forEach(groupId => {
+                next[groupId] = next[groupId].map(lead => {
+                    if (lead.id === leadId) {
+                        return { ...lead, stage: newStage };
+                    }
+                    return lead;
+                });
+            });
+            return next;
+        });
+    }, []);
+
+    const groups: GroupWithLeads[] = allGroups.map((group: LeadGroup) => ({
         id: group.id,
         name: group.name,
         leadIds: (groupLeadsMap[group.id] || []).map((l) => l.id),
-        _count: group._count,
+        _count: group._count || { leads: 0 },
     }));
 
-    console.log("📦 Computed groups with leadIds:", groups);
-
-    const leads: Lead[] = Object.values(groupLeadsMap).flat();
-    console.log("📦 All leads:", leads);
-
-    const addLeadToGroup = useCallback((groupId: string, leadId: string) => {
-        let leadToAdd: Lead | undefined;
-
-        for (const [gid, leadsArray] of Object.entries(groupLeadsMap)) {
-            const found = leadsArray.find(l => l.id === leadId);
-            if (found) {
-                leadToAdd = found;
-                break;
-            }
-        }
-
-        if (!leadToAdd) {
-            leadToAdd = {
-                id: leadId,
-                name: 'New Lead',
-                email: '',
-                phone: '',
-                avatar: '/images/avatar-placeholder.png',
-                service: '',
-                vehicle: '',
-                source: '',
-                priority: 'MEDIUM',
-                deposit: 0,
-                depositStatus: 'NONE',
-                stage: 'new',
-                stageId: '',
-                assignedToId: null,
-                notes: [],
-                date: new Date().toISOString().split('T')[0],
-            };
-        }
-
-        setGroupLeadsMap(prev => ({
-            ...prev,
-            [groupId]: [...(prev[groupId] || []), leadToAdd!],
-        }));
-    }, [groupLeadsMap]);
+    const allLeads: Lead[] = Object.values(groupLeadsMap).flat();
+    const leads: Lead[] = Array.from(
+        new Map(allLeads.map((lead) => [lead.id, lead])).values()
+    );
 
     return {
         groups,
         leads,
-        groupLeads: leads, // Alias for compatibility
-        isLoading,
+        groupLeads: leads,
+        isLoading: groupsLoading || isLoadingLeads,
         refetch: refetchGroups,
         fetchGroupLeads,
-        addLeadToGroup,
+        addGroupOptimistic,
+        removeOptimisticGroup,
+        addLeadToGroupOptimistic,
+        updateLeadStageOptimistic,
     };
 }

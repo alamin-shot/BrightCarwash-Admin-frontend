@@ -6,24 +6,26 @@ import { Button } from '@/components/ui/Button';
 import { Calendar, Send } from 'lucide-react';
 import { getAccessToken } from '@/lib/auth-client';
 import { toast } from 'react-toastify';
+import { useCreateCampaignMutation, useLaunchCampaignMutation } from '@/services/campaign.api';
 
 interface StepTwoActionsProps {
 	allFilled: boolean;
-	onSendNow?: () => void;
-	onScheduleLater?: () => void;
+	campaignData?: any;
 }
 
 export function StepTwoActions({
 	allFilled,
-	onSendNow,
-	onScheduleLater,
+	campaignData,
 }: StepTwoActionsProps) {
 	const router = useRouter();
+	const [createCampaign] = useCreateCampaignMutation();
+	const [launchCampaign] = useLaunchCampaignMutation();
 	const [isSending, setIsSending] = useState(false);
 	const [isScheduling, setIsScheduling] = useState(false);
 
+	console.log("🎯 StepTwoActions - campaignData:", campaignData); // ✅ Debug log
+
 	const handleSendNow = async () => {
-		// ✅ Check if user is logged in
 		const token = getAccessToken();
 		if (!token) {
 			toast.error('Please login to continue');
@@ -31,22 +33,38 @@ export function StepTwoActions({
 			return;
 		}
 
-		// ✅ Check if all required fields are filled
 		if (!allFilled) {
 			toast.warning('Please complete all steps before sending');
 			return;
 		}
 
+		// ✅ Check if templateId exists
+		if (!campaignData?.templateId) {
+			toast.error('Please select a template first');
+			console.error("❌ No templateId in campaignData:", campaignData);
+			return;
+		}
+
 		setIsSending(true);
 		try {
-			await onSendNow?.();
+			const campaign = await createCampaign({
+				...campaignData,
+				scheduledAt: null,
+			}).unwrap();
+
+			await launchCampaign(campaign.id).unwrap();
+
+			toast.success('Campaign sent successfully!');
+			router.push('/campaigns');
+		} catch (error: any) {
+			console.error('Send error:', error);
+			toast.error(error?.data?.message || 'Failed to send campaign');
 		} finally {
 			setIsSending(false);
 		}
 	};
 
 	const handleScheduleLater = async () => {
-		// ✅ Check if user is logged in
 		const token = getAccessToken();
 		if (!token) {
 			toast.error('Please login to continue');
@@ -54,15 +72,32 @@ export function StepTwoActions({
 			return;
 		}
 
-		// ✅ Check if all required fields are filled
 		if (!allFilled) {
 			toast.warning('Please complete all steps before scheduling');
 			return;
 		}
 
+		if (!campaignData?.templateId) {
+			toast.error('Please select a template first');
+			return;
+		}
+
+		const defaultDate = new Date();
+		defaultDate.setDate(defaultDate.getDate() + 7);
+		const scheduledAt = defaultDate.toISOString();
+
 		setIsScheduling(true);
 		try {
-			await onScheduleLater?.();
+			await createCampaign({
+				...campaignData,
+				scheduledAt: scheduledAt,
+			}).unwrap();
+
+			toast.success(`Campaign scheduled for ${defaultDate.toLocaleDateString()}`);
+			router.push('/campaigns');
+		} catch (error: any) {
+			console.error('Schedule error:', error);
+			toast.error(error?.data?.message || 'Failed to schedule campaign');
 		} finally {
 			setIsScheduling(false);
 		}

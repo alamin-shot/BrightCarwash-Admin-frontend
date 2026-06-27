@@ -1,7 +1,5 @@
-// src/components/pages/campaigns/page.tsx - SERVER COMPONENT
-import { CampaignsContent } from "./CampaignsContent";
+import { CampaignsContent } from ".";
 
 export default function CampaignsRootPage() {
-	// ✅ This is a server component - NO "use client"
 	return <CampaignsContent />;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { FormInput } from "@/components/ui/FormInput";
@@ -8,14 +8,30 @@ import { FormInput } from "@/components/ui/FormInput";
 interface SubjectModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialSubject?: string;
+  initialPreview?: string;
+  onSave?: (subject: string, preview: string) => void;
 }
 
 const labelClass = "text-[#777980] font-inter text-base font-normal leading-[130%]";
 const inputClass = "px-4 py-3 border-[#DFE1E7] rounded-lg bg-white text-[#1B1B1B] placeholder-[#777980] font-inter text-sm outline-none focus:border-[#0098E8] focus:ring-2 focus:ring-[#0098E8]/10 transition-all shadow-none";
 
-export function SubjectModal({ isOpen, onClose }: SubjectModalProps) {
-  const [subject, setSubject] = useState("");
-  const [preview, setPreview] = useState("");
+export function SubjectModal({
+  isOpen,
+  onClose,
+  initialSubject = "",
+  initialPreview = "",
+  onSave,
+}: SubjectModalProps) {
+  const [subject, setSubject] = useState(initialSubject);
+  const [preview, setPreview] = useState(initialPreview);
+
+  useEffect(() => {
+    if (isOpen) {
+      setSubject(initialSubject);
+      setPreview(initialPreview);
+    }
+  }, [isOpen, initialSubject, initialPreview]);
 
   const modalTitle = (
     <div className="flex flex-col gap-1">
@@ -23,6 +39,13 @@ export function SubjectModal({ isOpen, onClose }: SubjectModalProps) {
       <span className="text-[#777980] font-inter text-sm font-normal leading-[132%]">Add a subject line for this campaign.</span>
     </div>
   );
+
+  const handleSave = () => {
+    if (onSave) {
+      onSave(subject, preview);
+    }
+    onClose();
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={modalTitle} size="md" bodyClassName="py-3">
@@ -42,7 +65,7 @@ export function SubjectModal({ isOpen, onClose }: SubjectModalProps) {
 
         <div className="flex gap-3 justify-end pt-2">
           <Button type="button" variant="outline" onClick={onClose} className="flex-1 py-2.5">Cancel</Button>
-          <Button onClick={onClose} className="flex-1 py-2.5">Save</Button>
+          <Button onClick={handleSave} className="flex-1 py-2.5">Save</Button>
         </div>
       </div>
     </Modal>

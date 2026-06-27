@@ -7,7 +7,7 @@ import { StepThreeCards } from "../steps_cards/StepThreeCards";
 
 interface StepThreeDesignProps {
 	onBack: () => void;
-	onTemplateSelect: (name: string) => void;
+	onTemplateSelect: (name: string, id: string) => void; // ✅ Now passes ID
 }
 
 export function StepThreeDesign({ onBack, onTemplateSelect }: StepThreeDesignProps) {

@@ -10,10 +10,10 @@ import type { NavbarProps } from '@/types/navigation';
 
 const pageTitles: Record<string, string> = {
 	'/dashboard': 'Welcome back',
-	'/leads': 'Comprehensive Lead Insights',
-	'/payments': 'Overview of All Transactions',
-	'/campaigns': 'Ready to dive into your E-mail Campaigns?',
-	"/staffs": "Team Management and Access Control",
+	'/leads': 'Lead Insights',
+	'/payments': 'All Transactions',
+	'/campaigns': 'Email Campaigns',
+	"/staffs": "Team Management",
 	'/website-cms': 'Website CMS',
 	'/reports': 'Reports',
 	'/activity-log': 'Activity Log',

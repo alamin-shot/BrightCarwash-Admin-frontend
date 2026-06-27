@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +10,9 @@ interface SenderModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	campaignName: string;
+	initialName?: string;
+	initialEmail?: string;
+	onSave?: (name: string, email: string) => void;
 }
 
 const labelClass =
@@ -21,11 +24,20 @@ export function SenderModal({
 	isOpen,
 	onClose,
 	campaignName,
+	initialName = "Foysal Hasan",
+	initialEmail = "foysalhasan.bdcalling@gmail.com",
+	onSave,
 }: SenderModalProps) {
-	// ✅ Pre-filled with provided credentials
-	const [senderName, setSenderName] = useState("Foysal Hasan");
-	const [senderEmail, setSenderEmail] = useState("foysalhasan.bdcalling@gmail.com");
+	const [senderName, setSenderName] = useState(initialName);
+	const [senderEmail, setSenderEmail] = useState(initialEmail);
 	const [starred, setStarred] = useState(false);
+
+	useEffect(() => {
+		if (isOpen) {
+			setSenderName(initialName);
+			setSenderEmail(initialEmail);
+		}
+	}, [isOpen, initialName, initialEmail]);
 
 	const avatarBg = "#A0887E";
 	const firstLetter = senderName.trim().charAt(0).toUpperCase() || "F";
@@ -44,6 +56,13 @@ export function SenderModal({
 			</span>
 		</div>
 	);
+
+	const handleSave = () => {
+		if (onSave) {
+			onSave(senderName, senderEmail);
+		}
+		onClose();
+	};
 
 	return (
 		<Modal
@@ -73,7 +92,6 @@ export function SenderModal({
 					onChange={(e) => setSenderEmail(e.target.value)}
 					labelClassName={labelClass}
 					className={inputClass}
-					// ✅ Disable editing - backend only accepts this specific email
 					disabled
 				/>
 				<p className="text-xs text-[#777980] -mt-2">
@@ -126,7 +144,7 @@ export function SenderModal({
 					>
 						Cancel
 					</Button>
-					<Button onClick={onClose} className="px-6 w-auto!">
+					<Button onClick={handleSave} className="px-6 w-auto!">
 						Save
 					</Button>
 				</div>

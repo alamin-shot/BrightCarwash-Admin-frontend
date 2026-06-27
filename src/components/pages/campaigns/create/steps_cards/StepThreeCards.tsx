@@ -8,7 +8,7 @@ import type { Template } from "@/types/template";
 import { toast } from "react-toastify";
 
 interface StepThreeCardsProps {
-	onTemplateSelect: (name: string) => void;
+	onTemplateSelect: (name: string, id: string) => void;
 }
 
 export function StepThreeCards({ onTemplateSelect }: StepThreeCardsProps) {
@@ -24,9 +24,14 @@ export function StepThreeCards({ onTemplateSelect }: StepThreeCardsProps) {
 	}, []);
 
 	const handleUse = (template: Template) => {
+		console.log("🎯 Template selected in StepThreeCards:", {
+			name: template.name,
+			id: template.id
+		}); // ✅ Debug log
+
 		setSelectedId(template.id);
 		toast.success(`"${template.name}" selected for this campaign`);
-		onTemplateSelect(template.name);
+		onTemplateSelect(template.name, template.id);
 	};
 
 	return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useGetCampaignsQuery } from "@/services/campaign.api";
 import { useCampaignFilters } from "@/hooks/useCampaignFilters";
 import { useCampaignActions } from "@/hooks/useCampaignActions";
@@ -9,29 +9,35 @@ import { CampaignsFilters } from "./CampaignsFilters";
 import { CampaignsTable } from "./CampaignsTable";
 
 export function CampaignsContent() {
-	// ✅ Debug: Log when component renders
-	console.log("CampaignsContent render");
-
-	// ✅ All hooks called in the same order every time
+	const router = useRouter();
 	const query = useGetCampaignsQuery();
-	console.log("Query state:", { isLoading: query.isLoading, error: query.error, dataLength: query.data?.length });
-
 	const { data: campaigns = [], isLoading, error } = query;
-
 	const filters = useCampaignFilters(campaigns);
-	console.log("Filters:", { searchQuery: filters.searchQuery, typeFilter: filters.typeFilter });
-
 	const actions = useCampaignActions();
-	console.log("Actions:", { hasActions: !!actions });
 
-	// ✅ Conditional returns AFTER all hooks
+	// ✅ Override handleEdit to navigate with campaign data
+	const handleEdit = (campaign: any) => {
+		const params = new URLSearchParams({
+			id: campaign.id,
+			name: campaign.name,
+			tags: JSON.stringify(campaign.tags || []),
+			subject: campaign.emailConfig?.subject || "",
+			senderName: campaign.emailConfig?.senderName || "",
+			senderEmail: campaign.emailConfig?.senderEmail || "",
+			leadGroupId: campaign.emailConfig?.leadGroup?.id || "",
+			leadGroupName: campaign.emailConfig?.leadGroup?.name || "",
+			scheduledAt: campaign.scheduledAt || "",
+			status: campaign.status || "DRAFT",
+			templateId: campaign.templateId || "",
+		});
+		router.push(`/campaigns/create?edit=true&${params.toString()}`);
+	};
+
 	if (isLoading) {
-		console.log("Showing skeleton");
 		return <CampaignsSkeleton />;
 	}
 
 	if (error) {
-		console.log("Showing error");
 		return (
 			<div className="flex items-center justify-center py-12 text-[#FF4345] font-inter">
 				Failed to load campaigns.
@@ -39,7 +45,6 @@ export function CampaignsContent() {
 		);
 	}
 
-	console.log("Showing main content, campaigns:", campaigns.length);
 	return (
 		<div className="flex flex-col gap-6 w-full">
 			<CampaignsHeader />
@@ -53,7 +58,7 @@ export function CampaignsContent() {
 			/>
 			<CampaignsTable
 				campaigns={filters.filtered}
-				onEdit={actions.handleEdit}
+				onEdit={handleEdit}
 				onDelete={actions.handleDelete}
 				onLaunch={actions.handleLaunch}
 				onStatusAction={actions.handleStatusAction}

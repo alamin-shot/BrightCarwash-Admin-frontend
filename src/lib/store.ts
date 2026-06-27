@@ -9,7 +9,7 @@ import { campaignApi } from '@/services/campaign.api';
 import { teamApi } from '@/services/team.api';
 import { templateApi } from '@/services/template.api';
 import { activityLogApi } from '@/services/activity-log.api';
-
+import campaignCreationReducer from '@/store/slices/campaignCreationSlice';
 export const store = configureStore({
 	reducer: {
 		auth: authReducer,
@@ -21,6 +21,7 @@ export const store = configureStore({
 		[teamApi.reducerPath]: teamApi.reducer,
 		[templateApi.reducerPath]: templateApi.reducer,
 		[activityLogApi.reducerPath]: activityLogApi.reducer,
+		campaignCreation: campaignCreationReducer,
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware().concat(

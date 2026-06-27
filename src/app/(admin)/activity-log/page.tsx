@@ -1,10 +1,8 @@
+import { ActivityLogContent } from '@/components/pages/activity-log';
+
+// ✅ ISR: Revalidate page every 60 seconds in the background
+export const revalidate = 60;
+
 export default function ActivityLogPage() {
-  return (
-    <div className="adm-page">
-      <div className="adm-page-placeholder">
-        <h2>Activity Log</h2>
-        <p>Coming soon</p>
-      </div>
-    </div>
-  );
+  return <ActivityLogContent />;
 }

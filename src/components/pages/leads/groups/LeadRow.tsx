@@ -22,6 +22,10 @@ interface LeadRowProps {
 }
 
 export function LeadRow({ lead, stages, onStageChange, onDelete, router }: LeadRowProps) {
+    // ✅ Find the correct stage option using stageId, fallback to stage slug
+    const stageOption = stages.find(s => s.stageId === lead.stageId);
+    const currentStageValue = stageOption ? stageOption.value : lead.stage;
+
     return (
         <tr className="border-t border-[#E8E8E9] bg-white hover:bg-[#F8FAFB] transition-colors">
             <td className="py-2.5 px-4 border-r border-[#E8E8E9]">
@@ -56,7 +60,7 @@ export function LeadRow({ lead, stages, onStageChange, onDelete, router }: LeadR
             </td>
             <td className="py-2.5 px-4 border-r border-[#E8E8E9]">
                 <StageDropdown
-                    currentStage={lead.stage}
+                    currentStage={currentStageValue}
                     stages={stages}
                     onSelect={(stageId) => onStageChange(lead.id, stageId)}
                 />

@@ -50,7 +50,7 @@ export function GroupAccordionRow({
                         <Users size={16} className="text-[#777980]" />
                         <span className="text-sm font-semibold text-[#1B1B1B]">{group.name}</span>
                         <span className="text-xs text-[#777980] bg-[#F1F1F1] px-2 py-0.5 rounded-full">
-                            {group.leadIds.length} Leads
+                            {group._count?.leads || 0} Leads
                         </span>
                     </div>
                     <div className="flex items-center gap-1">

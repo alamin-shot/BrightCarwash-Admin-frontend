@@ -45,13 +45,19 @@ export function useGroupsData() {
         limit: 100
     });
     const [groupLeadsMap, setGroupLeadsMap] = useState<Record<string, Lead[]>>({});
-    const [isLoadingLeads, setIsLoadingLeads] = useState(true);
+    const [isLoadingLeads, setIsLoadingLeads] = useState(false);
     const [optimisticGroups, setOptimisticGroups] = useState<LeadGroup[]>([]);
+    const [fetchingGroups, setFetchingGroups] = useState<Set<string>>(new Set());
 
-    // ✅ Combine API groups with optimistic groups
     const allGroups = [...apiGroups, ...optimisticGroups];
 
-    const fetchGroupLeads = useCallback(async (groupId: string) => {
+    const fetchGroupLeads = useCallback(async (groupId: string, force?: boolean) => {
+        if (!force && (groupLeadsMap[groupId]?.length > 0 || fetchingGroups.has(groupId))) {
+            return groupLeadsMap[groupId] || [];
+        }
+
+        setFetchingGroups(prev => new Set(prev).add(groupId));
+
         try {
             const token = getAccessToken();
             if (!token) {
@@ -73,68 +79,23 @@ export function useGroupsData() {
         } catch (error: any) {
             console.error(`Failed to fetch leads for group ${groupId}:`, error);
             return [];
+        } finally {
+            setFetchingGroups(prev => {
+                const next = new Set(prev);
+                next.delete(groupId);
+                return next;
+            });
         }
-    }, []);
+    }, [groupLeadsMap, fetchingGroups]);
 
-    // ✅ Fetch ALL groups' leads in parallel on page load
-    useEffect(() => {
-        const fetchAllGroupLeads = async () => {
-            if (apiGroups.length === 0) {
-                setIsLoadingLeads(false);
-                return;
-            }
-
-            setIsLoadingLeads(true);
-
-            try {
-                const token = getAccessToken();
-                if (!token) {
-                    setIsLoadingLeads(false);
-                    return;
-                }
-
-                const fetchPromises = apiGroups.map(async (group: LeadGroup) => {
-                    try {
-                        const url = `/admin/lead-groups/${group.id}/leads?page=1&limit=100`;
-                        const res = await axiosInstance.get(url);
-                        const leadsData = res.data?.data?.leads || [];
-                        const mappedLeads = leadsData.map(mapApiLeadToLead);
-                        return { groupId: group.id, leads: mappedLeads };
-                    } catch (error: any) {
-                        console.error(`Failed to fetch leads for group ${group.id}:`, error);
-                        return { groupId: group.id, leads: [] };
-                    }
-                });
-
-                const results = await Promise.all(fetchPromises);
-
-                const newMap: Record<string, Lead[]> = {};
-                results.forEach(({ groupId, leads }) => {
-                    newMap[groupId] = leads;
-                });
-
-                setGroupLeadsMap(newMap);
-            } catch (error) {
-                console.error('Failed to fetch group leads:', error);
-            } finally {
-                setIsLoadingLeads(false);
-            }
-        };
-
-        fetchAllGroupLeads();
-    }, [apiGroups]);
-
-    // ✅ Optimistic add group
     const addGroupOptimistic = useCallback((group: LeadGroup) => {
         setOptimisticGroups(prev => [...prev, group]);
     }, []);
 
-    // ✅ Remove optimistic group (when API confirms or on error)
     const removeOptimisticGroup = useCallback((groupId: string) => {
         setOptimisticGroups(prev => prev.filter(g => g.id !== groupId));
     }, []);
 
-    // ✅ Optimistic add lead to group
     const addLeadToGroupOptimistic = useCallback((groupId: string, lead: Lead) => {
         setGroupLeadsMap(prev => {
             const currentLeads = prev[groupId] || [];
@@ -148,7 +109,6 @@ export function useGroupsData() {
         });
     }, []);
 
-    // ✅ Optimistic update lead stage
     const updateLeadStageOptimistic = useCallback((leadId: string, newStage: string) => {
         setGroupLeadsMap(prev => {
             const next = { ...prev };

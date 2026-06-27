@@ -19,19 +19,15 @@ export function useGroupActions({
     const [updateStage] = useUpdateLeadStageMutation();
     const [deleteLead] = useDeleteLeadMutation();
 
-    // ✅ Optimistic stage update
     const handleStageChange = useCallback(async (id: string, stageName: string) => {
-        // ✅ Update UI immediately
         updateLeadStageOptimistic(id, stageName);
 
         try {
             await updateStage({ id, stageName }).unwrap();
             toast.success("Stage updated");
-            // ✅ Refetch in background to sync
             await refetchLeads();
         } catch {
             toast.error("Failed to update stage");
-            // ✅ Revert on error
             await refetchLeads();
         }
     }, [updateStage, refetchLeads, updateLeadStageOptimistic]);
@@ -62,14 +58,12 @@ export function useGroupActions({
         }
     }, [refetch]);
 
-    // ✅ Optimistic add lead to group
     const handleAddLeadToGroup = useCallback(async (groupId: string, leadId: string, leadData?: Lead) => {
         try {
             const token = getAccessToken();
-
-            // ✅ If we have lead data, add it optimistically
-            if (leadData) {
-                addLeadToGroupOptimistic(groupId, leadData);
+            if (!token) {
+                toast.error("Please login");
+                return false;
             }
 
             const res = await fetch(`${APP_CONFIG.API_BASE_URL}/admin/lead-groups/connect-leads`, {
@@ -82,20 +76,22 @@ export function useGroupActions({
             });
 
             if (!res.ok) throw new Error("Failed");
+
             toast.success("Lead added to group");
 
-            // ✅ Refresh in background
-            await Promise.all([refetch(), refetchLeads()]);
-            await fetchGroupLeads(groupId);
+            await Promise.all([
+                fetchGroupLeads(groupId, true),
+                refetch(),
+                refetchLeads()
+            ]);
+
             return true;
         } catch {
             toast.error("Failed to add lead to group");
-            // ✅ Revert on error
-            await refetch();
-            await fetchGroupLeads(groupId);
+            await fetchGroupLeads(groupId, true);
             return false;
         }
-    }, [refetch, refetchLeads, fetchGroupLeads, addLeadToGroupOptimistic]);
+    }, [refetch, refetchLeads, fetchGroupLeads]);
 
     return {
         router,

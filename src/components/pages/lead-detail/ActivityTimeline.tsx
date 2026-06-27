@@ -1,3 +1,6 @@
+"use client";
+
+import { useMemo } from "react";
 import type { ActivityItem, ActivityType } from "@/types/lead-detail";
 
 interface Props {
@@ -16,19 +19,32 @@ function TimelineDot({ type }: { type: ActivityType }) {
 }
 
 export function ActivityTimeline({ activities }: Props) {
+	// Sort by date descending (newest first)
+	const sortedActivities = useMemo(() => {
+		return [...activities].sort((a, b) => {
+			return new Date(b.date).getTime() - new Date(a.date).getTime();
+		});
+	}, [activities]);
+
+	if (sortedActivities.length === 0) {
+		return (
+			<div className="flex p-5 flex-col items-start gap-4 self-stretch rounded-lg border border-[#DFE1E7] bg-white">
+				<h3 className="text-[#1A1C21] font-inter text-lg font-semibold">Activity Timeline</h3>
+				<div className="w-full h-px bg-[#DFE1E7]" />
+				<p className="text-sm text-[#777980] text-center py-4 w-full">No activity yet</p>
+			</div>
+		);
+	}
+
 	return (
 		<div className="flex p-5 flex-col items-start gap-4 self-stretch rounded-lg border border-[#DFE1E7] bg-white">
 			<h3 className="text-[#1A1C21] font-inter text-lg font-semibold">Activity Timeline</h3>
 			<div className="w-full h-px bg-[#DFE1E7]" />
 
-			{/* Scrollable timeline */}
 			<div className="relative pl-1 max-h-64 overflow-y-auto adm-timeline-scroll self-stretch">
-				{activities.length === 0 && (
-					<p className="text-sm text-[#777980] text-center py-4">No activity yet</p>
-				)}
-				{activities.map((item, i) => (
+				{sortedActivities.map((item, i) => (
 					<div key={item.id} className="relative flex gap-4 pb-6 last:pb-0">
-						{i !== activities.length - 1 && (
+						{i !== sortedActivities.length - 1 && (
 							<div
 								className="absolute left-[5px] top-4 bottom-0 w-px bg-[#DFE1E7]"
 								style={{ height: "calc(100% + 8px)" }}

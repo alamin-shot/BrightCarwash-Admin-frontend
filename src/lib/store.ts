@@ -7,7 +7,8 @@ import authReducer from '@/store/slices/authSlice';
 import { paymentApi } from '@/services/payment.api';
 import { campaignApi } from '@/services/campaign.api';
 import { teamApi } from '@/services/team.api';
-import { templateApi } from '@/services/template.api'; // ✅ Add this
+import { templateApi } from '@/services/template.api';
+import { activityLogApi } from '@/services/activity-log.api';
 
 export const store = configureStore({
 	reducer: {
@@ -18,7 +19,8 @@ export const store = configureStore({
 		[paymentApi.reducerPath]: paymentApi.reducer,
 		[campaignApi.reducerPath]: campaignApi.reducer,
 		[teamApi.reducerPath]: teamApi.reducer,
-		[templateApi.reducerPath]: templateApi.reducer, // ✅ Add this
+		[templateApi.reducerPath]: templateApi.reducer,
+		[activityLogApi.reducerPath]: activityLogApi.reducer,
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware().concat(
@@ -28,7 +30,8 @@ export const store = configureStore({
 			paymentApi.middleware,
 			campaignApi.middleware,
 			teamApi.middleware,
-			templateApi.middleware, // ✅ Add this
+			templateApi.middleware,
+			activityLogApi.middleware,
 		),
 });
 

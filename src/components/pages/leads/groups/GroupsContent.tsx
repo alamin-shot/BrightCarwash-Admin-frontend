@@ -14,8 +14,6 @@ import type { StageOption } from "@/components/ui/StageDropdown";
 import type { Stage } from "@/types/stage";
 import { toast } from "react-toastify";
 import { CreateGroupModal } from "./CreateGroupModal";
-import { getAccessToken } from "@/lib/auth-client";
-import { APP_CONFIG } from "@/configs/app.config";
 
 export interface GroupsContentRef {
     exportData: () => void;
@@ -84,6 +82,18 @@ export const GroupsContent = forwardRef<GroupsContentRef, { groupModalOpen: bool
             }
         }, [groupModalOpen, refetch, refetchLeads]);
 
+        useEffect(() => {
+            if (groups.length > 0 && !isLoading) {
+                const idleCallback = () => {
+                    groups.forEach((group) => {
+                        fetchGroupLeads(group.id);
+                    });
+                };
+                const id = requestIdleCallback(idleCallback, { timeout: 2000 });
+                return () => cancelIdleCallback(id);
+            }
+        }, [groups, isLoading, fetchGroupLeads]);
+
         const handleLeadAdded = useCallback(async (leadId: string) => {
             if (!targetGroupId) return;
 
@@ -96,9 +106,7 @@ export const GroupsContent = forwardRef<GroupsContentRef, { groupModalOpen: bool
             }
         }, [targetGroupId, leads, handleAddLeadToGroup]);
 
-        // ✅ Optimistic group creation
         const handleGroupCreated = useCallback(async (newGroup: any) => {
-            // ✅ Immediately add group to UI
             const optimisticGroup: any = {
                 id: newGroup.id || `temp_${Date.now()}`,
                 name: newGroup.name,
@@ -110,16 +118,12 @@ export const GroupsContent = forwardRef<GroupsContentRef, { groupModalOpen: bool
             };
 
             addGroupOptimistic(optimisticGroup);
-
-            // ✅ Close modal immediately
             onGroupModalClose();
             toast.success(`Group "${newGroup.name}" created`);
 
-            // ✅ Refetch in background to get real ID and sync
             try {
                 await refetch();
                 await refetchLeads();
-                // ✅ Remove optimistic version if API returned real one
                 if (newGroup.id && !newGroup.id.startsWith('temp_')) {
                     removeOptimisticGroup(optimisticGroup.id);
                 }
@@ -155,6 +159,7 @@ export const GroupsContent = forwardRef<GroupsContentRef, { groupModalOpen: bool
                     }}
                     onDeleteGroup={handleDeleteGroup}
                     router={router}
+                    onGroupExpand={fetchGroupLeads}
                 />
                 <CreateGroupModal
                     isOpen={groupModalOpen}

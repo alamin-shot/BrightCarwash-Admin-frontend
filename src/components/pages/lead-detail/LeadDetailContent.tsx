@@ -1,52 +1,52 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { ChevronRight } from "lucide-react";
-import Link from "next/link";
+import { useState } from "react";
 import { LeadInfoCard } from "@/components/pages/lead-detail/LeadInfoCard";
 import { NotesSection } from "@/components/pages/lead-detail/NotesSection";
-import { QuickActions } from "@/components/pages/lead-detail/QuickActions";
 import { ActivityTimeline } from "@/components/pages/lead-detail/ActivityTimeline";
-import {
-	getLeadDetail,
-	getLeadActivities,
-} from "@/services/lead-detail.service";
-import type { LeadDetail, ActivityItem } from "@/types/lead-detail";
+import { AssignmentHistory } from "@/components/pages/lead-detail/AssignmentHistory";
+import { AssignMemberModal } from "@/components/pages/lead-detail/AssignMemberModal";
+import { LeadDetailHeader } from "@/components/pages/lead-detail/LeadDetailHeader";
+import { useLeadDetail } from "@/hooks/useLeadDetail";
+import { useLeadAssignment } from "@/hooks/useLeadAssignment";
+import { toast } from "react-toastify";
 
 interface Props {
 	leadId: string;
 }
 
 export function LeadDetailContent({ leadId }: Props) {
-	const [lead, setLead] = useState<LeadDetail | null>(null);
-	const [activities, setActivities] = useState<ActivityItem[]>([]);
-	const [initialLoading, setInitialLoading] = useState(true);
-	const [refresh, setRefresh] = useState(0);
+	const [modalOpen, setModalOpen] = useState(false);
 
-	const fetchData = useCallback(async () => {
-		const [l, a] = await Promise.all([
-			getLeadDetail(leadId),
-			getLeadActivities(leadId),
-		]);
-		setLead(l);
-		setActivities(a);
-	}, [leadId]);
+	const {
+		lead,
+		activities,
+		initialLoading,
+		triggerRefresh,
+		deleteNote,
+		addLocalActivity,
+	} = useLeadDetail(leadId);
 
-	// Initial load – show skeleton
-	useEffect(() => {
-		fetchData().finally(() => setInitialLoading(false));
-	}, [fetchData]);
+	const { handleAssign } = useLeadAssignment(
+		leadId,
+		lead,
+		addLocalActivity,
+		triggerRefresh
+	);
 
-	// Subsequent refreshes – no skeleton
-	useEffect(() => {
-		if (refresh > 0) {
-			fetchData();
+	const handleNoteAdded = () => {
+		triggerRefresh();
+	};
+
+	// ✅ Pass the note content (not id) to delete
+	const handleDeleteNote = async (noteContent: string) => {
+		try {
+			await deleteNote(noteContent);
+			toast.success("Note deleted");
+		} catch {
+			toast.error("Failed to delete note");
 		}
-	}, [refresh, fetchData]);
-
-	const handleNoteAdded = useCallback(() => {
-		setRefresh((prev) => prev + 1);
-	}, []);
+	};
 
 	if (initialLoading)
 		return <div className="h-[400px] bg-gray-100 rounded-lg animate-pulse" />;
@@ -54,13 +54,7 @@ export function LeadDetailContent({ leadId }: Props) {
 
 	return (
 		<div className="flex flex-col gap-4 w-full">
-			<div className="flex items-center gap-2 text-sm text-[#777980] font-inter">
-				<Link href="/leads" className="hover:text-[#0098E8]">
-					Leads
-				</Link>
-				<ChevronRight size={14} />
-				<span className="text-[#1B1B1B]">Lead Detail</span>
-			</div>
+			<LeadDetailHeader onAssignClick={() => setModalOpen(true)} />
 
 			<div className="flex items-start gap-5 self-stretch max-lg:flex-col">
 				<div className="flex flex-col gap-5 flex-1 min-w-0">
@@ -69,14 +63,24 @@ export function LeadDetailContent({ leadId }: Props) {
 						leadId={leadId}
 						notes={lead.notes}
 						onNoteAdded={handleNoteAdded}
+						onDeleteNote={handleDeleteNote} // ✅ Now passes content
 					/>
 				</div>
 
 				<div className="flex flex-col gap-5 w-[320px] max-lg:w-full shrink-0">
-					<QuickActions />
 					<ActivityTimeline activities={activities} />
+					<AssignmentHistory activities={activities} />
 				</div>
 			</div>
+
+			<AssignMemberModal
+				isOpen={modalOpen}
+				onClose={() => setModalOpen(false)}
+				leadId={leadId}
+				currentAssigneeId={lead.assignedToId}
+				currentAssigneeName={lead.assignedToName}
+				onAssign={handleAssign}
+			/>
 		</div>
 	);
 }

@@ -20,6 +20,7 @@ interface GroupsListProps {
     onAddLead: (groupId: string) => void;
     onDeleteGroup: (groupId: string) => void;
     router: { push: (url: string) => void };
+    onGroupExpand?: (groupId: string) => void;
 }
 
 export function GroupsList({
@@ -31,6 +32,7 @@ export function GroupsList({
     onAddLead,
     onDeleteGroup,
     router,
+    onGroupExpand,
 }: GroupsListProps) {
     if (groups.length === 0) {
         return (
@@ -50,6 +52,7 @@ export function GroupsList({
             router={router}
             onAddLead={onAddLead}
             onDeleteGroup={onDeleteGroup}
+            onGroupExpand={onGroupExpand}
         />
     );
 }

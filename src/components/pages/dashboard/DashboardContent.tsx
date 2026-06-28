@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/Button";
 import { DashboardMetrics } from "@/components/pages/dashboard/DashboardMetrics";
@@ -8,15 +8,35 @@ import { DashboardCharts } from "@/components/pages/dashboard/DashboardCharts";
 import { RecentInquiriesTable } from "@/components/pages/dashboard/RecentInquiriesTable";
 import { useGetDashboardMetricsQuery } from "@/services/dashboard.api";
 import { useGetLeadsQuery } from "@/services/leads.api";
+import { getStages } from "@/services/stage.service";
+import type { StageOption } from "@/components/ui/StageDropdown";
 import Link from "next/link";
 
 export function DashboardContent() {
   const { data: metricsData, isLoading: metricsLoading, error: metricsError } = useGetDashboardMetricsQuery();
   const { data: leadsData, isLoading: leadsLoading, refetch: refetchLeads } = useGetLeadsQuery();
+  const [stages, setStages] = useState<StageOption[]>([]);
+  const [stagesLoading, setStagesLoading] = useState(true);
 
-  useEffect(() => { refetchLeads(); }, [refetchLeads]);
+  useEffect(() => {
+    refetchLeads();
+  }, [refetchLeads]);
 
-  const isLoading = metricsLoading || leadsLoading;
+  useEffect(() => {
+    getStages().then((s) => {
+      const mappedStages = s.map((stage) => ({
+        value: stage.name.toLowerCase().replace(/\s+/g, "_"),
+        label: stage.name,
+        color: stage.color,
+        stageId: stage.id,
+        icon: stage.icon,
+      }));
+      setStages(mappedStages);
+      setStagesLoading(false);
+    });
+  }, []);
+
+  const isLoading = metricsLoading || leadsLoading || stagesLoading;
 
   if (isLoading) {
     return (
@@ -50,9 +70,15 @@ export function DashboardContent() {
   }
 
   const recentLeads = (leadsData || []).slice(0, 4).map((lead) => ({
-    id: lead.id, name: lead.name, avatar: lead.avatar,
-    service: lead.service, vehicle: lead.vehicle, source: lead.source,
-    deposit: lead.depositStatus?.toLowerCase() || "none", stage: lead.stage, date: lead.date,
+    id: lead.id,
+    name: lead.name,
+    avatar: lead.avatar,
+    service: lead.service,
+    vehicle: lead.vehicle,
+    source: lead.source,
+    deposit: lead.depositStatus?.toLowerCase() || "none",
+    stage: lead.stage,
+    date: lead.date,
   }));
 
   return (
@@ -63,7 +89,7 @@ export function DashboardContent() {
 
       <DashboardMetrics data={metricsData.data} />
       <DashboardCharts data={metricsData.data} />
-      <RecentInquiriesTable data={recentLeads as any} />
+      <RecentInquiriesTable data={recentLeads as any} stages={stages} />
     </div>
   );
 }

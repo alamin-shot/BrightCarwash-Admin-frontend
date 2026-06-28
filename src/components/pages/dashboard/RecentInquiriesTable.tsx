@@ -3,13 +3,17 @@ import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/ui/DataTable";
 import { recentInquiriesColumns } from "@/components/pages/dashboard/RecentInquiriesColumns";
 import type { RecentInquiry } from "@/types/dashboard";
+import type { StageOption } from "@/components/ui/StageDropdown";
 import Link from "next/link";
 
 interface RecentInquiriesTableProps {
   data: RecentInquiry[];
+  stages: StageOption[];
 }
 
-export function RecentInquiriesTable({ data }: RecentInquiriesTableProps) {
+export function RecentInquiriesTable({ data, stages }: RecentInquiriesTableProps) {
+  const columns = recentInquiriesColumns(stages);
+
   return (
     <div className="flex flex-col items-start gap-3 sm:gap-4 w-full">
       <div className="flex justify-between items-center w-full">
@@ -28,7 +32,7 @@ export function RecentInquiriesTable({ data }: RecentInquiriesTableProps) {
       </div>
 
       <DataTable
-        columns={recentInquiriesColumns}
+        columns={columns}
         data={data}
         rowKey={(row: RecentInquiry) => row.id}
         className="w-full"

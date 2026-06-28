@@ -28,7 +28,7 @@ export function DataTable<T>({ columns, data, rowKey, className = "" }: DataTabl
   }
 
   return (
-    <div className={`w-full overflow-x-auto rounded-lg border border-[#E8E8E9] ${className}`}>
+    <div className={`w-full overflow-x-auto ${className}`}>
       <table className="w-full border-collapse min-w-175">
         <thead>
           <tr className="bg-[#F1F1F1]">
@@ -48,9 +48,8 @@ export function DataTable<T>({ columns, data, rowKey, className = "" }: DataTabl
               {columns.map((col, colIndex) => (
                 <td
                   key={col.key}
-                  className={`py-2.5 sm:py-3 px-3 sm:px-4 whitespace-nowrap border-r border-[#E8E8E9] last:border-r-0 ${col.className || ""} ${
-                    rowIndex === data.length - 1 && colIndex === 0 ? "rounded-bl-lg" : ""
-                  } ${rowIndex === data.length - 1 && colIndex === columns.length - 1 ? "rounded-br-lg" : ""}`}
+                  className={`py-2.5 sm:py-3 px-3 sm:px-4 whitespace-nowrap border-r border-[#E8E8E9] last:border-r-0 ${col.className || ""} ${rowIndex === data.length - 1 && colIndex === 0 ? "rounded-bl-lg" : ""
+                    } ${rowIndex === data.length - 1 && colIndex === columns.length - 1 ? "rounded-br-lg" : ""}`}
                 >
                   {col.render(row)}
                 </td>

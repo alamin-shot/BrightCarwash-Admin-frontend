@@ -98,13 +98,24 @@ export const leadsApi = createApi({
 				}
 			},
 			async onQueryStarted({ id, stageName }, { dispatch, queryFulfilled }) {
+				console.log('⚡ [leadsApi] optimistic update for lead', id, 'stageName:', stageName);
 				const patchResult = dispatch(
 					leadsApi.util.updateQueryData("getLeads", undefined, (draft) => {
 						const lead = draft.find((l) => l.id === id);
-						if (lead) lead.stage = stageName.toLowerCase().replace(/\s+/g, "_");
+						if (lead) {
+							const newSlug = stageName.toLowerCase().replace(/\s+/g, "_");
+							console.log('🔄 Optimistic update: changing stage from', lead.stage, 'to', newSlug);
+							lead.stage = newSlug;
+						}
 					})
 				);
-				try { await queryFulfilled; } catch { patchResult.undo(); }
+				try {
+					await queryFulfilled;
+					console.log('✅ Mutation succeeded, optimistic update kept');
+				} catch {
+					console.log('❌ Mutation failed, reverting optimistic update');
+					patchResult.undo();
+				}
 			},
 			invalidatesTags: ["Leads"],
 		}),

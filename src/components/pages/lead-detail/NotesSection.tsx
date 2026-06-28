@@ -87,9 +87,7 @@ export function NotesSection({ leadId, notes, onNoteAdded, onDeleteNote }: Props
 							className="flex py-3 px-4 items-center rounded-md border border-[#DFE1E7] bg-white gap-4"
 						>
 							<span className="flex-1 text-sm text-[#1B1B1B]">{note.content}</span>
-							<span className="text-xs text-[#777980] whitespace-nowrap">
-								{note.author} • {note.date}
-							</span>
+
 							<button
 								onClick={() => openDeleteConfirm(note.content)} // ✅ Pass content
 								disabled={deletingId === note.content}

@@ -24,3 +24,11 @@ export interface CreateStageRequest {
 	sort_order?: number;
 	file?: File | null;
 }
+
+export interface StageOption {
+	value: string;
+	label: string;
+	color: string;
+	stageId: string;
+	icon?: string | null;
+}

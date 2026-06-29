@@ -149,6 +149,7 @@ export async function assignLeadToMember(
 	leadId: string,
 	assignedToId: string | null
 ): Promise<void> {
+
 	if (APP_CONFIG.MOCK_MODE) {
 		await delay(APP_CONFIG.MOCK_DELAY_MS);
 		mockLeadDetail.assignedToId = assignedToId;
@@ -171,9 +172,24 @@ export async function assignLeadToMember(
 	}
 
 	const token = getAccessToken();
-	// ✅ Send empty string when unassigning (backend now accepts it)
+
+	if (assignedToId === null) {
+		const res = await fetch(`${APP_CONFIG.API_BASE_URL}/admin/lead/${leadId}/unassign`, {
+			method: "PATCH",
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		});
+
+		if (!res.ok) {
+			const error = await res.json().catch(() => ({ message: "Unassignment failed" }));
+			throw new Error(error.message || "Failed to unassign lead");
+		}
+		return;
+	}
+
 	const payload = {
-		assigned_to_id: assignedToId !== null ? assignedToId : "",
+		assigned_to_id: assignedToId,
 		assignment_source: "Admin Panel",
 	};
 

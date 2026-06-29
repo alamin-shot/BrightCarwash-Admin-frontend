@@ -17,6 +17,7 @@ interface AddLeadModalProps {
 	borderColor?: string;
 	onLeadCreated?: (leadId: string) => void;
 	stages?: StageOption[];
+	title?: string;
 }
 
 export function AddLeadModal({
@@ -27,6 +28,7 @@ export function AddLeadModal({
 	borderColor = "#0098E8",
 	onLeadCreated,
 	stages = [],
+	title,
 }: AddLeadModalProps) {
 	const [createLead, { isLoading }] = useCreateLeadMutation();
 	const { data: leads = [] } = useGetLeadsQuery();
@@ -65,7 +67,6 @@ export function AddLeadModal({
 			return;
 		}
 
-		// ✅ Check if lead already exists
 		const existingLead = leads.find(
 			(l) => l.email.toLowerCase() === email.toLowerCase()
 		);
@@ -77,7 +78,6 @@ export function AddLeadModal({
 			return;
 		}
 
-		// ✅ Create new lead
 		const formattedPhone = phone.startsWith("+")
 			? phone
 			: `+880${phone.trim()}`;
@@ -121,7 +121,7 @@ export function AddLeadModal({
 				className="w-3 h-3 rounded-full shrink-0"
 				style={{ backgroundColor: borderColor }}
 			/>
-			<span>Add New Lead</span>
+			<span>{title || "Add New Lead"}</span>
 		</div>
 	);
 
@@ -261,6 +261,7 @@ export function AddLeadModal({
 							value={currentStageId}
 							onChange={handleStageChange}
 							fullWidth
+							scrollable
 						/>
 					</div>
 				</div>

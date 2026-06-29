@@ -8,7 +8,11 @@ import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 import type { EditorRef } from 'react-email-editor';
 import { toast } from 'react-toastify';
-import { useCreateTemplateMutation } from '@/services/template.api';
+import {
+	useCreateTemplateMutation,
+	useUploadTemplateImageMutation,
+} from '@/services/template.api';
+import { uploadImagesInHtml } from '@/lib/image-upload';
 
 const EmailEditorComponent = dynamic(() => import('react-email-editor'), {
 	ssr: false,
@@ -21,6 +25,7 @@ export function EmailEditor() {
 	const [templateName, setTemplateName] = useState('');
 	const router = useRouter();
 	const [createTemplate] = useCreateTemplateMutation();
+	const [uploadImage] = useUploadTemplateImageMutation();
 
 	const handleSave = () => {
 		const name =
@@ -29,8 +34,16 @@ export function EmailEditor() {
 			setSaving(true);
 			emailEditorRef.current.editor.exportHtml(async (data) => {
 				try {
-					// ✅ Ensure htmlContent has valid content
 					const htmlContent = data.html || '<p>Empty template</p>';
+
+					// Upload any embedded images and replace with hosted URLs
+					const processedHtml = await uploadImagesInHtml(
+						htmlContent,
+						async (file) => {
+							const result = await uploadImage(file).unwrap();
+							return result; // { url: string }
+						}
+					);
 
 					await createTemplate({
 						name: name,
@@ -39,7 +52,7 @@ export function EmailEditor() {
 						editorType: 'VISUAL_DRAG_DROP',
 						emailBody: {
 							subject: name,
-							htmlContent: htmlContent,
+							htmlContent: processedHtml,
 							designJson: { design: data.design || {} },
 						},
 					}).unwrap();

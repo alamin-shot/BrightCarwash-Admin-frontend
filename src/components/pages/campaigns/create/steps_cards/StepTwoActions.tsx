@@ -7,6 +7,7 @@ import { Calendar, Send } from 'lucide-react';
 import { getAccessToken } from '@/lib/auth-client';
 import { toast } from 'react-toastify';
 import { useCreateCampaignMutation, useLaunchCampaignMutation } from '@/services/campaign.api';
+import { ScheduleModal } from '@/components/pages/campaigns/create/modals/ScheduleModal';
 
 interface StepTwoActionsProps {
 	allFilled: boolean;
@@ -22,8 +23,9 @@ export function StepTwoActions({
 	const [launchCampaign] = useLaunchCampaignMutation();
 	const [isSending, setIsSending] = useState(false);
 	const [isScheduling, setIsScheduling] = useState(false);
+	const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
 
-	console.log("🎯 StepTwoActions - campaignData:", campaignData); // ✅ Debug log
+	console.log("🎯 StepTwoActions - campaignData:", campaignData);
 
 	const handleSendNow = async () => {
 		const token = getAccessToken();
@@ -38,7 +40,6 @@ export function StepTwoActions({
 			return;
 		}
 
-		// ✅ Check if templateId exists
 		if (!campaignData?.templateId) {
 			toast.error('Please select a template first');
 			console.error("❌ No templateId in campaignData:", campaignData);
@@ -64,40 +65,41 @@ export function StepTwoActions({
 		}
 	};
 
-	const handleScheduleLater = async () => {
+	const handleScheduleLater = (scheduledAt: string) => {
+		setScheduleModalOpen(false);
+		handleScheduleCampaign(scheduledAt);
+	};
+
+	const handleScheduleCampaign = async (scheduledAt: string) => {
 		const token = getAccessToken();
 		if (!token) {
-			toast.error('Please login to continue');
-			router.push('/login');
+			toast.error("Please login to continue");
+			router.push("/login");
 			return;
 		}
 
 		if (!allFilled) {
-			toast.warning('Please complete all steps before scheduling');
+			toast.warning("Please complete all steps before scheduling");
 			return;
 		}
 
 		if (!campaignData?.templateId) {
-			toast.error('Please select a template first');
+			toast.error("Please select a template first");
 			return;
 		}
-
-		const defaultDate = new Date();
-		defaultDate.setDate(defaultDate.getDate() + 7);
-		const scheduledAt = defaultDate.toISOString();
 
 		setIsScheduling(true);
 		try {
 			await createCampaign({
 				...campaignData,
-				scheduledAt: scheduledAt,
+				scheduledAt,
 			}).unwrap();
 
-			toast.success(`Campaign scheduled for ${defaultDate.toLocaleDateString()}`);
-			router.push('/campaigns');
+			toast.success(`Campaign scheduled for ${new Date(scheduledAt).toLocaleString()}`);
+			router.push("/campaigns");
 		} catch (error: any) {
-			console.error('Schedule error:', error);
-			toast.error(error?.data?.message || 'Failed to schedule campaign');
+			console.error("Schedule error:", error);
+			toast.error(error?.data?.message || "Failed to schedule campaign");
 		} finally {
 			setIsScheduling(false);
 		}
@@ -115,7 +117,7 @@ export function StepTwoActions({
 				Send now
 			</Button>
 			<Button
-				onClick={handleScheduleLater}
+				onClick={() => setScheduleModalOpen(true)}
 				isLoading={isScheduling}
 				loadingText='Scheduling...'
 				variant='outline'
@@ -124,6 +126,13 @@ export function StepTwoActions({
 				<Calendar size={16} />
 				Schedule for later
 			</Button>
+
+			<ScheduleModal
+				isOpen={scheduleModalOpen}
+				onClose={() => setScheduleModalOpen(false)}
+				onSchedule={handleScheduleLater}
+				isScheduling={isScheduling}
+			/>
 		</div>
 	);
 }

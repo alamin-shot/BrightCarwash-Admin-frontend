@@ -15,7 +15,7 @@ export function CampaignBreadcrumb({
     campaignName,
 }: CampaignBreadcrumbProps) {
     return (
-        <div className="flex items-center gap-2 text-sm text-[#777980] font-inter flex-wrap">
+        <div className="flex items-center gap-2 text-sm text-[#777980] font-inter whitespace-nowrap">
             <Link href="/campaigns" className="hover:text-[#0098E8] transition-colors">
                 Campaigns
             </Link>

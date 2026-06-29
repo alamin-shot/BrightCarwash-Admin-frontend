@@ -301,3 +301,8 @@ body {
 .adm-timeline-scroll::-webkit-scrollbar-thumb:hover {
 	background: #B0B3BC;
 }
+
+.adm-dropdown-scrollable {
+	overflow-y: auto;
+	overflow-x: hidden;
+}

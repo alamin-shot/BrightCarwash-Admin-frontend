@@ -92,10 +92,19 @@ export function CampaignCreateContent() {
 					handleTagKeyDown={(e: React.KeyboardEvent) => {
 						if (e.key === "Enter") {
 							e.preventDefault();
-							campaign.addTag(campaign.tagInput || "");
+							if (campaign.tagInput.trim()) {
+								campaign.addTag(campaign.tagInput.trim());
+								campaign.setTagInput("");
+							}
 						}
 					}}
-					onContinue={() => setCurrentStep(2)}
+					onContinue={() => {
+						if (campaign.tagInput.trim()) {
+							campaign.addTag(campaign.tagInput.trim());
+							campaign.setTagInput("");
+						}
+						setCurrentStep(2);
+					}}
 				/>
 			)}
 

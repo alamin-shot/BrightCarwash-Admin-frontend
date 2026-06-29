@@ -52,12 +52,12 @@ export const CampaignsTable = memo(function CampaignsTable({
     );
 
     return (
-        <div className="flex flex-col gap-4 w-full">
+        <div className="flex flex-col gap-4 w-full ">
             <DataTable
                 columns={columns}
                 data={paginated}
                 rowKey={(row) => row.id}
-                className="w-full"
+                className="w-full border border-[#E8E8E9] rounded-lg"
             />
             <Pagination
                 currentPage={currentPage}

@@ -20,12 +20,9 @@ interface GetTemplatesParams {
     limit?: number;
 }
 
-// ✅ Improved transform function with better error handling
 function transformTemplate(apiTemplate: any): Template {
-    // Ensure we have valid HTML content
     let htmlContent = apiTemplate.emailBody?.htmlContent || '';
 
-    // If htmlContent is empty or just whitespace, provide a fallback
     if (!htmlContent.trim()) {
         htmlContent = '<div style="padding:20px;color:#666;font-family:sans-serif;">No content available</div>';
     }
@@ -34,7 +31,6 @@ function transformTemplate(apiTemplate: any): Template {
         ...apiTemplate,
         html: htmlContent,
         subject: apiTemplate.emailBody?.subject || 'No subject',
-        // Also preserve the emailBody for other uses
         emailBody: {
             ...apiTemplate.emailBody,
             htmlContent: htmlContent,
@@ -242,6 +238,46 @@ export const templateApi = createApi({
             },
             invalidatesTags: (_result, _error, id) => ['Templates', { type: 'Template', id }],
         }),
+
+        // UPLOAD template image
+        uploadTemplateImage: builder.mutation<{ url: string }, File>({
+            queryFn: async (file) => {
+                try {
+                    const token = getAccessToken();
+                    const formData = new FormData();
+                    formData.append('image', file);
+
+                    const response = await fetch(`${APP_CONFIG.API_BASE_URL}/admin/templates/upload-image`, {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: formData,
+                    });
+
+                    const responseData = await response.json();
+
+                    if (!response.ok) {
+                        return {
+                            error: {
+                                status: response.status,
+                                data: responseData.message || 'Failed to upload image',
+                            },
+                        };
+                    }
+
+                    // Backend returns { url: "https://..." }
+                    return { data: responseData };
+                } catch (error) {
+                    return {
+                        error: {
+                            status: 500,
+                            data: error instanceof Error ? error.message : 'Failed to upload image',
+                        },
+                    };
+                }
+            },
+        }),
     }),
 });
 
@@ -252,4 +288,5 @@ export const {
     useUpdateTemplateMutation,
     useDeleteTemplateMutation,
     useArchiveTemplateMutation,
+    useUploadTemplateImageMutation,  // <-- new export
 } = templateApi;

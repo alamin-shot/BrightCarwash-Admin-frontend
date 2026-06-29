@@ -14,6 +14,7 @@ interface FilterDropdownProps {
 	fullWidth?: boolean;
 	buttonClassName?: string;
 	dropdownOffsetX?: number;
+	scrollable?: boolean;
 }
 
 export function FilterDropdown({
@@ -25,6 +26,7 @@ export function FilterDropdown({
 	fullWidth = false,
 	buttonClassName = '',
 	dropdownOffsetX = 0,
+	scrollable = false,
 }: FilterDropdownProps) {
 	const [open, setOpen] = useState(false);
 	const [dropdownStyle, setDropdownStyle] = useState<Record<string, string>>(
@@ -82,9 +84,8 @@ export function FilterDropdown({
 				ref={btnRef}
 				type='button'
 				onClick={() => setOpen(!open)}
-				className={`flex px-4 py-3 items-center gap-2 rounded-lg border text-sm font-inter cursor-pointer transition-colors ${
-					fullWidth ? 'w-full justify-between' : 'whitespace-nowrap'
-				} ${buttonClassName || defaultBtnClass}`}
+				className={`flex px-4 py-3 items-center gap-2 rounded-lg border text-sm font-inter cursor-pointer transition-colors ${fullWidth ? 'w-full justify-between' : 'whitespace-nowrap'
+					} ${buttonClassName || defaultBtnClass}`}
 			>
 				<span
 					className={
@@ -95,9 +96,8 @@ export function FilterDropdown({
 				</span>
 				<ChevronDown
 					size={16}
-					className={`transition-transform duration-200 shrink-0 ${
-						open ? 'rotate-180' : ''
-					} ${buttonClassName ? 'text-inherit' : 'text-[#777980]'}`}
+					className={`transition-transform duration-200 shrink-0 ${open ? 'rotate-180' : ''
+						} ${buttonClassName ? 'text-inherit' : 'text-[#777980]'}`}
 				/>
 			</button>
 
@@ -105,7 +105,7 @@ export function FilterDropdown({
 				createPortal(
 					<div
 						ref={dropdownMenuRef}
-						className='adm-glass-dropdown-menu'
+						className={`adm-glass-dropdown-menu ${scrollable ? 'adm-dropdown-scrollable max-h-[240px]' : ''}`}
 						style={dropdownStyle}
 					>
 						<Button
@@ -115,11 +115,10 @@ export function FilterDropdown({
 								onChange('');
 								setOpen(false);
 							}}
-							className={`flex w-full py-2.5 px-4 items-center text-sm text-left cursor-pointer transition-colors ${
-								!value
-									? 'bg-[#0098E8] text-white'
-									: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
-							}`}
+							className={`flex w-full py-2.5 px-4 items-center text-sm text-left cursor-pointer transition-colors ${!value
+								? 'bg-[#0098E8] text-white'
+								: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
+								}`}
 						>
 							{label}
 						</Button>
@@ -132,11 +131,10 @@ export function FilterDropdown({
 									onChange(option.value);
 									setOpen(false);
 								}}
-								className={`flex w-full py-2.5 px-4 items-center text-sm text-left cursor-pointer transition-colors capitalize ${
-									value === option.value
-										? 'bg-[#0098E8] text-white'
-										: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
-								}`}
+								className={`flex w-full py-2.5 px-4 items-center text-sm text-left cursor-pointer transition-colors capitalize ${value === option.value
+									? 'bg-[#0098E8] text-white'
+									: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
+									}`}
 							>
 								{option.label}
 							</Button>

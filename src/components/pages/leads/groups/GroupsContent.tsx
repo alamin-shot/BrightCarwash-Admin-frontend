@@ -172,6 +172,7 @@ export const GroupsContent = forwardRef<GroupsContentRef, { groupModalOpen: bool
                     onClose={() => { setLeadModalOpen(false); setTargetGroupId(null); }}
                     onLeadCreated={handleLeadAdded}
                     stages={stages}
+                    title="Add New Member"
                 />
             </div>
         );

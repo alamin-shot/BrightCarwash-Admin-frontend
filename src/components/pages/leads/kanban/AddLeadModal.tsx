@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { FilterDropdown } from "@/components/ui/FilterDropdown";
-import { useCreateLeadMutation } from "@/services/leads.api";
+import { useCreateLeadMutation, useGetLeadsQuery } from "@/services/leads.api";
 import type { LeadDepositStatus } from "@/types/leads";
 import { toast } from "react-toastify";
 import type { StageOption } from "@/components/ui/StageDropdown";
@@ -12,11 +12,11 @@ import type { StageOption } from "@/components/ui/StageDropdown";
 interface AddLeadModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	stage?: string;               // display name (e.g., "New Lead")
-	stageId?: string;             // real stage ID (for the dropdown value)
+	stage?: string;
+	stageId?: string;
 	borderColor?: string;
 	onLeadCreated?: (leadId: string) => void;
-	stages?: StageOption[];       // all available stages from backend
+	stages?: StageOption[];
 }
 
 export function AddLeadModal({
@@ -29,6 +29,7 @@ export function AddLeadModal({
 	stages = [],
 }: AddLeadModalProps) {
 	const [createLead, { isLoading }] = useCreateLeadMutation();
+	const { data: leads = [] } = useGetLeadsQuery();
 	const [name, setName] = useState("");
 	const [phone, setPhone] = useState("");
 	const [email, setEmail] = useState("");
@@ -38,19 +39,13 @@ export function AddLeadModal({
 	const [deposit, setDeposit] = useState<number>(0);
 	const [depositStatus, setDepositStatus] = useState<LeadDepositStatus>("NONE");
 
-	// Stage state: store both ID and label
 	const [currentStageId, setCurrentStageId] = useState(stageId);
 	const [currentStageLabel, setCurrentStageLabel] = useState(stage);
 
-	// Build dropdown options from real stages
 	const stageOptions = stages.length > 0
-		? stages.map((s) => ({
-			value: s.stageId,
-			label: s.label,
-		}))
+		? stages.map((s) => ({ value: s.stageId, label: s.label }))
 		: [{ value: stageId, label: stage }];
 
-	// Ensure the current stage is in the options
 	if (!stageOptions.some((o) => o.value === currentStageId)) {
 		stageOptions.unshift({ value: currentStageId, label: currentStageLabel });
 	}
@@ -70,7 +65,19 @@ export function AddLeadModal({
 			return;
 		}
 
-		// Format phone number: ensure it has +880 prefix
+		// ✅ Check if lead already exists
+		const existingLead = leads.find(
+			(l) => l.email.toLowerCase() === email.toLowerCase()
+		);
+
+		if (existingLead) {
+			toast.info(`Lead "${existingLead.name}" already exists. Adding to group.`);
+			onLeadCreated?.(existingLead.id);
+			onClose();
+			return;
+		}
+
+		// ✅ Create new lead
 		const formattedPhone = phone.startsWith("+")
 			? phone
 			: `+880${phone.trim()}`;
@@ -85,19 +92,26 @@ export function AddLeadModal({
 				source,
 				priority: "MEDIUM",
 				deposit_status: depositStatus,
-				stage_name: currentStageLabel,                         // ← send the label, not the ID
+				stage_name: currentStageLabel,
 				stage: currentStageLabel.toLowerCase().replace(/\s+/g, "_"),
 			}).unwrap();
 
 			toast.success(`${name} added`);
-			setName(""); setPhone(""); setEmail(""); setService(""); setVehicle(""); setSource("");
-			setDeposit(0); setDepositStatus("NONE");
+			setName("");
+			setPhone("");
+			setEmail("");
+			setService("");
+			setVehicle("");
+			setSource("");
+			setDeposit(0);
+			setDepositStatus("NONE");
 			setCurrentStageId(stageId);
 			setCurrentStageLabel(stage);
 			onClose();
 			onLeadCreated?.(result.id);
-		} catch {
-			toast.error("Failed to add lead");
+		} catch (error: any) {
+			const message = error?.data?.message || error?.message || "Failed to add lead";
+			toast.error(message);
 		}
 	};
 
@@ -118,40 +132,112 @@ export function AddLeadModal({
 		<Modal isOpen={isOpen} onClose={onClose} title={modalTitle} size="lg">
 			<form onSubmit={handleSubmit} className="flex flex-col gap-4">
 				<div>
-					<label htmlFor="name" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Name *</label>
-					<input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Full name" className={inputClass} />
+					<label htmlFor="name" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">
+						Name *
+					</label>
+					<input
+						id="name"
+						type="text"
+						value={name}
+						onChange={(e) => setName(e.target.value)}
+						required
+						placeholder="Full name"
+						className={inputClass}
+					/>
 				</div>
 				<div className="grid grid-cols-2 gap-3">
 					<div>
-						<label htmlFor="phone" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Phone *</label>
-						<input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required placeholder="01328908206" className={inputClass} />
+						<label htmlFor="phone" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">
+							Phone *
+						</label>
+						<input
+							id="phone"
+							type="tel"
+							value={phone}
+							onChange={(e) => setPhone(e.target.value)}
+							required
+							placeholder="01328908206"
+							className={inputClass}
+						/>
 					</div>
 					<div>
-						<label htmlFor="email" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Email *</label>
-						<input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="email@example.com" className={inputClass} />
+						<label htmlFor="email" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">
+							Email *
+						</label>
+						<input
+							id="email"
+							type="email"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+							required
+							placeholder="email@example.com"
+							className={inputClass}
+						/>
 					</div>
 				</div>
 				<div className="grid grid-cols-2 gap-3">
 					<div>
-						<label htmlFor="service" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Service *</label>
-						<input id="service" type="text" value={service} onChange={(e) => setService(e.target.value)} required placeholder="Service type" className={inputClass} />
+						<label htmlFor="service" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">
+							Service *
+						</label>
+						<input
+							id="service"
+							type="text"
+							value={service}
+							onChange={(e) => setService(e.target.value)}
+							required
+							placeholder="Service type"
+							className={inputClass}
+						/>
 					</div>
 					<div>
-						<label htmlFor="vehicle" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Vehicle *</label>
-						<input id="vehicle" type="text" value={vehicle} onChange={(e) => setVehicle(e.target.value)} required placeholder="Vehicle model" className={inputClass} />
+						<label htmlFor="vehicle" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">
+							Vehicle *
+						</label>
+						<input
+							id="vehicle"
+							type="text"
+							value={vehicle}
+							onChange={(e) => setVehicle(e.target.value)}
+							required
+							placeholder="Vehicle model"
+							className={inputClass}
+						/>
 					</div>
 				</div>
 				<div className="grid grid-cols-4 gap-3">
 					<div>
-						<label className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Source *</label>
-						<input type="text" value={source} onChange={(e) => setSource(e.target.value)} required placeholder="Website etc." className={inputClass} />
+						<label className="block text-sm font-medium text-[#1B1B1B] mb-1.5">
+							Source *
+						</label>
+						<input
+							type="text"
+							value={source}
+							onChange={(e) => setSource(e.target.value)}
+							required
+							placeholder="Website etc."
+							className={inputClass}
+						/>
 					</div>
 					<div>
-						<label htmlFor="deposit" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Deposit ($)</label>
-						<input id="deposit" type="number" min="0" step="1" value={deposit} onChange={(e) => setDeposit(Number(e.target.value))} placeholder="0" className={inputClass} />
+						<label htmlFor="deposit" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">
+							Deposit ($)
+						</label>
+						<input
+							id="deposit"
+							type="number"
+							min="0"
+							step="1"
+							value={deposit}
+							onChange={(e) => setDeposit(Number(e.target.value))}
+							placeholder="0"
+							className={inputClass}
+						/>
 					</div>
 					<div>
-						<label className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Status</label>
+						<label className="block text-sm font-medium text-[#1B1B1B] mb-1.5">
+							Status
+						</label>
 						<FilterDropdown
 							label="None"
 							options={[
@@ -166,7 +252,9 @@ export function AddLeadModal({
 						/>
 					</div>
 					<div>
-						<label className="block text-sm font-medium text-[#1B1B1B] mb-1.5">Stage</label>
+						<label className="block text-sm font-medium text-[#1B1B1B] mb-1.5">
+							Stage
+						</label>
 						<FilterDropdown
 							label="Select stage"
 							options={stageOptions}
@@ -177,8 +265,16 @@ export function AddLeadModal({
 					</div>
 				</div>
 				<div className="flex gap-3 justify-end mt-2 pt-4 border-t border-[#E8E8E9]">
-					<Button type="button" variant="outline" onClick={onClose} className="px-6">Cancel</Button>
-					<Button type="submit" isLoading={isLoading} loadingText="Adding…" className="px-6 text-white shadow-lg" style={{ backgroundColor: borderColor }}>
+					<Button type="button" variant="outline" onClick={onClose} className="px-6">
+						Cancel
+					</Button>
+					<Button
+						type="submit"
+						isLoading={isLoading}
+						loadingText="Adding…"
+						className="px-6 text-white shadow-lg"
+						style={{ backgroundColor: borderColor }}
+					>
 						Add Lead
 					</Button>
 				</div>

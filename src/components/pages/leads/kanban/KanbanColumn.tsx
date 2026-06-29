@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/Button';
 import { KanbanCard } from '@/components/pages/leads/kanban/KanbanCard';
 import { AddLeadModal } from '@/components/pages/leads/kanban/AddLeadModal';
 import type { Lead } from '@/types/leads';
-import { StageOption } from '@/components/ui/StageDropdown';
+import type { StageOption } from '@/components/ui/StageDropdown';
+import Image from 'next/image';
 
 interface KanbanColumnProps {
 	id: string;
@@ -16,7 +17,7 @@ interface KanbanColumnProps {
 	title: string;
 	borderColor: string;
 	stageColor: string;
-	icon: string;
+	icon: string; // could be URL or icon name
 	items: Lead[];
 	stages: StageOption[];
 }
@@ -33,6 +34,9 @@ export function KanbanColumn({
 	const [modalOpen, setModalOpen] = useState(false);
 	const badgeTint = borderColor + '26';
 
+	// ✅ Check if icon is a URL
+	const isIconUrl = icon && (icon.startsWith('http://') || icon.startsWith('https://'));
+
 	return (
 		<>
 			<div
@@ -47,7 +51,21 @@ export function KanbanColumn({
 					}}
 				>
 					<div className='flex items-center gap-2'>
-						<Icon name={icon} width={18} height={18} color={borderColor} />
+						{isIconUrl ? (
+							<div className="w-[18px] h-[18px] flex items-center justify-center">
+								<Image
+									src={icon}
+									alt={title}
+									width={18}
+									height={18}
+									className="object-contain"
+									unoptimized
+									crossOrigin="anonymous"
+								/>
+							</div>
+						) : (
+							<Icon name={icon} width={18} height={18} color={borderColor} />
+						)}
 						<span
 							className='text-sm font-semibold capitalize leading-none tracking-tight'
 							style={{ color: borderColor }}

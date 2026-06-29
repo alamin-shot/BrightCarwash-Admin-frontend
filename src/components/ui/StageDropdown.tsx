@@ -108,8 +108,8 @@ export function StageDropdown({
 
 	const currentOption = stages.find((s) => s.value === currentStage);
 	const currentColor = currentOption?.color || defaultColor;
-	const iconName = currentOption?.icon ? getStageIconUrl(currentOption.icon) : getDefaultStageIcon(currentOption?.label || '');
 	const hasIcon = currentOption ? hasCustomIcon(currentOption) : false;
+	const iconUrl = hasIcon && currentOption?.icon ? getStageIconUrl(currentOption.icon) : null;
 	const tintedBg = hexToTintedBg(currentColor);
 
 	const handleCreated = () => {
@@ -126,18 +126,20 @@ export function StageDropdown({
 					className='inline-flex py-1.5 pl-2 pr-1 justify-center items-center gap-1 rounded text-sm capitalize cursor-pointer'
 					style={{ backgroundColor: tintedBg, color: currentColor }}
 				>
-					{hasIcon ? (
+					{hasIcon && iconUrl ? (
 						<div className="w-3.5 h-3.5 flex items-center justify-center">
 							<Image
-								src={iconName as string}
+								src={iconUrl}
 								alt="stage icon"
 								width={14}
 								height={14}
 								className="object-contain"
+								unoptimized
+								crossOrigin="anonymous"
 							/>
 						</div>
 					) : (
-						<Icon name={iconName as string} width={14} height={14} color={currentColor} />
+						<Icon name={getDefaultStageIcon(currentOption?.label || '')} width={14} height={14} color={currentColor} />
 					)}
 					{currentOption?.label || currentStage}
 					<ChevronDown size={12} style={{ color: currentColor, opacity: 0.7 }} />
@@ -151,8 +153,10 @@ export function StageDropdown({
 					>
 						{stages.map((stage) => {
 							const isSelected = stage.value === currentStage;
-							const stageIconName = stage.icon ? getStageIconUrl(stage.icon) : getDefaultStageIcon(stage.label);
-							const hasStageIcon = hasCustomIcon(stage);
+							const stageHasIcon = hasCustomIcon(stage);
+							const stageIconUrl = stageHasIcon && stage.icon ? getStageIconUrl(stage.icon) : null;
+							const stageDefaultIcon = getDefaultStageIcon(stage.label);
+
 							return (
 								<Button
 									key={stage.stageId}
@@ -166,19 +170,21 @@ export function StageDropdown({
 										: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
 										}`}
 								>
-									{hasStageIcon ? (
+									{stageHasIcon && stageIconUrl ? (
 										<div className="w-3.5 h-3.5 flex items-center justify-center">
 											<Image
-												src={stageIconName as string}
+												src={stageIconUrl}
 												alt="stage icon"
 												width={14}
 												height={14}
 												className="object-contain"
+												unoptimized
+												crossOrigin="anonymous"
 											/>
 										</div>
 									) : (
 										<Icon
-											name={stageIconName as string}
+											name={stageDefaultIcon}
 											width={14}
 											height={14}
 											color={isSelected ? '#FFFFFF' : stage.color || defaultColor}

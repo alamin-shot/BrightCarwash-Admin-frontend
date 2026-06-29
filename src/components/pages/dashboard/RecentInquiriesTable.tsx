@@ -35,7 +35,7 @@ export function RecentInquiriesTable({ data, stages }: RecentInquiriesTableProps
         columns={columns}
         data={data}
         rowKey={(row: RecentInquiry) => row.id}
-        className="w-full"
+        className="w-full border rounded-xl border-[#DFE1E7]"
       />
     </div>
   );

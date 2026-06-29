@@ -11,6 +11,7 @@ import { useGetLeadsQuery } from "@/services/leads.api";
 import { getStages } from "@/services/stage.service";
 import type { StageOption } from "@/components/ui/StageDropdown";
 import Link from "next/link";
+import { mapStagesToOptions } from "@/lib/stage-utils";
 
 export function DashboardContent() {
   const { data: metricsData, isLoading: metricsLoading, error: metricsError } = useGetDashboardMetricsQuery();
@@ -24,13 +25,7 @@ export function DashboardContent() {
 
   useEffect(() => {
     getStages().then((s) => {
-      const mappedStages = s.map((stage) => ({
-        value: stage.name.toLowerCase().replace(/\s+/g, "_"),
-        label: stage.name,
-        color: stage.color,
-        stageId: stage.id,
-        icon: stage.icon,
-      }));
+      const mappedStages = mapStagesToOptions(s);
       setStages(mappedStages);
       setStagesLoading(false);
     });

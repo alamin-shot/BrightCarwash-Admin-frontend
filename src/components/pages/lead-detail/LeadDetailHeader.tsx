@@ -1,36 +1,51 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, UserPlus } from "lucide-react";
+import { ChevronRight, Pencil, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 interface LeadDetailHeaderProps {
     onAssignClick: () => void;
+    onEditClick: () => void;
 }
 
-export function LeadDetailHeader({ onAssignClick }: LeadDetailHeaderProps) {
+export function LeadDetailHeader({ onAssignClick, onEditClick }: LeadDetailHeaderProps) {
     return (
-        <>
-            <div className="flex items-center gap-2 text-sm text-[#777980] font-inter">
-                <Link href="/leads" className="hover:text-[#0098E8]">
-                    Leads
-                </Link>
-                <ChevronRight size={14} />
-                <span className="text-[#1B1B1B]">Lead Detail</span>
+        <div className="flex flex-col justify-between items-start self-stretch">
+            <div>
+                <div className="flex items-center gap-2 text-sm text-[#777980] font-inter mb-6">
+                    <Link href="/leads" className="hover:text-[#0098E8]">
+                        Leads
+                    </Link>
+                    <ChevronRight size={14} />
+                    <span className="text-[#1B1B1B]">Lead Detail</span>
+                </div>
+            </div>
+            <div className="flex justify-between items-center self-stretch">
+                <div>
+                    <h2 className="text-[#0B1220] font-lora text-xl font-bold leading-[100%]">
+                        Lead Details
+                    </h2>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                    <Button
+                        onClick={onAssignClick}
+                        className="flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto!"
+                    >
+                        <UserPlus size={16} />
+                        Assign Member
+                    </Button>
+                    <Button
+                        onClick={onEditClick}
+                        variant="outline"
+                        className="flex py-2.5 px-4 items-center gap-2 rounded border border-[#DFE1E7] text-[#1B1B1B] font-inter text-sm hover:bg-[#F8FAFB] transition-colors w-auto!"
+                    >
+                        <Pencil size={16} />
+                        Edit Lead
+                    </Button>
+                </div>
             </div>
 
-            <div className="flex justify-between items-start self-stretch">
-                <h2 className="text-[#0B1220] font-lora text-xl font-bold leading-[100%]">
-                    Lead Details
-                </h2>
-                <Button
-                    className="flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto!"
-                    onClick={onAssignClick}
-                >
-                    <UserPlus size={16} />
-                    Assign Member
-                </Button>
-            </div>
-        </>
+        </div>
     );
 }

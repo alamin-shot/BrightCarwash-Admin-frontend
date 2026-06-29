@@ -11,8 +11,8 @@ interface AssignMemberModalProps {
     onClose: () => void;
     leadId: string;
     currentAssigneeId?: string | null;
-    currentAssigneeName?: string | null; // ✅ NEW prop
-    onAssign: (memberId: string) => Promise<void>;
+    currentAssigneeName?: string | null;
+    onAssign: (memberId: string | null) => Promise<void>;
 }
 
 export function AssignMemberModal({
@@ -43,8 +43,12 @@ export function AssignMemberModal({
             member.email?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    // ✅ Toggle selection: if already selected, deselect (set to null)
+    const handleSelectMember = (id: string) => {
+        setSelectedId((prev) => (prev === id ? null : id));
+    };
+
     const handleAssign = async () => {
-        if (!selectedId) return;
         setIsSubmitting(true);
         try {
             await onAssign(selectedId);
@@ -55,6 +59,20 @@ export function AssignMemberModal({
             setIsSubmitting(false);
         }
     };
+
+    const getButtonText = () => {
+        if (selectedId === null && currentAssigneeId !== null) {
+            return "Remove Assignment";
+        }
+        if (selectedId === currentAssigneeId) {
+            return "Already Assigned";
+        }
+        return "Assign Team Member";
+    };
+
+    const isDisabled =
+        selectedId === currentAssigneeId || // No change
+        (selectedId === null && currentAssigneeId === null); // Already unassigned
 
     if (!isOpen) return null;
 
@@ -92,7 +110,7 @@ export function AssignMemberModal({
 
                     <div className="w-full h-px bg-[#DFE1E7]" />
 
-                    {/* ✅ Current assignee info */}
+                    {/* Current assignee info */}
                     {currentAssigneeId && currentAssigneeName && (
                         <div className="flex items-center gap-2 px-3 py-2 bg-[#EBF5FF] rounded-lg border border-[#0098E8] text-sm">
                             <span className="text-[#1B1B1B] font-medium">Currently assigned:</span>
@@ -114,7 +132,7 @@ export function AssignMemberModal({
                             <AssignMemberList
                                 members={filteredMembers}
                                 selectedId={selectedId}
-                                onSelect={setSelectedId}
+                                onSelect={handleSelectMember}
                             />
                         )}
                     </div>
@@ -130,12 +148,10 @@ export function AssignMemberModal({
                             onClick={handleAssign}
                             isLoading={isSubmitting}
                             loadingText="Assigning..."
-                            disabled={!selectedId || selectedId === currentAssigneeId}
+                            disabled={isDisabled}
                             className="px-6 w-auto!"
                         >
-                            {selectedId === currentAssigneeId
-                                ? "Already Assigned"
-                                : "Assign Team Member"}
+                            {getButtonText()}
                         </Button>
                     </div>
                 </div>

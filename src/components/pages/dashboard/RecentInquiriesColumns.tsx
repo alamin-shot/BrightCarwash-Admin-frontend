@@ -3,17 +3,19 @@ import { Icon } from "@/components/ui/Icon";
 import type { Column } from "@/components/ui/DataTable";
 import type { RecentInquiry } from "@/types/dashboard";
 import type { StageOption } from "@/components/ui/StageDropdown";
-import { getStageIconUrl, getDefaultStageIcon, getTextColorForBackground } from "@/lib/stage-utils";
+import { getStageIconUrl, getDefaultStageIcon, hexToTintedBg } from "@/lib/stage-utils";
 
 const depositStyles: Record<string, string> = {
   paid: "text-[#006F1F] border-[#E8E8E9] bg-white",
   pending: "text-[#FFAF00] border-[#E8E8E9] bg-white",
   refunded: "text-[#FF4345] border-[#E8E8E9] bg-white",
   none: "text-[#777980] border-[#E8E8E9] bg-white",
+  failed: "text-[#FF4345] border-[#FF4345] bg-white",
 };
 
+// ✅ Match by `value` (slug) – exact match
 function getStageFromName(name: string, stages: StageOption[]): StageOption | undefined {
-  return stages.find(s => s.label.toLowerCase() === name.toLowerCase());
+  return stages.find(s => s.value === name);
 }
 
 function hasCustomIcon(stage: StageOption | undefined): boolean {
@@ -64,28 +66,32 @@ export function recentInquiriesColumns(stages: StageOption[]): Column<RecentInqu
       render: (row) => {
         const stage = getStageFromName(row.stage, stages);
         const color = stage?.color || "#777980";
-        const iconName = stage?.icon ? getStageIconUrl(stage.icon) : getDefaultStageIcon(row.stage);
+        const tintedBg = hexToTintedBg(color);
+        const iconUrl = stage?.icon ? getStageIconUrl(stage.icon) : null;
         const hasIcon = hasCustomIcon(stage);
-        const textColor = getTextColorForBackground(color);
+        const displayName = stage?.label || row.stage;
 
         return (
           <span
-            className={`inline-flex py-[6px] px-2 justify-center items-center gap-1 rounded text-sm capitalize ${textColor}`}
-            style={{ backgroundColor: color }}
+            className="inline-flex py-[6px] px-2 justify-center items-center gap-1 rounded text-sm capitalize"
+            style={{ backgroundColor: tintedBg, color: color }}
           >
-            {hasIcon && iconName ? (
-              <img
-                src={iconName}
-                alt="stage icon"
-                className="w-3.5 h-3.5 object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
+            {hasIcon && iconUrl ? (
+              <div className="w-3.5 h-3.5 flex items-center justify-center">
+                <Image
+                  src={iconUrl}
+                  alt="stage icon"
+                  width={14}
+                  height={14}
+                  className="object-contain"
+                  unoptimized
+                  crossOrigin="anonymous"
+                />
+              </div>
             ) : (
-              <Icon name={getDefaultStageIcon(row.stage)} width={14} height={14} color={textColor === "text-white" ? "#FFFFFF" : "#1B1B1B"} />
+              <Icon name={getDefaultStageIcon(displayName)} width={14} height={14} color={color} />
             )}
-            {row.stage}
+            {displayName}
           </span>
         );
       },

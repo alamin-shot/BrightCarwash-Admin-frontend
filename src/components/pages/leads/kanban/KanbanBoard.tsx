@@ -5,20 +5,12 @@ import { DragDropContext, type DropResult } from '@hello-pangea/dnd';
 import { KanbanColumn } from '@/components/pages/leads/kanban/KanbanColumn';
 import type { Lead } from '@/types/leads';
 import type { StageOption } from '@/components/ui/StageDropdown';
+import { getDefaultStageIcon } from '@/lib/stage-utils';
 
 interface KanbanBoardProps {
 	leads: Lead[];
 	stages: StageOption[];
 	onStageChange: (id: string, stageId: string) => void;
-}
-
-function getIconForStage(stage: StageOption): string {
-	const label = stage.label.toLowerCase();
-	if (label.includes('new')) return 'new';
-	if (label.includes('contract')) return 'contract';
-	if (label.includes('convert')) return 'convert';
-	if (label.includes('lost')) return 'lost';
-	return 'new';
 }
 
 export function KanbanBoard({
@@ -56,19 +48,23 @@ export function KanbanBoard({
 				onWheel={handleWheel}
 				className='flex gap-4 overflow-x-auto pb-4 adm-kanban-board h-full'
 			>
-				{stages.map((stage) => (
-					<KanbanColumn
-						key={stage.stageId}
-						id={stage.value}
-						stageId={stage.stageId}
-						title={stage.label}
-						borderColor={stage.color}
-						stageColor={stage.color}
-						icon={getIconForStage(stage)}
-						items={getLeadsByStage(stage.value)}
-						stages={stages}
-					/>
-				))}
+				{stages.map((stage) => {
+					// ✅ Use custom icon if available, otherwise fallback to default
+					const icon = stage.icon || getDefaultStageIcon(stage.label);
+					return (
+						<KanbanColumn
+							key={stage.stageId}
+							id={stage.value}
+							stageId={stage.stageId}
+							title={stage.label}
+							borderColor={stage.color}
+							stageColor={stage.color}
+							icon={icon}
+							items={getLeadsByStage(stage.value)}
+							stages={stages}
+						/>
+					);
+				})}
 			</div>
 		</DragDropContext>
 	);

@@ -145,13 +145,20 @@ export async function deleteLeadNote(leadId: string, noteContent: string): Promi
 	}
 }
 
-export async function assignLeadToMember(leadId: string, assignedToId: string | null): Promise<void> {
+export async function assignLeadToMember(
+	leadId: string,
+	assignedToId: string | null
+): Promise<void> {
 	if (APP_CONFIG.MOCK_MODE) {
 		await delay(APP_CONFIG.MOCK_DELAY_MS);
 		mockLeadDetail.assignedToId = assignedToId;
 		mockLeadDetail.assignedToName = assignedToId ? "Assigned User" : null;
 		const now = new Date();
-		const dateStr = now.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
+		const dateStr = now.toLocaleDateString("en-US", {
+			day: "numeric",
+			month: "short",
+			year: "numeric",
+		});
 		mockActivities.unshift({
 			id: `act_${Date.now()}`,
 			type: "staff",
@@ -164,20 +171,95 @@ export async function assignLeadToMember(leadId: string, assignedToId: string | 
 	}
 
 	const token = getAccessToken();
+	// ✅ Send empty string when unassigning (backend now accepts it)
+	const payload = {
+		assigned_to_id: assignedToId !== null ? assignedToId : "",
+		assignment_source: "Admin Panel",
+	};
+
 	const res = await fetch(`${APP_CONFIG.API_BASE_URL}/admin/lead/${leadId}/assign`, {
 		method: "PATCH",
 		headers: {
 			"Content-Type": "application/json",
 			Authorization: `Bearer ${token}`,
 		},
-		body: JSON.stringify({
-			assigned_to_id: assignedToId,
-			assignment_source: "Admin Panel",
-		}),
+		body: JSON.stringify(payload),
 	});
 
 	if (!res.ok) {
 		const error = await res.json().catch(() => ({ message: "Assignment failed" }));
 		throw new Error(error.message || "Failed to assign lead");
 	}
+}
+
+export async function updateLeadDetails(
+	leadId: string,
+	data: {
+		name?: string;
+		email?: string;
+		phone?: string;
+		service?: string;
+		vehicle?: string;
+		source?: string;
+		priority?: string;
+		deposit_status?: string;
+		notes?: string[];
+		stage_name?: string;
+	}
+): Promise<LeadDetail> {
+	if (APP_CONFIG.MOCK_MODE) {
+		await delay(APP_CONFIG.MOCK_DELAY_MS);
+		// Update mock data
+		const mockLead = mockLeadDetail; // Assuming mockLeadDetail is imported
+		if (data.name) mockLead.name = data.name;
+		if (data.email) mockLead.email = data.email;
+		if (data.phone) mockLead.phone = data.phone;
+		if (data.service) mockLead.service = data.service;
+		if (data.vehicle) mockLead.vehicle = data.vehicle;
+		if (data.source) mockLead.source = data.source;
+		if (data.priority) mockLead.priority = data.priority;
+		if (data.deposit_status) mockLead.depositStatus = data.deposit_status;
+		if (data.notes) mockLead.notes = data.notes.map((content) => ({
+			id: `note_${Date.now()}_${Math.random()}`,
+			content,
+			author: "You",
+			date: new Date().toISOString().split('T')[0],
+		}));
+		if (data.stage_name) {
+			// You'd need to map stage_name to stage value/color, but for mock we can set stage to the name
+			mockLead.stage = data.stage_name;
+			mockLead.stageColor = '#0098E8'; // default
+		}
+		return { ...mockLead };
+	}
+
+	const token = getAccessToken();
+	const formData = new FormData();
+	if (data.name) formData.append('name', data.name);
+	if (data.email) formData.append('email', data.email);
+	if (data.phone) formData.append('phone', data.phone);
+	if (data.service) formData.append('service', data.service);
+	if (data.vehicle) formData.append('vehicle', data.vehicle);
+	if (data.source) formData.append('source', data.source);
+	if (data.priority) formData.append('priority', data.priority);
+	if (data.deposit_status) formData.append('deposit_status', data.deposit_status);
+	if (data.notes && data.notes.length) {
+		data.notes.forEach((note) => formData.append('notes', note));
+	}
+	if (data.stage_name) formData.append('stage_name', data.stage_name);
+
+	const res = await fetch(`${APP_CONFIG.API_BASE_URL}/admin/lead/${leadId}`, {
+		method: 'PATCH',
+		headers: { Authorization: `Bearer ${token}` },
+		body: formData,
+	});
+
+	if (!res.ok) {
+		const error = await res.json().catch(() => ({ message: 'Update failed' }));
+		throw new Error(error.message || 'Failed to update lead');
+	}
+
+	// After update, refetch the lead details
+	const updated = await getLeadDetail(leadId);
+	return updated;
 }

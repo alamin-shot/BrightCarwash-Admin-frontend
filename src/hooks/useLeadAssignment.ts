@@ -12,10 +12,10 @@ export function useLeadAssignment(
     triggerRefresh: () => void
 ) {
     const handleAssign = useCallback(
-        async (memberId: string) => {
+        async (memberId: string | null) => {
             try {
                 await assignLeadToMember(leadId, memberId);
-                toast.success("Member assigned successfully");
+                toast.success(memberId ? "Member assigned successfully" : "Member unassigned successfully");
 
                 const now = new Date();
                 const dateStr = now.toLocaleDateString("en-US", {

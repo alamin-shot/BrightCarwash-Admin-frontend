@@ -43,11 +43,8 @@ export function CreateGroupModal({ isOpen, onClose, selectedLeads, onGroupCreate
                 throw new Error(data.message || "Failed to create group");
             }
 
-            // ✅ Close modal immediately with group data
             setGroupName("");
             onGroupCreated?.(data.data);
-
-            // ✅ Don't close modal here - parent will close it via onGroupModalClose
 
         } catch (error: any) {
             toast.error(error.message || "Failed to create group");
@@ -57,7 +54,7 @@ export function CreateGroupModal({ isOpen, onClose, selectedLeads, onGroupCreate
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={() => { }} title="New Group" size="sm">
+        <Modal isOpen={isOpen} onClose={onClose} title="New Group" size="sm">
             <div className="flex flex-col gap-3">
                 <div className="w-full h-px bg-[#DFE1E7]" />
                 <div>

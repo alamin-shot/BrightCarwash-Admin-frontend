@@ -25,7 +25,7 @@ import { useLeadFilters } from '@/hooks/useLeadFilters';
 import { useLeadSelection } from '@/hooks/useLeadSelection';
 import type { Lead } from '@/types/leads';
 import type { StageOption } from '@/components/ui/StageDropdown';
-import type { Stage } from '@/types/stage';
+import { mapStagesToOptions } from '@/lib/stage-utils';
 import { toast } from 'react-toastify';
 
 const ITEMS_PER_PAGE = 10;
@@ -40,22 +40,6 @@ interface LeadsTableExternalProps {
 	onSelectionChange?: (count: number, ids: string[]) => void;
 	groupFilter?: string[];
 	searchQuery?: string;
-}
-
-function mapStagesToOptions(stages: Stage[]): StageOption[] {
-	const nameToValue: Record<string, string> = {
-		'new lead': 'new',
-		contracted: 'contracted',
-		converted: 'converted',
-		lost: 'lost',
-	};
-	return stages.map((s) => ({
-		value: nameToValue[s.name.toLowerCase()] ?? s.name.toLowerCase().replace(/\s+/g, '_'),
-		label: s.name,
-		color: s.color,
-		stageId: s.id,
-		icon: s.icon, // ✅ Add icon from API
-	}));
 }
 
 export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
@@ -119,6 +103,7 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 			},
 			[updateStage],
 		);
+
 		const handleDelete = useCallback(
 			async (lead: Lead) => {
 				try {

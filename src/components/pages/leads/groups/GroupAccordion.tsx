@@ -1,3 +1,6 @@
+
+
+
 "use client";
 
 import { useState } from "react";
@@ -22,7 +25,6 @@ interface GroupAccordionProps {
     onAddLead: (groupId: string) => void;
     onDeleteGroup: (groupId: string) => void;
     onGroupExpand?: (groupId: string) => void;
-    onStageCreated?: () => void;
 }
 
 export function GroupAccordion({
@@ -35,9 +37,7 @@ export function GroupAccordion({
     onAddLead,
     onDeleteGroup,
     onGroupExpand,
-    onStageCreated
 }: GroupAccordionProps) {
-    // ✅ All groups start collapsed – no auto‑expansion
     const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
     const toggleGroup = (groupId: string) => {
@@ -103,7 +103,6 @@ export function GroupAccordion({
                                 onAddLead={onAddLead}
                                 onDeleteGroup={onDeleteGroup}
                                 router={router}
-                                onStageCreated={onStageCreated}
                             />
                         );
                     })}

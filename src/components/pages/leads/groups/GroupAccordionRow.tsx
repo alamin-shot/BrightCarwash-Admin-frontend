@@ -59,7 +59,7 @@ export function GroupAccordionRow({
                                 <Button
                                     variant="icon"
                                     onClick={(e) => { e.stopPropagation(); onAddLead(group.id); }}
-                                    className="flex h-6 w-6 items-center justify-center rounded text-[#777980] hover:bg-gray-100 transition-colors"
+                                    className="flex h-6 w-6 items-center justify-center rounded text-[#586cc3] bg-gray-300/50 hover:bg-[#586cc3]/10 transition-colors"
                                 >
                                     <Plus size={14} />
                                 </Button>

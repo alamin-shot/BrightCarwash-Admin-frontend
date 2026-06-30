@@ -15,9 +15,9 @@ export function useLeadFilters(leads: Lead[]) {
 					if (!searchQuery) return true;
 					const q = searchQuery.toLowerCase();
 					return (
-						lead.name.toLowerCase().includes(q) ||
-						lead.service.toLowerCase().includes(q) ||
-						lead.vehicle.toLowerCase().includes(q)
+						(lead.name?.toLowerCase() ?? '').includes(q) ||
+						(lead.service?.toLowerCase() ?? '').includes(q) ||
+						(lead.vehicle?.toLowerCase() ?? '').includes(q)
 					);
 				})
 				.filter((lead) => !sourceFilter || lead.source === sourceFilter)

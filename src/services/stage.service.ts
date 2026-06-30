@@ -59,6 +59,12 @@ export async function createStage(data: CreateStageRequest): Promise<Stage> {
 		headers: { Authorization: `Bearer ${token}` },
 		body: formData,
 	});
-	const json: SingleStageResponse = await res.json();
+
+	const json = await res.json();
+
+	if (!res.ok) {
+		throw new Error(json.message || `Request failed: ${res.status}`);
+	}
+
 	return json.data;
 }

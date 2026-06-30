@@ -61,7 +61,7 @@ export function CreateStageModal({
 		try {
 			await createStage({
 				name: name.trim(),
-				color: color, 
+				color: color,
 				sort_order: sortOrder,
 				file,
 			});
@@ -74,8 +74,9 @@ export function CreateStageModal({
 			setFilePreview(null);
 			onCreated();
 			onClose();
-		} catch {
-			toast.error('Failed to create stage');
+		} catch (error: any) {
+			toast.error(error?.message || 'Failed to create stage');
+
 		} finally {
 			setIsSubmitting(false);
 		}

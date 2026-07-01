@@ -11,8 +11,23 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-	title: 'Car Wash Admin',
-	description: 'Car wash admin dashboard application',
+	title: 'Bright Car Wash Admin',
+	description: 'Premium Car Wash Administration Dashboard',
+	icons: {
+		icon: '/images/logo.png',
+	},
+	openGraph: {
+		title: 'Bright Car Wash Admin',
+		description: 'Premium Car Wash Administration Dashboard',
+		images: [
+			{
+				url: '/images/logo.png',
+				width: 512,
+				height: 512,
+				alt: 'Bright Car Wash',
+			},
+		],
+	},
 };
 
 export default function RootLayout({
@@ -22,7 +37,7 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang='en' className={inter.variable}>
-			<body className='font-sans' style={{ fontFamily: 'Inter, sans-serif' }}>
+			<body className={inter.className}>
 				<StoreProvider>{children}</StoreProvider>
 				<ToastContainer
 					position='top-right'

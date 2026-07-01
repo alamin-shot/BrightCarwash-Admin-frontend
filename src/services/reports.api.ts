@@ -3,6 +3,10 @@ import type {
     StageSummaryData,
     StageBreakdownItem,
     LeadSourceItem,
+    CampaignTableResponse,
+    CampaignHighlight,
+    MemberActivityHighlights,
+    MemberTableRow,
 } from '@/types/reports';
 import { APP_CONFIG } from '@/configs/app.config';
 import axiosInstance from '@/lib/axios-instance';
@@ -58,11 +62,62 @@ export const reportsApi = createApi({
                 }
             },
         }),
+        // Inside endpoints:
+
+        getCampaignHighlights: builder.query<CampaignHighlight[], { startDate: string; endDate: string }>({
+            queryFn: async (params) => {
+                try {
+                    const { data } = await axiosInstance.get('/admin/reports/campaigns/highlights', { params });
+                    return { data: data.data };
+                } catch (error) {
+                    return { error: { status: 500, data: 'Failed' } };
+                }
+            },
+        }),
+
+        getCampaignTable: builder.query<CampaignTableResponse, { page: number; limit: number; search?: string; startDate: string; endDate: string }>({
+            queryFn: async (params) => {
+                try {
+                    const { data } = await axiosInstance.get('/admin/reports/campaigns/table', { params });
+                    return { data: data.data };
+                } catch (error) {
+                    return { error: { status: 500, data: 'Failed' } };
+                }
+            },
+        }),
+        // Inside endpoints:
+
+        getMemberHighlights: builder.query<MemberActivityHighlights, { startDate: string; endDate: string }>({
+            queryFn: async (params) => {
+                try {
+                    const { data } = await axiosInstance.get('/admin/reports/member-activity/highlights', { params });
+                    return { data: data.data };
+                } catch (error) {
+                    return { error: { status: 500, data: 'Failed' } };
+                }
+            },
+        }),
+
+        getMemberTable: builder.query<{ data: MemberTableRow[]; meta: { totalItems: number; itemCount: number; itemsPerPage: number; totalPages: number; currentPage: number } }, { page: number; limit: number; search?: string }>({
+            queryFn: async (params) => {
+                try {
+                    const { data } = await axiosInstance.get('/admin/reports/member-activity/table', { params });
+                    return { data: data.data };
+                } catch (error) {
+                    return { error: { status: 500, data: 'Failed' } };
+                }
+            },
+        }),
     }),
+
 });
 
 export const {
     useGetStageSummaryQuery,
     useGetStageBreakdownQuery,
     useGetLeadSourcesQuery,
+    useGetCampaignHighlightsQuery,
+    useGetCampaignTableQuery,
+    useGetMemberHighlightsQuery,
+    useGetMemberTableQuery,
 } = reportsApi;

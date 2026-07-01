@@ -51,7 +51,7 @@ export function TeamsRolesSection({
                 </Button>
             </div>
 
-            <div className="max-h-56 overflow-y-auto rounded-lg border border-[#E8E8E9]">
+            <div className="max-h-79 overflow-y-auto rounded-lg border border-[#E8E8E9]">
                 <table className="w-full border-collapse">
                     <thead>
                         <tr className="bg-[#F1F1F1] sticky top-0 z-10">

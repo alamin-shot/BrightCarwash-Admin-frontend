@@ -28,3 +28,61 @@ export interface ReportsState {
     tab: 'lead-conversion' | 'deposit-revenue' | 'campaign-performance' | 'member-activity';
     period: string;
 }
+
+export interface DepositRevenueSummary {
+    totalDepositRevenue: { current: number; lastPeriod: number; percentageChange: number };
+    paidDeposits: { current: number; lastPeriod: number; percentageChange: number };
+    refunded: { current: number; lastPeriod: number; percentageChange: number };
+}
+
+export interface DepositRevenueTrendPoint {
+    month: string;
+    revenue: number;
+}
+
+export interface CampaignHighlight {
+    id: string;
+    name: string;
+    openRate: number;
+    clickRate: number;
+}
+
+export interface CampaignTableRow {
+    rowNumber: number;
+    id: string;
+    campaignName: string;
+    sent: number;
+    openRate: number;
+    clickRate: number;
+}
+
+export interface CampaignTableResponse {
+    data: CampaignTableRow[];
+    meta: {
+        totalItems: number;
+        itemCount: number;
+        itemsPerPage: number;
+        totalPages: number;
+        currentPage: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+    };
+}
+
+export interface MemberActivityHighlights {
+    activeTeamMembers: number;
+    avgLeadsPerMember: number;
+    mostAssignedMember: {
+        name: string;
+        assignedCount: number;
+    };
+}
+
+export interface MemberTableRow {
+    id: string;
+    firstName: string;
+    lastName: string;
+    role: string[];
+    assigned: number;
+    stageBreakdown: Record<string, number>;
+}

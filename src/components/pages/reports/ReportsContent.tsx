@@ -2,10 +2,13 @@
 
 import { useMemo } from 'react';
 import { FilterDropdown } from '@/components/ui/FilterDropdown';
-import { ReportTabSwitcher } from './ReportTabSwitcher';
-import { LeadConversionContent } from './LeadConversionContent';
+import { ReportTabSwitcher } from './lead-conversion/ReportTabSwitcher';
+import { LeadConversionContent } from './lead-conversion/LeadConversionContent';
 import { useReportState } from '@/hooks/useReportState';
 import { format, subDays, subMonths } from 'date-fns';
+import { DepositRevenueContent } from './deposit-revenue/DepositRevenueContent';
+import { CampaignPerformanceContent } from './campaign-performance/CampaignPerformanceContent';
+import { MemberActivityContent } from './member-activity/MemberActivityContent';
 
 const PERIOD_OPTIONS = [
     { value: 'last30days', label: 'Last 30 Days' },
@@ -40,7 +43,9 @@ export function ReportsContent() {
             </div>
             <ReportTabSwitcher activeTab={tab} onChange={setTab} />
             {tab === 'lead-conversion' && <LeadConversionContent startDate={startDate} endDate={endDate} />}
-            {/* Placeholder for other tabs */}
+            {tab === 'deposit-revenue' && <DepositRevenueContent />}
+            {tab === 'campaign-performance' && <CampaignPerformanceContent startDate={startDate} endDate={endDate} />}
+            {tab === 'member-activity' && <MemberActivityContent startDate={startDate} endDate={endDate} />}
         </div>
     );
 }

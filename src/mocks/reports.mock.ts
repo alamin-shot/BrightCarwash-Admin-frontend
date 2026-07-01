@@ -1,4 +1,4 @@
-import type { StageSummaryData, StageBreakdownItem, LeadSourceItem, LeadStageDatum } from '@/types/reports';
+import type { DepositRevenueSummary, DepositRevenueTrendPoint, StageSummaryData, StageBreakdownItem, LeadSourceItem, LeadStageDatum } from '@/types/reports';
 
 export const mockStageSummary: StageSummaryData = {
     totalLeads: { current: 20, lastPeriod: 0, percentageChange: 100 },
@@ -27,4 +27,20 @@ export const mockLeadStageData: LeadStageDatum[] = [
     { month: 'Apr', converted: 330, contacted: 150, lost: 480 },
     { month: 'May', converted: 820, contacted: 1180, lost: 700 },
     { month: 'Jun', converted: 390, contacted: 420, lost: 580 },
+];
+
+
+export const mockDepositRevenueSummary: DepositRevenueSummary = {
+    totalDepositRevenue: { current: 12450, lastPeriod: 10200, percentageChange: 22 },
+    paidDeposits: { current: 89, lastPeriod: 72, percentageChange: 23 },
+    refunded: { current: 5, lastPeriod: 8, percentageChange: -37 },
+};
+
+export const mockDepositRevenueTrend: DepositRevenueTrendPoint[] = [
+    { month: 'Jan', revenue: 1800 },
+    { month: 'Feb', revenue: 2100 },
+    { month: 'Mar', revenue: 1950 },
+    { month: 'Apr', revenue: 2400 },
+    { month: 'May', revenue: 2200 },
+    { month: 'Jun', revenue: 2000 },
 ];

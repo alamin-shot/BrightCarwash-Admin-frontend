@@ -73,7 +73,7 @@ export function TeamsMembersSection({
             </div>
 
             {/* Scrollable table – max 4 rows visible */}
-            <div className="max-h-56 overflow-y-auto rounded-lg border border-[#E8E8E9]">
+            <div className="max-h-79 overflow-y-auto rounded-lg border border-[#E8E8E9]">
                 <DataTable
                     columns={columns}
                     data={paginated}

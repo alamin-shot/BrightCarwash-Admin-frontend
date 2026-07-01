@@ -13,7 +13,7 @@ export const NAVIGATION_CONFIG: NavSection[] = [
   {
     title: "MANAGEMENT",
     items: [
-      { id: "staffs", label: "Staffs", icon: "staffs", href: "/staffs" },
+      { id: "teams", label: "Teams", icon: "staffs", href: "/teams" },
       { id: "website-cms", label: "Website CMS", icon: "website-cms", href: "/website-cms" },
       { id: "reports", label: "Reports", icon: "reports", href: "/reports" },
       { id: "activity-log", label: "Activity Log", icon: "activity-log", href: "/activity-log" },

@@ -10,6 +10,7 @@ import { teamApi } from '@/services/team.api';
 import { templateApi } from '@/services/template.api';
 import { activityLogApi } from '@/services/activity-log.api';
 import campaignCreationReducer from '@/store/slices/campaignCreationSlice';
+import { reportsApi } from '@/services/reports.api';
 export const store = configureStore({
 	reducer: {
 		auth: authReducer,
@@ -22,6 +23,8 @@ export const store = configureStore({
 		[templateApi.reducerPath]: templateApi.reducer,
 		[activityLogApi.reducerPath]: activityLogApi.reducer,
 		campaignCreation: campaignCreationReducer,
+		[reportsApi.reducerPath]: reportsApi.reducer,
+
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware().concat(
@@ -33,6 +36,7 @@ export const store = configureStore({
 			teamApi.middleware,
 			templateApi.middleware,
 			activityLogApi.middleware,
+			reportsApi.middleware,
 		),
 });
 

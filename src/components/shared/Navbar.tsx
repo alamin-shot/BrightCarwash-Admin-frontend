@@ -13,7 +13,7 @@ const pageTitles: Record<string, string> = {
 	'/leads': 'Lead Insights',
 	'/payments': 'All Transactions',
 	'/campaigns': 'Email Campaigns',
-	"/staffs": "Team Management",
+	"/teams": "Team Management",
 	'/website-cms': 'Website CMS',
 	'/reports': 'Reports',
 	'/activity-log': 'Activity Log',
@@ -40,7 +40,7 @@ export function Navbar({ onMenuClick }: NavbarProps) {
 					<Icon name='menu' width={24} height={24} />
 				</Button>
 				<h1 className='text-[#1B1B1B] font-inter text-base sm:text-lg lg:text-2xl font-medium leading-[150%] tracking-[-0.36px] m-0 truncate'>
-					{title}, {user ? `${user.firstName} ${user.lastName}` : 'User'}
+					{title}
 				</h1>
 			</div>
 

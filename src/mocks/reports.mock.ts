@@ -1,4 +1,4 @@
-import type { StageSummaryData, StageBreakdownItem, LeadSourceItem } from '@/types/reports';
+import type { StageSummaryData, StageBreakdownItem, LeadSourceItem, LeadStageDatum } from '@/types/reports';
 
 export const mockStageSummary: StageSummaryData = {
     totalLeads: { current: 20, lastPeriod: 0, percentageChange: 100 },

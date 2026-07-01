@@ -58,7 +58,9 @@ export function SubjectModal({
         <div>
           <label className={labelClass}>Preview</label>
           <div className="flex flex-col gap-1 p-3 rounded-xl border border-[#DFE1E7] bg-white mt-1.5">
-            <span className="text-[#1D1F2C] font-inter text-sm font-bold leading-[140%] break-words">{subject || "Subject line"}</span>
+            <span className="text-[#1D1F2C] font-inter text-sm font-bold leading-[140%] break-words">
+              {subject.length > 100 ? subject.slice(0, 100) + '...' : (subject || "Subject line")}
+            </span>
             <span className="text-[#777980] font-inter text-xs leading-[140%] break-words">{preview || "Preview text appears here..."}</span>
           </div>
         </div>

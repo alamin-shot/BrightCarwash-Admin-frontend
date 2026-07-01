@@ -9,6 +9,7 @@ interface ActionItem {
 	label: string;
 	onClick: () => void;
 	variant?: 'default' | 'danger';
+	disabled?: boolean;
 }
 
 interface ActionsDropdownProps {
@@ -31,7 +32,6 @@ export function ActionsDropdown({ items }: ActionsDropdownProps) {
 		function handleClickOutside(e: MouseEvent) {
 			if (!open) return;
 			const target = e.target as Node;
-			// If click is inside the dropdown portal OR inside the trigger, do nothing
 			if (portalRef.current?.contains(target) || ref.current?.contains(target)) {
 				return;
 			}
@@ -98,13 +98,15 @@ export function ActionsDropdown({ items }: ActionsDropdownProps) {
 							key={item.label}
 							variant='icon'
 							onClick={() => {
-								console.log('🎯 [ActionsDropdown] Selected:', item.label);
+								if (item.disabled) return;
 								item.onClick();
 								setOpen(false);
 							}}
-							className={`flex w-full py-2.5 px-4 items-center text-sm text-left cursor-pointer transition-colors ${item.variant === 'danger'
-									? 'text-[#FF4345] hover:bg-[#FFE6E6]'
-									: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
+							className={`flex w-full py-2.5 px-4 items-center text-sm text-left cursor-pointer transition-colors ${item.disabled
+									? 'text-[#A5A5AB] cursor-not-allowed'
+									: item.variant === 'danger'
+										? 'text-[#FF4345] hover:bg-[#FFE6E6]'
+										: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
 								}`}
 						>
 							{item.label}

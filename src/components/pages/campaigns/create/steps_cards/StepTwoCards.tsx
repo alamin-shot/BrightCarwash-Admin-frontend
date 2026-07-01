@@ -94,9 +94,9 @@ export function StepTwoCards({
 			return `From: ${senderName}`;
 		}
 		if (key === "subject" && filled.subject && subject) {
-			return `Subject: ${subject}`;
+			const truncated = subject.length > 50 ? subject.slice(0, 50) + '...' : subject;
+			return `Subject: ${truncated}`;
 		}
-		// ✅ This now works because 'desc' exists
 		return cardConfig.find((c) => c.key === key)?.desc || "";
 	};
 

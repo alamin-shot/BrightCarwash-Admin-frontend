@@ -23,9 +23,6 @@ export function createCampaignColumns({
 	onLaunch,
 	onStatusAction,
 }: CampaignColumnsParams): Column<Campaign>[] {
-	// ✅ NO hooks here - this is a pure function
-	// ✅ All hooks are in the parent component (CampaignsTable)
-
 	return [
 		{
 			key: "checkbox",
@@ -74,7 +71,7 @@ export function createCampaignColumns({
 			header: "Status",
 			render: (row) => (
 				<span
-					className={`inline-flex py-1.5 px-3 justify-center items-center gap-1 rounded-md text-sm font-medium ${STATUS_STYLES[row.status] || STATUS_STYLES.DRAFT
+					className={`inline-flex py-1.5 px-3 justify-center items-center gap-1 rounded-md text-sm font-medium capitalize ${STATUS_STYLES[row.status] || STATUS_STYLES.DRAFT
 						}`}
 				>
 					{row.status}
@@ -93,7 +90,6 @@ export function createCampaignColumns({
 	];
 }
 
-// Helper components - no hooks
 function Checkbox() {
 	return (
 		<input
@@ -107,13 +103,15 @@ function buildActions(
 	row: Campaign,
 	{ onEdit, onDelete, onLaunch, onStatusAction }: CampaignColumnsParams
 ) {
+	const isLocked = row.status === "SCHEDULED" || row.status === "COMPLETED";
+
 	const items = [
-		{ label: "Edit", onClick: () => onEdit(row) },
-		{ label: "Delete", onClick: () => onDelete(row), variant: "danger" as const },
+		{ label: "Edit", onClick: () => onEdit(row), disabled: isLocked },
+		{ label: "Delete", onClick: () => onDelete(row), variant: "danger" as const, disabled: isLocked },
 	];
 
 	if (row.status === "DRAFT" && onLaunch) {
-		items.splice(1, 0, { label: "Launch", onClick: () => onLaunch(row) });
+		items.splice(1, 0, { label: "Launch", onClick: () => onLaunch(row), disabled: false });
 	}
 
 	if (row.status === "ACTIVE" && onStatusAction) {
@@ -121,6 +119,7 @@ function buildActions(
 			label: "Suspend",
 			onClick: () => onStatusAction(row, "SUSPEND"),
 			variant: "danger" as const,
+			disabled: false,
 		});
 	}
 
@@ -128,6 +127,7 @@ function buildActions(
 		items.splice(1, 0, {
 			label: "Restart",
 			onClick: () => onStatusAction(row, "RESTART"),
+			disabled: false,
 		});
 	}
 

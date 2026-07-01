@@ -288,5 +288,5 @@ export const {
     useUpdateTemplateMutation,
     useDeleteTemplateMutation,
     useArchiveTemplateMutation,
-    useUploadTemplateImageMutation,  // <-- new export
+    useUploadTemplateImageMutation,
 } = templateApi;

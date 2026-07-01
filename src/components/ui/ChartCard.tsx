@@ -2,10 +2,11 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import dynamic from 'next/dynamic';
+import { ApexAxisChartSeries, ApexNonAxisChartSeries } from 'apexcharts';
 
 interface ChartCardProps {
     options: ApexCharts.ApexOptions;
-    series: ApexCharts.ApexAxisChartSeries | ApexCharts.ApexNonAxisChartSeries;
+    series: ApexAxisChartSeries | ApexNonAxisChartSeries;
     type: 'area' | 'bar' | 'donut' | 'line';
     height?: number;
     className?: string;

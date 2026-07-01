@@ -5,7 +5,7 @@ interface CampaignCreationState {
     tags: string[];
     tagInput: string;
     selectedTemplateName: string;
-    templateId: string | null; // ✅ ADD THIS
+    templateId: string | null;
     designFilled: boolean;
     selectedGroupId: string | null;
     selectedGroupName: string | null;
@@ -120,7 +120,7 @@ export const {
     removeTag,
     setTagInput,
     setSelectedTemplateName,
-    setTemplateId, // ✅ EXPORT THIS
+    setTemplateId,
     setDesignFilled,
     setSelectedGroup,
     setSender,

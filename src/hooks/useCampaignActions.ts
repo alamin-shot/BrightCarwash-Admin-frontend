@@ -11,14 +11,12 @@ import {
 import type { Campaign } from "@/types/campaign";
 
 export function useCampaignActions() {
-    // ✅ All hooks called in the same order every time
     const router = useRouter();
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [deleteCampaign] = useDeleteCampaignMutation();
     const [launchCampaign] = useLaunchCampaignMutation();
     const [statusAction] = useCampaignStatusActionMutation();
 
-    // ✅ No conditional returns here
     const handleEdit = useCallback(
         (campaign: Campaign) => {
             console.log("Edit campaign:", campaign.id);

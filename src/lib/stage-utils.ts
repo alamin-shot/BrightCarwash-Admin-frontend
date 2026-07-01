@@ -27,7 +27,6 @@ export function hexToTintedBg(hex: string): string {
     return `rgba(${r}, ${g}, ${b}, 0.12)`;
 }
 
-// ✅ Convert Stage[] to StageOption[] (used in LeadsTable and Dashboard)
 export function mapStagesToOptions(stages: Stage[]): StageOption[] {
     const nameToValue: Record<string, string> = {
         'new lead': 'new',

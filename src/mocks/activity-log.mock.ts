@@ -25,5 +25,4 @@ export const mockActivityLogs: ActivityLog[] = [
         updatedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
         userId: 'user_002',
     },
-    // Add more mock entries for testing...
 ];

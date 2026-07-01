@@ -25,7 +25,6 @@ export function usePaymentPageState() {
                 if (updates.status) params.set('status', updates.status);
                 else params.delete('status');
             }
-            // Reset page to 1 if search or status changes
             if (updates.search !== undefined || updates.status !== undefined) {
                 params.set('page', '1');
             }

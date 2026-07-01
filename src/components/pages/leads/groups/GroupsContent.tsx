@@ -163,7 +163,7 @@ export const GroupsContent = forwardRef<GroupsContentRef, { groupModalOpen: bool
                 />
                 <CreateGroupModal
                     isOpen={groupModalOpen}
-                    onClose={onGroupModalClose}  // ✅ Fix: pass the actual close function
+                    onClose={onGroupModalClose}
                     selectedLeads={[]}
                     onGroupCreated={handleGroupCreated}
                 />

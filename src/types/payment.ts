@@ -13,13 +13,13 @@ export interface PaymentStatsResponse {
 
 export interface PaymentTransaction {
 	id: string;
-	transactionId: string;      // from transaction_id
-	customerName: string;       // from customer_name
+	transactionId: string;
+	customerName: string;
 	service: string;
 	amount: number;
 	currency: string;
-	status: 'PAID' | 'PENDING' | 'FAILED' | 'REFUNDED'; // FAILED added
-	date: string;               // from created_at
+	status: 'PAID' | 'PENDING' | 'FAILED' | 'REFUNDED';
+	date: string;
 	leadId: string;
 }
 
@@ -32,7 +32,7 @@ export interface PaymentTransactionResponse {
 			transaction_id: string;
 			customer_name: string;
 			service: string;
-			amount: string;          // backend returns string
+			amount: string;
 			currency: string;
 			status: string;
 			created_at: string;

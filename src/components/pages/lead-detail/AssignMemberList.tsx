@@ -1,7 +1,7 @@
 "use client";
 
-import { AssignMemberItem } from "./AssignMemberItem";
 import type { TeamMember } from "@/types/team";
+import { AssignMemberItem } from "./AssignMemberItem";
 
 interface AssignMemberListProps {
     members: TeamMember[];

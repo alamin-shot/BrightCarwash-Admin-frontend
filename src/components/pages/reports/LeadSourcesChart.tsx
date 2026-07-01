@@ -26,7 +26,21 @@ export function LeadSourcesChart({ data }: Props) {
         chart: { type: 'donut', fontFamily: 'Inter' },
         labels,
         colors: donutColors,
-        plotOptions: { pie: { donut: { size: '55%', labels: { show: true, total: { show: true, label: 'Total Leads', formatter: () => data.reduce((s, i) => s + i.count, 0) } } } } },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '55%',
+                    labels: {
+                        show: true,
+                        total: {
+                            show: true,
+                            label: 'Total Leads',
+                            formatter: () => String(data.reduce((s, i) => s + i.count, 0)),
+                        },
+                    },
+                },
+            },
+        },
         legend: { position: 'right' },
         dataLabels: { enabled: false },
     }), [labels, series]);

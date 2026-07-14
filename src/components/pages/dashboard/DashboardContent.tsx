@@ -16,10 +16,9 @@ import { mapStagesToOptions } from "@/lib/stage-utils";
 export function DashboardContent() {
   const { data: metricsData, isLoading: metricsLoading, error: metricsError } = useGetDashboardMetricsQuery();
 
-  // ✅ Fix: useGetLeadsQuery now returns PaginatedResponse
   const { data: leadsResponse, isLoading: leadsLoading, refetch: refetchLeads } = useGetLeadsQuery({
     page: 1,
-    limit: 10, // Only need 4 for recent inquiries, but fetch 10 just in case
+    limit: 10,
   });
 
   const [stages, setStages] = useState<StageOption[]>([]);
@@ -70,7 +69,6 @@ export function DashboardContent() {
     );
   }
 
-  // ✅ Extract leads array from the paginated response
   const leadsData = leadsResponse?.data || [];
 
   const recentLeads = leadsData.slice(0, 4).map((lead) => ({
@@ -80,7 +78,7 @@ export function DashboardContent() {
     service: lead.service,
     email: lead.email,
     source: lead.source,
-    deposit: lead.depositStatus?.toLowerCase() || "none",
+    deposit: lead.depositStatus.toLowerCase() || "none",
     stage: lead.stage,
     date: lead.date,
   }));

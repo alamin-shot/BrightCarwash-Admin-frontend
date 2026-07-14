@@ -9,7 +9,7 @@ export interface Lead {
 	source: string;
 	priority: 'LOW' | 'MEDIUM' | 'HIGH';
 	deposit: number;
-
+	depositStatus: 'PENDING' | 'PAID' | 'NONE';
 	stage: string;
 	stageId: string;
 	assignedToId: string | null;
@@ -25,6 +25,7 @@ export interface CreateLeadRequest {
 	vehicle: string;
 	source: string;
 	priority: Lead["priority"];
+	deposit_status: Lead["depositStatus"];
 	stage_name?: string;
 	stage?: string;
 	notes?: string[];

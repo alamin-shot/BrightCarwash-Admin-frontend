@@ -1,56 +1,64 @@
-import { useCallback, useMemo } from 'react';
-import { useExportExcel } from '@/hooks/useExportExcel';
+import { useCallback } from 'react';
+import { useExportLeadsMutation } from '@/services/leads.api';
 import { toast } from 'react-toastify';
 import type { Lead } from '@/types/leads';
 
-const exportColumns = [
-    { key: 'name', header: 'Lead Name' },
-    { key: 'service', header: 'Service' },
-    { key: 'email', header: 'Email' },
-    { key: 'source', header: 'Source' },
-    { key: 'depositStatus', header: 'Deposit' },
-    { key: 'stage', header: 'Stage' },
-    { key: 'date', header: 'Date' },
-];
+export function useLeadsExport(
+    leads: Lead[],
+    selectedIds: Set<string>,
+    filters: {
+        search?: string;
+        source?: string;
+        depositStatus?: string;
+        stageId?: string;
+        assignedToId?: string;
+        priority?: string;
+        stageName?: string;
+        dateFrom?: string;
+        dateTo?: string;
+        sortBy?: string;
+        sortOrder?: string;
+    }
+) {
+    const [exportLeads] = useExportLeadsMutation();
 
-export function useLeadsExport(leads: Lead[], selectedIds: Set<string>) {
-    const { handleExport: exportExcel } = useExportExcel({
-        data: leads,
-        columns: exportColumns,
-        filename: 'leads-export',
-    });
+    const exportExcel = useCallback(async () => {
+        try {
+            const leadIds = selectedIds.size > 0 ? Array.from(selectedIds) : undefined;
 
-    const exportCSV = useCallback(() => {
-        const dataToExport = selectedIds.size > 0
-            ? leads.filter((item) => selectedIds.has(item.id))
-            : leads;
+            const result = await exportLeads({
+                format: 'xlsx',
+                leadIds,
+                ...filters,
+            }).unwrap();
 
-        if (dataToExport.length === 0) {
-            toast.warning('No data to export');
-            return;
+            if (result.success) {
+                const count = leadIds?.length || 'all';
+                toast.success(`Exported ${count} leads as Excel`);
+            }
+        } catch (error: any) {
+            toast.error(error?.data || 'Failed to export as Excel');
         }
+    }, [exportLeads, selectedIds, filters]);
 
-        const headers = exportColumns.map(col => `"${col.header}"`).join(',');
-        const rows = dataToExport.map(row =>
-            exportColumns.map(col => {
-                const value = row[col.key as keyof Lead];
-                if (value === null || value === undefined) return '""';
-                return `"${String(value).replace(/"/g, '""')}"`;
-            }).join(',')
-        );
+    const exportCSV = useCallback(async () => {
+        try {
+            const leadIds = selectedIds.size > 0 ? Array.from(selectedIds) : undefined;
 
-        const csvContent = [headers, ...rows].join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'leads-export.csv';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        toast.success(`Exported ${dataToExport.length} leads as CSV`);
-    }, [leads, selectedIds]);
+            const result = await exportLeads({
+                format: 'csv',
+                leadIds,
+                ...filters,
+            }).unwrap();
+
+            if (result.success) {
+                const count = leadIds?.length || 'all';
+                toast.success(`Exported ${count} leads as CSV`);
+            }
+        } catch (error: any) {
+            toast.error(error?.data || 'Failed to export as CSV');
+        }
+    }, [exportLeads, selectedIds, filters]);
 
     return { exportExcel, exportCSV };
 }

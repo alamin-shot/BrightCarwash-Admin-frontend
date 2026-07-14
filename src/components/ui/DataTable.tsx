@@ -1,10 +1,11 @@
-import { ReactNode } from "react";
-import { Inbox } from "lucide-react";
+'use client';
+
+import type { ReactNode } from 'react';
 
 export interface Column<T> {
   key: string;
   header: string | ReactNode;
-  render: (row: T) => ReactNode;
+  render?: (row: T) => ReactNode;
   className?: string;
 }
 
@@ -13,29 +14,33 @@ interface DataTableProps<T> {
   data: T[];
   rowKey: (row: T) => string;
   className?: string;
+  onRowClick?: (row: T) => void; // ✅ Added row click handler
 }
 
-export function DataTable<T>({ columns, data, rowKey, className = "" }: DataTableProps<T>) {
+export function DataTable<T>({
+  columns,
+  data,
+  rowKey,
+  className = '',
+  onRowClick,
+}: DataTableProps<T>) {
   if (data.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 text-center rounded-lg border border-[#E8E8E9] bg-white">
-        <div className="w-12 h-12 rounded-full bg-[#F8FAFB] flex items-center justify-center mb-3">
-          <Inbox size={24} className="text-[#777980]" />
-        </div>
-        <p className="text-[#777980] font-inter text-sm">No data available</p>
+      <div className="flex items-center justify-center py-12 text-[#777980] font-inter text-sm">
+        No data available
       </div>
     );
   }
 
   return (
-    <div className={`w-full overflow-x-auto ${className}`}>
-      <table className="w-full border-collapse min-w-175">
+    <div className={`overflow-x-auto ${className}`}>
+      <table className="w-full border-collapse">
         <thead>
           <tr className="bg-[#F1F1F1]">
-            {columns.map((col, index) => (
+            {columns.map((col) => (
               <th
                 key={col.key}
-                className={`py-2.5 sm:py-3 px-3 sm:px-4 text-left text-[#777980] font-inter text-[10px] sm:text-xs font-medium uppercase tracking-wider whitespace-nowrap border-r border-[#E8E8E9] last:border-r-0 ${col.className || ""} ${index === 0 ? "rounded-tl-lg" : ""} ${index === columns.length - 1 ? "rounded-tr-lg" : ""}`}
+                className={`py-2.5 px-4 text-left text-[#777980] font-inter text-xs font-medium uppercase tracking-wider border-r border-[#E8E8E9] last:border-r-0 ${col.className || ''}`}
               >
                 {col.header}
               </th>
@@ -43,19 +48,35 @@ export function DataTable<T>({ columns, data, rowKey, className = "" }: DataTabl
           </tr>
         </thead>
         <tbody>
-          {data.map((row, rowIndex) => (
-            <tr key={rowKey(row)} className="border-t border-[#E8E8E9] bg-white">
-              {columns.map((col, colIndex) => (
-                <td
-                  key={col.key}
-                  className={`py-2.5 sm:py-3 px-3 sm:px-4 whitespace-nowrap border-r border-[#E8E8E9] last:border-r-0 ${col.className || ""} ${rowIndex === data.length - 1 && colIndex === 0 ? "rounded-bl-lg" : ""
-                    } ${rowIndex === data.length - 1 && colIndex === columns.length - 1 ? "rounded-br-lg" : ""}`}
-                >
-                  {col.render(row)}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {data.map((row) => {
+            const rowId = rowKey(row);
+            const isClickable = !!onRowClick;
+
+            return (
+              <tr
+                key={rowId}
+                className={`border-t border-[#E8E8E9] bg-white transition-colors ${isClickable ? 'hover:bg-[#F8FAFB] cursor-pointer' : ''
+                  }`}
+                onClick={() => {
+                  if (isClickable) {
+                    // Check if click target is inside a dropdown or checkbox
+                    const target = window.event?.target as HTMLElement;
+                    if (target?.closest('.no-row-click')) return;
+                    onRowClick?.(row);
+                  }
+                }}
+              >
+                {columns.map((col) => (
+                  <td
+                    key={`${rowId}-${col.key}`}
+                    className={`py-2.5 px-4 border-r border-[#E8E8E9] last:border-r-0 ${col.className || ''}`}
+                  >
+                    {col.render ? col.render(row) : (row as any)[col.key]}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -19,14 +19,12 @@ const ITEMS_PER_PAGE = 10;
 
 interface LeadsTableExternalProps {
 	viewMode: 'list' | 'kanban';
-	groupMode: 'all' | 'groups';
 	onSelectionChange?: (count: number, ids: string[]) => void;
-	groupFilter?: string[];
 	searchQuery?: string;
 }
 
 export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
-	function LeadsTable({ viewMode, groupMode, onSelectionChange, groupFilter, searchQuery: externalSearch }, ref) {
+	function LeadsTable({ viewMode, onSelectionChange, searchQuery: externalSearch }, ref) {
 		const router = useRouter();
 
 		const {
@@ -55,11 +53,22 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 			handleDelete,
 		} = useLeadsData(externalSearch);
 
-		const { exportExcel, exportCSV } = useLeadsExport(leads, selectedIds);
+		// ✅ Build filters for export
+		const exportFilters = useMemo(() => ({
+			search: searchTerm || externalSearch || undefined,
+			source: sourceFilter || undefined,
+			depositStatus: depositFilter || undefined,
+			sortBy: 'created_at',
+			sortOrder: 'desc',
+		}), [searchTerm, externalSearch, sourceFilter, depositFilter]);
 
-		useImperativeHandle(ref, () => ({ exportExcel: () => exportExcel(selectedIds), exportCSV }), [exportExcel, exportCSV, selectedIds]);
+		const { exportExcel, exportCSV } = useLeadsExport(leads, selectedIds, exportFilters);
 
-		// Selection callbacks
+		useImperativeHandle(ref, () => ({
+			exportExcel: () => exportExcel(),
+			exportCSV: () => exportCSV()
+		}), [exportExcel, exportCSV]);
+
 		useEffect(() => {
 			onSelectionChange?.(selectedIds.size, Array.from(selectedIds));
 		}, [selectedIds, onSelectionChange]);
@@ -98,7 +107,6 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 					depositFilter={depositFilter}
 					onDepositChange={(val) => { setDepositFilter(val); setCurrentPage(1); }}
 					uniqueSources={uniqueSources}
-					groupMode={groupMode}
 				/>
 				{viewMode === 'list' ? (
 					<>
@@ -111,7 +119,13 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 									</div>
 								</div>
 							)}
-							<DataTable columns={columns} data={leads} rowKey={(row) => row.id} className="w-full" />
+							<DataTable
+								columns={columns}
+								data={leads}
+								rowKey={(row) => row.id}
+								className="w-full"
+								onRowClick={(row) => router.push(`/leads/${row.id}`)} // ✅ Added
+							/>
 						</div>
 						<Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={totalItems} itemsPerPage={ITEMS_PER_PAGE} isLoading={isPageLoading} />
 					</>

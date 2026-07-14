@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { getStages } from '@/services/stage.service';
 import { mapStagesToOptions } from '@/lib/stage-utils';
@@ -7,7 +9,6 @@ export function useLeadsContent() {
     const [modalOpen, setModalOpen] = useState(false);
     const [groupModalOpen, setGroupModalOpen] = useState(false);
     const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
-    const [groupMode, setGroupMode] = useState<'all' | 'groups'>('all');
     const [selectedCount, setSelectedCount] = useState(0);
     const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
     const [stages, setStages] = useState<StageOption[]>([]);
@@ -42,8 +43,6 @@ export function useLeadsContent() {
         setGroupModalOpen,
         viewMode,
         setViewMode,
-        groupMode,
-        setGroupMode,
         selectedCount,
         selectedLeads,
         setSelectedLeads,

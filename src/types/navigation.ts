@@ -5,11 +5,13 @@ export interface NavItem {
   label: string;
   icon: string;
   href: string;
+  subItems?: NavItem[];
 }
 
 export interface NavSection {
   title: string;
   items: NavItem[];
+
 }
 
 export interface SidebarProps {

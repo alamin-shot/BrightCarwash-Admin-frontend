@@ -306,7 +306,93 @@ export const leadsApi = createApi({
 			},
 			providesTags: ["Leads"],
 		}),
+		// Add to endpoints inside leadsApi
+		exportLeads: builder.mutation<{ success: boolean; message: string }, {
+			format?: 'xlsx' | 'csv';
+			leadIds?: string[];
+			search?: string;
+			source?: string;
+			depositStatus?: string;
+			stageId?: string;
+			assignedToId?: string;
+			priority?: string;
+			stageName?: string;
+			dateFrom?: string;
+			dateTo?: string;
+			sortBy?: string;
+			sortOrder?: string;
+		}>({
+			queryFn: async (params) => {
+				try {
+					const token = getAccessToken();
+
+					// Build request body
+					const requestBody: Record<string, any> = {
+						format: params.format || 'xlsx',
+						sort_by: params.sortBy || 'created_at',
+						sort_order: params.sortOrder || 'desc',
+					};
+
+					// Add optional filters
+					if (params.leadIds && params.leadIds.length > 0) {
+						requestBody.leadIds = params.leadIds;
+					}
+					if (params.search) requestBody.search = params.search;
+					if (params.source) requestBody.source = params.source;
+					if (params.depositStatus) requestBody.deposit_status = params.depositStatus;
+					if (params.stageId) requestBody.stage_id = params.stageId;
+					if (params.assignedToId) requestBody.assigned_to_id = params.assignedToId;
+					if (params.priority) requestBody.priority = params.priority;
+					if (params.stageName) requestBody.stage_name = params.stageName;
+					if (params.dateFrom) requestBody.date_from = params.dateFrom;
+					if (params.dateTo) requestBody.date_to = params.dateTo;
+
+					const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/lead/export`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${token}`,
+						},
+						body: JSON.stringify(requestBody),
+					});
+
+					if (!response.ok) {
+						const errorData = await response.json().catch(() => ({}));
+						throw new Error(errorData.message || 'Export failed');
+					}
+
+					// Get filename from Content-Disposition header
+					const contentDisposition = response.headers.get('Content-Disposition');
+					let filename = `leads-export.${params.format || 'xlsx'}`;
+					if (contentDisposition) {
+						const match = contentDisposition.match(/filename="?(.+?)"?$/);
+						if (match) filename = match[1];
+					}
+
+					// Download the file
+					const blob = await response.blob();
+					const url = window.URL.createObjectURL(blob);
+					const link = document.createElement('a');
+					link.href = url;
+					link.download = filename;
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+					window.URL.revokeObjectURL(url);
+
+					return { data: { success: true, message: 'Export successful' } };
+				} catch (error) {
+					return {
+						error: {
+							status: 500,
+							data: error instanceof Error ? error.message : 'Failed to export leads',
+						},
+					};
+				}
+			},
+		}),
 	}),
+
 });
 
 export const {
@@ -317,5 +403,6 @@ export const {
 	useDeleteLeadMutation,
 	useConnectLeadsToGroupMutation,
 	useDisconnectLeadsFromGroupMutation,
-	useGetGroupLeadsQuery
+	useGetGroupLeadsQuery,
+	useExportLeadsMutation,
 } = leadsApi;

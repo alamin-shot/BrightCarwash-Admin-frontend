@@ -17,7 +17,6 @@ interface LeadsColumnsParams {
 	onStageCreated?: () => void;
 }
 
-// ✅ Helper function to truncate text to max words
 const truncateToMaxWords = (text: string, maxWords: number = 8): string => {
 	if (!text) return '';
 	const words = text.split(' ');
@@ -42,7 +41,7 @@ export function createLeadsColumns({
 			header: (
 				<input
 					type='checkbox'
-					className='w-5 h-5 rounded-md border border-[#E8E8E9] bg-white cursor-pointer accent-[#0098E8]'
+					className='w-5 h-5 rounded-md border border-[#E8E8E9] bg-white cursor-pointer accent-[#0098E8] no-row-click'
 					checked={allSelected}
 					onChange={onSelectAll}
 				/>
@@ -51,7 +50,7 @@ export function createLeadsColumns({
 			render: (row) => (
 				<input
 					type='checkbox'
-					className='w-5 h-5 rounded-md border border-[#E8E8E9] bg-white cursor-pointer accent-[#0098E8]'
+					className='w-5 h-5 rounded-md border border-[#E8E8E9] bg-white cursor-pointer accent-[#0098E8] no-row-click'
 					checked={selectedIds.has(row.id)}
 					onChange={() => onSelectRow(row.id)}
 				/>
@@ -93,7 +92,7 @@ export function createLeadsColumns({
 			key: 'email',
 			header: 'Email',
 			render: (row) => (
-				<span className='text-[#1B1B1B] font-inter text-sm truncate block max-w-[140px]'>
+				<span className='text-[#1B1B1B] font-inter text-sm truncate block max-w-[180px]'>
 					{row.email}
 				</span>
 			),
@@ -110,6 +109,7 @@ export function createLeadsColumns({
 		{
 			key: 'stage',
 			header: 'Stage',
+			className: 'no-row-click', // ✅ Prevents row click on stage dropdown
 			render: (row) => (
 				<StageDropdown
 					currentStage={row.stage}
@@ -131,7 +131,7 @@ export function createLeadsColumns({
 		{
 			key: 'actions',
 			header: '',
-			className: 'w-12',
+			className: 'w-12 no-row-click', // ✅ Prevents row click on actions dropdown
 			render: (row) => (
 				<ActionsDropdown
 					items={[

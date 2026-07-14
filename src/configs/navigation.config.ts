@@ -7,7 +7,17 @@ export const NAVIGATION_CONFIG: NavSection[] = [
       { id: "dashboard", label: "Dashboard", icon: "dashboard", href: "/dashboard" },
       { id: "leads", label: "Leads", icon: "leads", href: "/leads" },
       { id: "payments", label: "Payments", icon: "payments", href: "/payments" },
-      { id: "campaigns", label: "Campaigns", icon: "campaigns", href: "/campaigns" },
+      {
+        id: "marketing",
+        label: "Marketing",
+        icon: "campaigns",
+        href: "/marketing/campaigns",
+        subItems: [
+          { id: "marketing-campaigns", label: "Campaigns", icon: "campaigns", href: "/marketing/campaigns" },
+          { id: "marketing-email-list", label: "Email List", icon: "list", href: "/marketing/email-list" },
+          { id: "marketing-lead-groups", label: "Lead Groups", icon: "staffs", href: "/marketing/lead-groups" },
+        ]
+      },
     ],
   },
   {

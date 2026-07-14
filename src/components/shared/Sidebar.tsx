@@ -8,7 +8,7 @@ import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/Button";
 import { NAVIGATION_CONFIG } from "@/configs/navigation.config";
 import { useAuth } from "@/hooks/useAuth";
-import type { SidebarProps } from "@/types/navigation";
+import type { SidebarProps, NavItem } from "@/types/navigation";
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
@@ -18,6 +18,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   function isActive(href: string): boolean {
     if (href === "/dashboard") return pathname === "/dashboard";
     return pathname.startsWith(href);
+  }
+
+  function isSubItemActive(subItems: NavItem[] | undefined): boolean {
+    if (!subItems) return false;
+    return subItems.some((item) => pathname.startsWith(item.href));
   }
 
   return (
@@ -30,9 +35,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       )}
 
       <aside
-        className={`w-[250px] h-screen fixed top-0 left-0 flex flex-col py-4 sm:py-6 pl-4 sm:pl-6 pr-3 sm:pr-4 border-r border-[#ECEFF3] bg-[#0B1220] z-50 transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        }`}
+        className={`w-[250px] h-screen fixed top-0 left-0 flex flex-col py-4 sm:py-6 pl-4 sm:pl-6 pr-3 sm:pr-4 border-r border-[#ECEFF3] bg-[#0B1220] z-50 transition-transform duration-300 ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
       >
         <div className="flex h-full flex-col justify-between items-start flex-1 overflow-y-auto">
           <div className="flex flex-col items-start gap-6 sm:gap-8 w-full">
@@ -61,26 +65,87 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     {section.title}
                   </span>
                   <div className="flex flex-col items-start gap-0.5 sm:gap-1 self-stretch">
-                    {section.items.map((item) => (
-                      <Link
-                        key={item.id}
-                        href={item.href}
-                        onClick={onClose}
-                        className={`flex py-2.5 sm:py-[14px] px-3 sm:px-4 items-center gap-2 sm:gap-3 self-stretch rounded-lg font-inter text-sm sm:text-base font-normal leading-[124%] tracking-[0.08px] no-underline transition-colors duration-200 cursor-pointer ${
-                          isActive(item.href)
-                            ? "bg-[#B23730] text-white"
-                            : "text-white/80 hover:bg-white/5"
-                        }`}
-                      >
-                        <Icon
-                          name={item.icon}
-                          width={18}
-                          height={18}
-                          className={`sm:w-5 sm:h-5 ${isActive(item.href) ? "opacity-100" : "opacity-80"}`}
-                        />
-                        <span className="truncate">{item.label}</span>
-                      </Link>
-                    ))}
+                    {section.items.map((item) => {
+                      const hasSubItems = item.subItems && item.subItems.length > 0;
+                      const isParentActive = isActive(item.href) || (hasSubItems && isSubItemActive(item.subItems));
+
+                      return (
+                        <div key={item.id} className="flex flex-col items-start gap-0.5 sm:gap-1 self-stretch">
+                          {/* Parent Item */}
+                          <Link
+                            href={item.href}
+                            onClick={onClose}
+                            className={`flex py-2.5 sm:py-[14px] px-3 sm:px-4 items-center gap-2 sm:gap-3 self-stretch rounded-lg font-inter text-sm sm:text-base font-normal leading-[124%] tracking-[0.08px] no-underline transition-colors duration-200 cursor-pointer ${isParentActive
+                              ? "bg-[#B23730] text-white"
+                              : "text-white/80 hover:bg-white/5"
+                              }`}
+                          >
+                            <Icon
+                              name={item.icon}
+                              width={18}
+                              height={18}
+                              className={`sm:w-5 sm:h-5 ${isParentActive ? "opacity-100" : "opacity-80"}`}
+                            />
+                            <span className="truncate">{item.label}</span>
+                          </Link>
+
+                          {/* Sub-items with L-shaped branch lines - NO GAP */}
+                          {hasSubItems && (
+                            <div className="flex flex-col items-start gap-0 self-stretch pl-6 sm:pl-8">
+                              {item.subItems?.map((subItem, index) => {
+                                const isSubActive = pathname.startsWith(subItem.href);
+                                const isLast = index === (item.subItems?.length || 0) - 1;
+
+                                return (
+                                  <Link
+                                    key={subItem.id}
+                                    href={subItem.href}
+                                    onClick={onClose}
+                                    className={`flex py-2 sm:py-2.5 items-center gap-2 sm:gap-3 self-stretch rounded-lg font-inter text-sm sm:text-sm font-normal leading-[124%] tracking-[0.08px] no-underline transition-colors duration-200 cursor-pointer ${isSubActive
+                                      ? "bg-[#B23730] text-white"
+                                      : "text-white/60 hover:bg-white/5"
+                                      }`}
+                                  >
+                                    {/* L-shaped branch line - White, rounded corners, no gap */}
+                                    <span className="flex items-center justify-center w-5 h-5 flex-shrink-0">
+                                      <svg
+                                        viewBox="0 0 20 20"
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        {isLast ? (
+                                          // └── style (last item)
+                                          <path
+                                            d="M 10 0 L 10 10 L 15 10"
+                                            stroke="#FFFFFF"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            opacity="0.5"
+                                          />
+                                        ) : (
+                                          // ├── style (middle items)
+                                          <path
+                                            d="M 10 0 L 10 20 L 15 20"
+                                            stroke="#FFFFFF"
+                                            strokeWidth="1.5"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            opacity="0.5"
+                                          />
+                                        )}
+                                      </svg>
+                                    </span>
+                                    <span className="truncate">{subItem.label}</span>
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ))}

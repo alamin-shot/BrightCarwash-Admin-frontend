@@ -11,8 +11,8 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
 
     const chartData = performanceTrend.map((d) => ({
         month: d.month,
-        inquiries: d.total,
-        deposits: d.converted,
+        total: d.total,
+        converted: d.converted,
     }));
 
     const totalDistribution = statusDistribution.reduce((sum, s) => sum + s.count, 0);
@@ -23,10 +23,10 @@ export function DashboardCharts({ data }: DashboardChartsProps) {
 
     return (
         <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 w-full items-stretch" style={{ minHeight: "350px" }}>
-            <div className="w-full lg:w-3/4">
+            <div className="w-full sm:w-full lg:w-3/4 xl:w-3/4">
                 <InquiriesChart data={chartData} />
             </div>
-            <div className="w-full lg:w-1/4">
+            <div className="w-full lg:w-2/4 xl:w-1/4">
                 <ServiceMixChart data={serviceMix} />
             </div>
         </div>

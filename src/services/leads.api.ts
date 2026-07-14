@@ -1,13 +1,14 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import type { Lead, CreateLeadRequest, LeadApiResponse } from "@/types/leads";
-import { APP_CONFIG } from "@/configs/app.config";
-import { mockLeads } from "@/mocks/leads.mock";
 import { getAccessToken } from "@/lib/auth-client";
 import type { LeadGroup, LeadGroupsListResponse } from "@/types/campaign";
 
-
-function delay(ms: number): Promise<void> {
-	return new Promise((resolve) => setTimeout(resolve, ms));
+interface PaginatedResponse<T> {
+	data: T[];
+	total: number;
+	page: number;
+	limit: number;
+	totalPages: number;
 }
 
 function mapApiToLead(data: LeadApiResponse): Lead {
@@ -42,7 +43,7 @@ function mapApiToLead(data: LeadApiResponse): Lead {
 
 async function fetchFromBackend<T>(url: string, options?: RequestInit): Promise<T> {
 	const token = getAccessToken();
-	const res = await fetch(`${APP_CONFIG.API_BASE_URL}${url}`, {
+	const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${url}`, {
 		...options,
 		headers: {
 			Authorization: `Bearer ${token}`,
@@ -57,18 +58,69 @@ async function fetchFromBackend<T>(url: string, options?: RequestInit): Promise<
 export const leadsApi = createApi({
 	reducerPath: "leadsApi",
 	baseQuery: async () => ({ data: null }),
-	// ✅ Add LeadGroups to tagTypes
 	tagTypes: ["Leads", "LeadGroups"],
 	endpoints: (builder) => ({
-		getLeads: builder.query<Lead[], void>({
-			queryFn: async () => {
+		getLeads: builder.query<PaginatedResponse<Lead>, {
+			page?: number;
+			limit?: number;
+			search?: string;
+			source?: string;
+			depositStatus?: string;
+			stageId?: string;
+			assignedToId?: string;
+			priority?: string;
+			dateFrom?: string;
+			dateTo?: string;
+			sortBy?: string;
+			sortOrder?: string;
+		}>({
+			queryFn: async (params = {}) => {
 				try {
-					if (APP_CONFIG.MOCK_MODE) {
-						await delay(APP_CONFIG.MOCK_DELAY_MS);
-						return { data: mockLeads.map((l) => ({ ...l })) };
-					}
-					const json = await fetchFromBackend<{ success: boolean; data: LeadApiResponse[] }>("/admin/lead?limit=100");
-					return { data: (json.data || []).map(mapApiToLead) };
+					const queryParams = new URLSearchParams();
+
+					queryParams.append('pagination_type', 'offset');
+					queryParams.append('page', String(params.page || 1));
+					queryParams.append('limit', String(params.limit || 10));
+
+					// Sort params
+					queryParams.append('sort_by', params.sortBy || 'created_at');
+					queryParams.append('sort_order', params.sortOrder || 'desc');
+
+					// Filters
+					if (params.search) queryParams.append('search', params.search);
+					if (params.source) queryParams.append('source', params.source);
+					if (params.depositStatus) queryParams.append('deposit_status', params.depositStatus);
+					if (params.stageId) queryParams.append('stage_id', params.stageId);
+					if (params.assignedToId) queryParams.append('assigned_to_id', params.assignedToId);
+					if (params.priority) queryParams.append('priority', params.priority);
+					if (params.dateFrom) queryParams.append('date_from', params.dateFrom);
+					if (params.dateTo) queryParams.append('date_to', params.dateTo);
+
+					const url = `/admin/lead?${queryParams.toString()}`;
+
+					const json = await fetchFromBackend<{
+						success: boolean;
+						message: string;
+						data: LeadApiResponse[];
+						meta: {
+							page: number;
+							limit: number;
+							total_count: number;
+							total_pages: number;
+							has_next: boolean;
+							has_previous: boolean;
+						};
+					}>(url);
+
+					return {
+						data: {
+							data: (json.data || []).map(mapApiToLead),
+							total: json.meta?.total_count || 0,
+							page: json.meta?.page || params.page || 1,
+							limit: json.meta?.limit || params.limit || 10,
+							totalPages: json.meta?.total_pages || 1,
+						}
+					};
 				} catch (error) {
 					return { error: { status: 500, data: error instanceof Error ? error.message : "Failed to fetch leads" } };
 				}
@@ -79,13 +131,6 @@ export const leadsApi = createApi({
 		updateLeadStage: builder.mutation<Lead, { id: string; stageName: string }>({
 			queryFn: async ({ id, stageName }) => {
 				try {
-					if (APP_CONFIG.MOCK_MODE) {
-						await delay(APP_CONFIG.MOCK_DELAY_MS);
-						const lead = mockLeads.find((l) => l.id === id);
-						if (!lead) throw new Error("Lead not found");
-						lead.stage = stageName.toLowerCase().replace(/\s+/g, "_");
-						return { data: { ...lead } };
-					}
 					const formData = new FormData();
 					formData.append("stage_name", stageName);
 					const json = await fetchFromBackend<{ success: boolean; data: LeadApiResponse }>(`/admin/lead/${id}`, {
@@ -98,22 +143,18 @@ export const leadsApi = createApi({
 				}
 			},
 			async onQueryStarted({ id, stageName }, { dispatch, queryFulfilled }) {
-				console.log('⚡ [leadsApi] optimistic update for lead', id, 'stageName:', stageName);
 				const patchResult = dispatch(
-					leadsApi.util.updateQueryData("getLeads", undefined, (draft) => {
-						const lead = draft.find((l) => l.id === id);
+					leadsApi.util.updateQueryData("getLeads", { page: 1, limit: 10 }, (draft) => {
+						const lead = draft.data.find((l) => l.id === id);
 						if (lead) {
 							const newSlug = stageName.toLowerCase().replace(/\s+/g, "_");
-							console.log('🔄 Optimistic update: changing stage from', lead.stage, 'to', newSlug);
 							lead.stage = newSlug;
 						}
 					})
 				);
 				try {
 					await queryFulfilled;
-					console.log('✅ Mutation succeeded, optimistic update kept');
 				} catch {
-					console.log('❌ Mutation failed, reverting optimistic update');
 					patchResult.undo();
 				}
 			},
@@ -123,29 +164,6 @@ export const leadsApi = createApi({
 		createLead: builder.mutation<Lead, CreateLeadRequest>({
 			queryFn: async (body) => {
 				try {
-					if (APP_CONFIG.MOCK_MODE) {
-						await delay(APP_CONFIG.MOCK_DELAY_MS);
-						const newLead: Lead = {
-							id: `inq_${Date.now()}`,
-							avatar: "/images/avatar-placeholder.png",
-							date: new Date().toISOString().split("T")[0],
-							priority: body.priority || "MEDIUM",
-							deposit: 0,
-							stage: body.stage || "new",
-							stageId: "",
-							assignedToId: null,
-							notes: body.notes || [],
-							name: body.name,
-							email: body.email,
-							phone: body.phone,
-							service: body.service,
-							vehicle: body.vehicle,
-							source: body.source,
-							depositStatus: body.deposit_status || "NONE",
-						};
-						mockLeads.push(newLead);
-						return { data: { ...newLead } };
-					}
 					const formData = new FormData();
 					formData.append("name", body.name);
 					formData.append("email", body.email);
@@ -170,7 +188,10 @@ export const leadsApi = createApi({
 			async onQueryStarted(_body, { dispatch, queryFulfilled }) {
 				try {
 					const { data: newLead } = await queryFulfilled;
-					dispatch(leadsApi.util.updateQueryData("getLeads", undefined, (draft) => { draft.push(newLead); }));
+					dispatch(leadsApi.util.updateQueryData("getLeads", { page: 1, limit: 10 }, (draft) => {
+						draft.data.unshift(newLead);
+						draft.total += 1;
+					}));
 				} catch { /* undo not needed */ }
 			},
 		}),
@@ -178,10 +199,6 @@ export const leadsApi = createApi({
 		getLeadGroups: builder.query<LeadGroup[], { search?: string; page?: number; limit?: number }>({
 			queryFn: async (params = {}) => {
 				try {
-					if (APP_CONFIG.MOCK_MODE) {
-						await delay(APP_CONFIG.MOCK_DELAY_MS);
-						return { data: [] };
-					}
 					const queryParams = new URLSearchParams();
 					if (params.search) queryParams.append('search', params.search);
 					if (params.page) queryParams.append('page', String(params.page || 1));
@@ -203,31 +220,91 @@ export const leadsApi = createApi({
 			keepUnusedDataFor: 300,
 		}),
 
-		deleteLead: builder.mutation<void, string>({
+		deleteLead: builder.mutation<{ success: boolean }, string>({
 			queryFn: async (id) => {
 				try {
-					if (APP_CONFIG.MOCK_MODE) {
-						await delay(APP_CONFIG.MOCK_DELAY_MS);
-						const idx = mockLeads.findIndex((l) => l.id === id);
-						if (idx !== -1) mockLeads.splice(idx, 1);
-						return { data: undefined };
-					}
 					await fetchFromBackend(`/admin/lead/${id}`, { method: "DELETE" });
-					return { data: undefined };
+					return { data: { success: true } };
 				} catch (error) {
 					return { error: { status: 500, data: error instanceof Error ? error.message : "Failed to delete lead" } };
 				}
 			},
 			async onQueryStarted(id, { dispatch, queryFulfilled }) {
 				const patchResult = dispatch(
-					leadsApi.util.updateQueryData("getLeads", undefined, (draft) => {
-						const idx = draft.findIndex((l) => l.id === id);
-						if (idx !== -1) draft.splice(idx, 1);
+					leadsApi.util.updateQueryData("getLeads", { page: 1, limit: 10 }, (draft) => {
+						const idx = draft.data.findIndex((l) => l.id === id);
+						if (idx !== -1) {
+							draft.data.splice(idx, 1);
+							draft.total -= 1;
+						}
 					})
 				);
 				try { await queryFulfilled; } catch { patchResult.undo(); }
 			},
 			invalidatesTags: ["Leads"],
+		}),
+
+		connectLeadsToGroup: builder.mutation<{ success: boolean }, { groupId: string; leadIds: string[] }>({
+			queryFn: async ({ groupId, leadIds }) => {
+				try {
+					await fetchFromBackend(`/admin/lead-groups/connect-leads`, {
+						method: "POST",
+						body: JSON.stringify({ groupId, leadIds }),
+					});
+					return { data: { success: true } };
+				} catch (error) {
+					return {
+						error: {
+							status: 500,
+							data: error instanceof Error ? error.message : "Failed to connect leads to group",
+						},
+					};
+				}
+			},
+			invalidatesTags: ["LeadGroups", "Leads"],
+		}),
+
+		disconnectLeadsFromGroup: builder.mutation<{ success: boolean }, { groupId: string; leadIds: string[] }>({
+			queryFn: async ({ groupId, leadIds }) => {
+				try {
+					await fetchFromBackend(`/admin/lead-groups/disconnect-leads`, {
+						method: "POST",
+						body: JSON.stringify({ groupId, leadIds }),
+					});
+					return { data: { success: true } };
+				} catch (error) {
+					return {
+						error: {
+							status: 500,
+							data: error instanceof Error ? error.message : "Failed to disconnect leads from group",
+						},
+					};
+				}
+			},
+			invalidatesTags: ["LeadGroups", "Leads"],
+		}),
+
+		getGroupLeads: builder.query<Lead[], { groupId: string; search?: string; page?: number; limit?: number }>({
+			queryFn: async ({ groupId, search, page = 1, limit = 50 }) => {
+				try {
+					const queryParams = new URLSearchParams();
+					if (search) queryParams.append('search', search);
+					queryParams.append('page', String(page));
+					queryParams.append('limit', String(limit));
+
+					const url = `/admin/lead-groups/${groupId}/leads${queryParams.toString() ? `?${queryParams}` : ''}`;
+					const json = await fetchFromBackend<{ success: boolean; data: LeadApiResponse[] }>(url);
+					return { data: (json.data || []).map(mapApiToLead) };
+				} catch (error) {
+					return {
+						error: {
+							status: 500,
+							data: error instanceof Error ? error.message : "Failed to fetch group leads",
+						},
+					};
+				}
+			},
+			providesTags: ["Leads"],
 		}),
 	}),
 });
@@ -237,5 +314,8 @@ export const {
 	useUpdateLeadStageMutation,
 	useCreateLeadMutation,
 	useGetLeadGroupsQuery,
-	useDeleteLeadMutation
+	useDeleteLeadMutation,
+	useConnectLeadsToGroupMutation,
+	useDisconnectLeadsFromGroupMutation,
+	useGetGroupLeadsQuery
 } = leadsApi;

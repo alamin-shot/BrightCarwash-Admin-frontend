@@ -1,11 +1,6 @@
 import { APP_CONFIG } from "@/configs/app.config";
 import type { LeadDetail, ActivityItem, LeadDetailApiResponse } from "@/types/lead-detail";
-import { mockLeadDetail, mockActivities } from "@/mocks/lead-detail.mock";
 import { getAccessToken } from "@/lib/auth-client";
-
-function delay(ms: number): Promise<void> {
-	return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 async function fetchFromBackend<T>(url: string, options?: RequestInit): Promise<T> {
 	const token = getAccessToken();
@@ -59,39 +54,26 @@ function mapApiToLeadDetail(data: LeadDetailApiResponse): LeadDetail {
 }
 
 export async function getLeadDetail(id: string): Promise<LeadDetail> {
-	if (APP_CONFIG.MOCK_MODE) {
-		await delay(APP_CONFIG.MOCK_DELAY_MS);
-		return { ...mockLeadDetail, id };
-	}
 	const json = await fetchFromBackend<{ success: boolean; data: LeadDetailApiResponse }>(`/admin/lead/${id}`);
 	return mapApiToLeadDetail(json.data);
 }
 
+// ✅ Activities: Call real endpoint if available, otherwise return empty array
 export async function getLeadActivities(id: string): Promise<ActivityItem[]> {
-	if (APP_CONFIG.MOCK_MODE) {
-		await delay(APP_CONFIG.MOCK_DELAY_MS);
-		return [...mockActivities];
+	try {
+		// If you have a real endpoint for activities, uncomment and use it:
+		// const json = await fetchFromBackend<{ success: boolean; data: ActivityItem[] }>(`/admin/lead/${id}/activities`);
+		// return json.data || [];
+
+		// For now, return empty array since we don't have an activities endpoint
+		return [];
+	} catch (error) {
+		console.warn('Failed to fetch activities, returning empty array:', error);
+		return [];
 	}
-	// TODO: Replace with real endpoint when available
-	return [...mockActivities];
 }
 
 export async function addLeadNote(id: string, content: string): Promise<void> {
-	mockActivities.unshift({
-		id: `act_${Date.now()}`,
-		type: "lead",
-		title: "Note added",
-		description: content,
-		user: "You",
-		date: new Date().toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }),
-	});
-
-	if (APP_CONFIG.MOCK_MODE) {
-		await delay(APP_CONFIG.MOCK_DELAY_MS);
-		mockLeadDetail.notes.unshift({ id: `note_${Date.now()}`, content, author: "You", date: new Date().toDateString() });
-		return;
-	}
-
 	const currentLead = await getLeadDetail(id);
 	const currentNotes = currentLead.notes.map((n) => n.content);
 	currentNotes.push(content);
@@ -113,13 +95,6 @@ export async function addLeadNote(id: string, content: string): Promise<void> {
 }
 
 export async function deleteLeadNote(leadId: string, noteContent: string): Promise<void> {
-	if (APP_CONFIG.MOCK_MODE) {
-		await delay(APP_CONFIG.MOCK_DELAY_MS);
-		const noteIndex = mockLeadDetail.notes.findIndex(n => n.content === noteContent);
-		if (noteIndex > -1) mockLeadDetail.notes.splice(noteIndex, 1);
-		return;
-	}
-
 	// 1. Fetch current lead to get all notes
 	const lead = await getLeadDetail(leadId);
 
@@ -149,28 +124,6 @@ export async function assignLeadToMember(
 	leadId: string,
 	assignedToId: string | null
 ): Promise<void> {
-
-	if (APP_CONFIG.MOCK_MODE) {
-		await delay(APP_CONFIG.MOCK_DELAY_MS);
-		mockLeadDetail.assignedToId = assignedToId;
-		mockLeadDetail.assignedToName = assignedToId ? "Assigned User" : null;
-		const now = new Date();
-		const dateStr = now.toLocaleDateString("en-US", {
-			day: "numeric",
-			month: "short",
-			year: "numeric",
-		});
-		mockActivities.unshift({
-			id: `act_${Date.now()}`,
-			type: "staff",
-			title: assignedToId ? "Lead assigned" : "Lead unassigned",
-			subtitle: assignedToId ? "to Assigned User" : undefined,
-			user: "You",
-			date: dateStr,
-		});
-		return;
-	}
-
 	const token = getAccessToken();
 
 	if (assignedToId === null) {
@@ -223,32 +176,6 @@ export async function updateLeadDetails(
 		stage_name?: string;
 	}
 ): Promise<LeadDetail> {
-	if (APP_CONFIG.MOCK_MODE) {
-		await delay(APP_CONFIG.MOCK_DELAY_MS);
-		// Update mock data
-		const mockLead = mockLeadDetail; // Assuming mockLeadDetail is imported
-		if (data.name) mockLead.name = data.name;
-		if (data.email) mockLead.email = data.email;
-		if (data.phone) mockLead.phone = data.phone;
-		if (data.service) mockLead.service = data.service;
-		if (data.vehicle) mockLead.vehicle = data.vehicle;
-		if (data.source) mockLead.source = data.source;
-		if (data.priority) mockLead.priority = data.priority;
-		if (data.deposit_status) mockLead.depositStatus = data.deposit_status;
-		if (data.notes) mockLead.notes = data.notes.map((content) => ({
-			id: `note_${Date.now()}_${Math.random()}`,
-			content,
-			author: "You",
-			date: new Date().toISOString().split('T')[0],
-		}));
-		if (data.stage_name) {
-			// You'd need to map stage_name to stage value/color, but for mock we can set stage to the name
-			mockLead.stage = data.stage_name;
-			mockLead.stageColor = '#0098E8'; // default
-		}
-		return { ...mockLead };
-	}
-
 	const token = getAccessToken();
 	const formData = new FormData();
 	if (data.name) formData.append('name', data.name);

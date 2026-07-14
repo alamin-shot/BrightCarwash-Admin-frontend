@@ -12,7 +12,8 @@ interface AssignMemberModalProps {
     leadId: string;
     currentAssigneeId?: string | null;
     currentAssigneeName?: string | null;
-    onAssign: (memberId: string | null) => Promise<void>;
+    // ✅ Pass memberId AND memberName
+    onAssign: (memberId: string | null, memberName: string | null) => Promise<void>;
 }
 
 export function AssignMemberModal({
@@ -27,15 +28,17 @@ export function AssignMemberModal({
     const [selectedId, setSelectedId] = useState<string | null>(
         currentAssigneeId || null
     );
+    const [selectedName, setSelectedName] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { data: members = [], isLoading } = useGetTeamMembersQuery();
 
     useEffect(() => {
         if (isOpen) {
             setSelectedId(currentAssigneeId || null);
+            setSelectedName(currentAssigneeName || null);
             setSearchQuery("");
         }
-    }, [isOpen, currentAssigneeId]);
+    }, [isOpen, currentAssigneeId, currentAssigneeName]);
 
     const filteredMembers = members.filter(
         (member) =>
@@ -45,13 +48,20 @@ export function AssignMemberModal({
 
     // ✅ Toggle selection: if already selected, deselect (set to null)
     const handleSelectMember = (id: string) => {
-        setSelectedId((prev) => (prev === id ? null : id));
+        if (selectedId === id) {
+            setSelectedId(null);
+            setSelectedName(null);
+        } else {
+            const member = members.find((m) => m.id === id);
+            setSelectedId(id);
+            setSelectedName(member?.name || null);
+        }
     };
 
     const handleAssign = async () => {
         setIsSubmitting(true);
         try {
-            await onAssign(selectedId);
+            await onAssign(selectedId, selectedName); // ✅ pass both
             onClose();
         } catch {
             // Error handled in parent

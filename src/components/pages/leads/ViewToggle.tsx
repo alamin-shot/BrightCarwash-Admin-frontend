@@ -46,9 +46,8 @@ export function ViewToggle({ viewMode, onChange }: ViewToggleProps) {
 			<Button
 				variant='icon'
 				onClick={() => onChange('kanban')}
-				className={`relative z-10 flex py-2 px-3 justify-center items-center gap-1 rounded-md text-sm font-inter transition-colors duration-200 ${
-					viewMode === 'kanban' ? 'text-white' : 'text-[#1B1B1B]'
-				}`}
+				className={`relative z-10 flex py-2 px-3 justify-center items-center gap-1 rounded-md text-sm font-inter transition-colors duration-200 ${viewMode === 'kanban' ? 'text-white' : 'text-[#1B1B1B]'
+					}`}
 			>
 				<Icon
 					name='kanban'
@@ -61,9 +60,8 @@ export function ViewToggle({ viewMode, onChange }: ViewToggleProps) {
 			<Button
 				variant='icon'
 				onClick={() => onChange('list')}
-				className={`relative z-10 flex py-2 px-3 justify-center items-center gap-1 rounded-md text-sm font-inter transition-colors duration-200 ${
-					viewMode === 'list' ? 'text-white' : 'text-[#1B1B1B]'
-				}`}
+				className={`relative z-10 flex py-2 px-3 justify-center items-center gap-1 rounded-md text-sm font-inter transition-colors duration-200 ${viewMode === 'list' ? 'text-white' : 'text-[#1B1B1B]'
+					}`}
 			>
 				<Icon
 					name='list'

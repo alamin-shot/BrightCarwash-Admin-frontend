@@ -17,6 +17,7 @@ interface Props {
 	onStatusChange: (value: string) => void;
 	currentPage: number;
 	onPageChange: (page: number) => void;
+	isLoading?: boolean; // ✅ Added loading prop
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -37,8 +38,14 @@ export function PaymentsTable({
 	onStatusChange,
 	currentPage,
 	onPageChange,
+	isLoading = false, // ✅ Default to false
 }: Props) {
 	const totalPages = meta?.totalPages || 1;
+	const totalItems = meta?.totalItems || payments.length;
+
+	// ✅ Check if we have data to show (for initial load)
+	const hasData = payments.length > 0;
+	const showLoadingOverlay = isLoading && hasData;
 
 	return (
 		<div className="flex flex-col gap-4 w-full">
@@ -62,19 +69,31 @@ export function PaymentsTable({
 				/>
 			</div>
 
-			<DataTable
-				columns={paymentsColumns}
-				data={payments}
-				rowKey={(row) => row.id}
-				className="w-full border border-[#E8E8E9] rounded-lg"
-			/>
+			{/* ✅ Table with loading overlay */}
+			<div className="w-full border border-[#E8E8E9] rounded-lg overflow-visible relative">
+				{showLoadingOverlay && (
+					<div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-lg">
+						<div className="flex flex-col items-center gap-2">
+							<div className="w-8 h-8 border-2 border-[#0098E8] border-t-transparent rounded-full animate-spin" />
+							<span className="text-[#777980] font-inter text-sm">Loading...</span>
+						</div>
+					</div>
+				)}
+				<DataTable
+					columns={paymentsColumns}
+					data={payments}
+					rowKey={(row) => row.id}
+					className="w-full"
+				/>
+			</div>
 
 			<Pagination
 				currentPage={currentPage}
 				totalPages={totalPages}
 				onPageChange={onPageChange}
-				totalItems={meta?.totalItems || payments.length}
+				totalItems={totalItems}
 				itemsPerPage={ITEMS_PER_PAGE}
+				isLoading={isLoading}
 			/>
 		</div>
 	);

@@ -9,8 +9,8 @@ export interface MetricCard {
 
 export interface ChartDataPoint {
   month: string;
-  inquiries: number;
-  deposits: number;
+  total: number;
+  converted: number;
 }
 
 export interface ServiceMixItem {
@@ -23,7 +23,8 @@ export interface RecentInquiry {
   name: string;
   avatar: string;
   service: string;
-  vehicle: string;
+  email: string;
+  vehicle?: string;
   source: string;
   deposit: string;
   stage: string;

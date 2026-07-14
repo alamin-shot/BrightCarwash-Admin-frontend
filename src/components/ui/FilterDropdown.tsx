@@ -15,6 +15,7 @@ interface FilterDropdownProps {
 	buttonClassName?: string;
 	dropdownOffsetX?: number;
 	scrollable?: boolean;
+	maxHeight?: number;
 }
 
 export function FilterDropdown({
@@ -27,6 +28,7 @@ export function FilterDropdown({
 	buttonClassName = '',
 	dropdownOffsetX = 0,
 	scrollable = false,
+	maxHeight = 200
 }: FilterDropdownProps) {
 	const [open, setOpen] = useState(false);
 	const [dropdownStyle, setDropdownStyle] = useState<Record<string, string>>(

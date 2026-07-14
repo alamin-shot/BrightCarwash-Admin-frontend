@@ -15,7 +15,13 @@ import { mapStagesToOptions } from "@/lib/stage-utils";
 
 export function DashboardContent() {
   const { data: metricsData, isLoading: metricsLoading, error: metricsError } = useGetDashboardMetricsQuery();
-  const { data: leadsData, isLoading: leadsLoading, refetch: refetchLeads } = useGetLeadsQuery();
+
+  // ✅ Fix: useGetLeadsQuery now returns PaginatedResponse
+  const { data: leadsResponse, isLoading: leadsLoading, refetch: refetchLeads } = useGetLeadsQuery({
+    page: 1,
+    limit: 10, // Only need 4 for recent inquiries, but fetch 10 just in case
+  });
+
   const [stages, setStages] = useState<StageOption[]>([]);
   const [stagesLoading, setStagesLoading] = useState(true);
 
@@ -64,12 +70,15 @@ export function DashboardContent() {
     );
   }
 
-  const recentLeads = (leadsData || []).slice(0, 4).map((lead) => ({
+  // ✅ Extract leads array from the paginated response
+  const leadsData = leadsResponse?.data || [];
+
+  const recentLeads = leadsData.slice(0, 4).map((lead) => ({
     id: lead.id,
     name: lead.name,
     avatar: lead.avatar,
     service: lead.service,
-    vehicle: lead.vehicle,
+    email: lead.email,
     source: lead.source,
     deposit: lead.depositStatus?.toLowerCase() || "none",
     stage: lead.stage,
@@ -84,7 +93,7 @@ export function DashboardContent() {
 
       <DashboardMetrics data={metricsData.data} />
       <DashboardCharts data={metricsData.data} />
-      <RecentInquiriesTable data={recentLeads as any} stages={stages} />
+      <RecentInquiriesTable data={recentLeads} stages={stages} />
     </div>
   );
 }

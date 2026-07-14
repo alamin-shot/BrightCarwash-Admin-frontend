@@ -1,6 +1,3 @@
-
-
-
 "use client";
 
 import { useState } from "react";
@@ -47,7 +44,6 @@ export function GroupAccordion({
                 next.delete(groupId);
             } else {
                 next.add(groupId);
-                // ✅ Fetch leads only when user explicitly expands
                 onGroupExpand?.(groupId);
             }
             return next;
@@ -70,7 +66,7 @@ export function GroupAccordion({
         <div className="w-full overflow-x-auto rounded-lg border border-[#E8E8E9]">
             <table className="w-full border-collapse">
                 <colgroup>
-                    {["22%", "15%", "12%", "13%", "11%", "15%", "8%"].map((w, i) => (
+                    {["20%", "15%", "18%", "12%", "10%", "15%", "8%"].map((w, i) => (
                         <col key={i} style={{ width: w }} />
                     ))}
                 </colgroup>
@@ -78,7 +74,7 @@ export function GroupAccordion({
                     <tr className="bg-[#F1F1F1]">
                         <th className="py-2.5 px-4 text-left text-[#777980] font-inter text-xs font-medium uppercase tracking-wider border-r border-[#E8E8E9]">Lead Name</th>
                         <th className="py-2.5 px-4 text-left text-[#777980] font-inter text-xs font-medium uppercase tracking-wider border-r border-[#E8E8E9]">Service</th>
-                        <th className="py-2.5 px-4 text-left text-[#777980] font-inter text-xs font-medium uppercase tracking-wider border-r border-[#E8E8E9]">Vehicle</th>
+                        <th className="py-2.5 px-4 text-left text-[#777980] font-inter text-xs font-medium uppercase tracking-wider border-r border-[#E8E8E9]">Email</th>
                         <th className="py-2.5 px-4 text-left text-[#777980] font-inter text-xs font-medium uppercase tracking-wider border-r border-[#E8E8E9]">Source</th>
                         <th className="py-2.5 px-4 text-left text-[#777980] font-inter text-xs font-medium uppercase tracking-wider border-r border-[#E8E8E9]">Deposit</th>
                         <th className="py-2.5 px-4 text-left text-[#777980] font-inter text-xs font-medium uppercase tracking-wider border-r border-[#E8E8E9]">Stage</th>

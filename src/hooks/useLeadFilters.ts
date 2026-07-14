@@ -1,36 +1,12 @@
+// src/hooks/useLeadFilters.ts - Optional: Keep for local filtering if needed
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
-import type { Lead } from '@/types/leads';
+import { useState, useCallback } from 'react';
 
-export function useLeadFilters(leads: Lead[]) {
+export function useLeadFilters() {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [sourceFilter, setSourceFilter] = useState('');
 	const [depositFilter, setDepositFilter] = useState('');
-
-	const filteredLeads = useMemo(
-		() =>
-			leads
-				.filter((lead) => {
-					if (!searchQuery) return true;
-					const q = searchQuery.toLowerCase();
-					return (
-						(lead.name?.toLowerCase() ?? '').includes(q) ||
-						(lead.service?.toLowerCase() ?? '').includes(q) ||
-						(lead.vehicle?.toLowerCase() ?? '').includes(q)
-					);
-				})
-				.filter((lead) => !sourceFilter || lead.source === sourceFilter)
-				.filter(
-					(lead) => !depositFilter || lead.depositStatus === depositFilter,
-				),
-		[leads, searchQuery, sourceFilter, depositFilter],
-	);
-
-	const uniqueSources = useMemo(
-		() => [...new Set(leads.map((l) => l.source))],
-		[leads],
-	);
 
 	const resetFilters = useCallback(() => {
 		setSearchQuery('');
@@ -45,8 +21,6 @@ export function useLeadFilters(leads: Lead[]) {
 		setSourceFilter,
 		depositFilter,
 		setDepositFilter,
-		filteredLeads,
-		uniqueSources,
 		resetFilters,
 	};
 }

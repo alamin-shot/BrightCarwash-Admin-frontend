@@ -12,7 +12,7 @@ export function useLeadAssignment(
     triggerRefresh: () => void
 ) {
     const handleAssign = useCallback(
-        async (memberId: string | null) => {
+        async (memberId: string | null, memberName: string | null) => {
             try {
                 await assignLeadToMember(leadId, memberId);
                 toast.success(memberId ? "Member assigned successfully" : "Member unassigned successfully");
@@ -23,11 +23,15 @@ export function useLeadAssignment(
                     month: "short",
                     year: "numeric",
                 });
+
+                // ✅ Use the provided memberName, fallback to a generic "a team member"
+                const displayName = memberName || "a team member";
+
                 const newActivity: ActivityItem = {
                     id: `local_${Date.now()}`,
                     type: "staff",
-                    title: "Lead assigned",
-                    subtitle: `to ${currentLead?.assignedToName || "Unknown"}`,
+                    title: memberId ? "Lead assigned" : "Lead unassigned",
+                    subtitle: memberId ? `to ${displayName}` : undefined,
                     user: "You",
                     date: dateStr,
                 };
@@ -38,7 +42,7 @@ export function useLeadAssignment(
                 throw error;
             }
         },
-        [leadId, currentLead, addLocalActivity, triggerRefresh]
+        [leadId, addLocalActivity, triggerRefresh]
     );
 
     return { handleAssign };

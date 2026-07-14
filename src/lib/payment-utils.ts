@@ -1,60 +1,70 @@
-import type { PaymentStatsData } from '@/types/payment';
+import type { PaymentStatsData, PaymentStatsResponse, PaymentTransaction } from '@/types/payment';
+import type { MetricCard } from '@/types/dashboard';
 
-export const PAYMENT_EXPORT_COLUMNS = [
-    { key: 'customerName', header: 'Customer Name' },
-    { key: 'service', header: 'Service' },
-    { key: 'transactionId', header: 'Transaction ID' },
-    { key: 'amount', header: 'Amount' },
-    { key: 'status', header: 'Status' },
-    { key: 'date', header: 'Date' },
-];
-
-interface MetricCardData {
-    id: string;
-    heading: string;
-    value: string;
-    changePercent: string;
-    changeDirection: 'up' | 'down';
-    vsLabel: string;
+// ✅ Helper to convert cents to dollars
+export function centsToDollars(cents: number): string {
+    return (cents / 100).toFixed(2);
 }
 
-export function mapStatsToMetrics(stats: PaymentStatsData): MetricCardData[] {
-    const toDirection = (s: string): 'up' | 'down' =>
-        s === 'down' ? 'down' : 'up';
+// ✅ Helper to format currency
+export function formatCurrency(amount: number, currency: string = 'USD'): string {
+    const dollars = amount / 100;
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currency,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(dollars);
+}
 
+// ✅ Helper to format transaction amount (alias for clarity)
+export function formatTransactionAmount(amount: number, currency: string = 'USD'): string {
+    return formatCurrency(amount, currency);
+}
+
+// ✅ Accept PaymentStatsData directly (the data from the response)
+export function mapStatsToMetrics(statsData: PaymentStatsData): MetricCard[] {
     return [
         {
-            id: 'totalRevenue',
+            id: 'total-revenue',
             heading: 'Total Revenue',
-            value: `$${stats.totalRevenue.value}`,
-            changePercent: stats.totalRevenue.percentage.replace(/^\+/, ''),
-            changeDirection: toDirection(stats.totalRevenue.status),
-            vsLabel: 'vs last month',
+            value: formatCurrency(statsData.totalRevenue.value || 0),
+            changePercent: statsData.totalRevenue.percentage,
+            changeDirection: statsData.totalRevenue.status === 'up' ? 'up' : 'down',
+            vsLabel: 'vs last period',
         },
         {
-            id: 'paidDeposits',
+            id: 'paid-deposits',
             heading: 'Paid Deposits',
-            value: String(stats.paidDeposits.value),
-            changePercent: stats.paidDeposits.percentage.replace(/^\+/, ''),
-            changeDirection: toDirection(stats.paidDeposits.status),
-            vsLabel: 'vs last month',
+            value: formatCurrency(statsData.paidDeposits.value || 0),
+            changePercent: statsData.paidDeposits.percentage,
+            changeDirection: statsData.paidDeposits.status === 'up' ? 'up' : 'down',
+            vsLabel: 'vs last period',
         },
         {
             id: 'pending',
             heading: 'Pending',
-            value: String(stats.pending.value),
-            changePercent: stats.pending.percentage.replace(/^\+/, ''),
-            changeDirection: toDirection(stats.pending.status),
-            vsLabel: 'vs last month',
+            value: formatCurrency(statsData.pending.value || 0),
+            changePercent: statsData.pending.percentage,
+            changeDirection: statsData.pending.status === 'up' ? 'up' : 'down',
+            vsLabel: 'vs last period',
         },
         {
             id: 'failed',
             heading: 'Failed',
-            value: String(stats.failed.value),
-            changePercent: stats.failed.percentage.replace(/^\+/, ''),
-            // Invert direction because an increase in failures is bad
-            changeDirection: stats.failed.status === 'up' ? 'down' : 'up',
-            vsLabel: 'vs last month',
+            value: formatCurrency(statsData.failed.value || 0),
+            changePercent: statsData.failed.percentage,
+            changeDirection: statsData.failed.status === 'up' ? 'up' : 'down',
+            vsLabel: 'vs last period',
         },
     ];
 }
+
+export const PAYMENT_EXPORT_COLUMNS = [
+    { key: 'id', header: 'Transaction ID' },
+    { key: 'amount', header: 'Amount' },
+    { key: 'status', header: 'Status' },
+    { key: 'method', header: 'Payment Method' },
+    { key: 'customerName', header: 'Customer Name' },
+    { key: 'date', header: 'Date' },
+];

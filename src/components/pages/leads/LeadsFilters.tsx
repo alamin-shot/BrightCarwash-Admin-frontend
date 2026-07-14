@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Search } from 'lucide-react';
 import { FilterDropdown } from '@/components/ui/FilterDropdown';
@@ -45,13 +45,15 @@ export function LeadsFilters({
 						options={uniqueSources.map((s) => ({ value: s, label: s }))}
 						value={sourceFilter}
 						onChange={onSourceChange}
+						scrollable
+						maxHeight={200}
 					/>
-					<FilterDropdown
+					{/* <FilterDropdown
 						label='All deposits'
 						options={depositOptions.map((d) => ({ value: d, label: d }))}
 						value={depositFilter}
 						onChange={onDepositChange}
-					/>
+					/> */}
 				</div>
 			)}
 		</>

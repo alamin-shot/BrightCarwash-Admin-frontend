@@ -4,6 +4,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Button } from '@/components/ui/Button';
 import { MetricCard } from '@/components/ui/MetricCard';
 import { PaymentsTable } from '@/components/pages/payments/PaymentsTable';
+import { ExportDropdown } from '@/components/ui/ExportDropdown';
 import {
 	useGetPaymentStatsQuery,
 	useGetPaymentTransactionsQuery,
@@ -22,6 +23,7 @@ export function PaymentsContent() {
 	const {
 		data: txData,
 		isLoading: txLoading,
+		isFetching, // ✅ Added isFetching for background loading
 		error: txError,
 	} = useGetPaymentTransactionsQuery({ page, limit: 10, search, status });
 
@@ -34,6 +36,10 @@ export function PaymentsContent() {
 
 	const metrics = stats ? mapStatsToMetrics(stats) : [];
 
+	const handleExportExcel = () => {
+		handleExport();
+	};
+
 	const handleExportCSV = async () => {
 		try {
 			await exportCSV(search, status);
@@ -43,7 +49,8 @@ export function PaymentsContent() {
 		}
 	};
 
-	if (statsLoading || txLoading) {
+	// ✅ Show loading only on initial load, not on page change
+	if (statsLoading || (txLoading && !txData)) {
 		return (
 			<div className="flex flex-col gap-6 w-full">
 				<div className="flex justify-between items-end">
@@ -75,20 +82,12 @@ export function PaymentsContent() {
 					Payments Overview
 				</h2>
 				<div className="flex items-center gap-3 shrink-0">
-					<Button
-						variant="outline"
-						className="flex py-2.5 px-4 items-center gap-2 rounded border border-[#DFE1E7] text-[#1B1B1B] font-inter text-sm w-auto"
-						onClick={() => handleExport()}
-					>
-						<Icon name="export" width={14} height={14} /> Excel
-					</Button>
-					<Button
-						variant="outline"
-						className="flex py-2.5 px-4 items-center gap-2 rounded border border-[#DFE1E7] text-[#1B1B1B] font-inter text-sm w-auto"
-						onClick={handleExportCSV}
-					>
-						<Icon name="export" width={14} height={14} /> CSV
-					</Button>
+					<ExportDropdown
+						options={[
+							{ label: 'Export as Excel (.xlsx)', onClick: handleExportExcel },
+							{ label: 'Export as CSV (.csv)', onClick: handleExportCSV },
+						]}
+					/>
 				</div>
 			</div>
 
@@ -107,6 +106,7 @@ export function PaymentsContent() {
 				onStatusChange={setStatus}
 				currentPage={page}
 				onPageChange={setPage}
+				isLoading={isFetching} // ✅ Pass isFetching for loading overlay
 			/>
 		</div>
 	);

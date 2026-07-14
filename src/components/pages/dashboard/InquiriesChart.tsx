@@ -21,8 +21,8 @@ export function InquiriesChart({ data }: InquiriesChartProps) {
   }, []);
 
   const months = data.map((d) => d.month);
-  const inquiries = data.map((d) => d.inquiries);
-  const deposits = data.map((d) => d.deposits);
+  const total = data.map((d) => d.total);
+  const converted = data.map((d) => d.converted);
 
   const options: ApexCharts.ApexOptions = {
     chart: {
@@ -91,11 +91,11 @@ export function InquiriesChart({ data }: InquiriesChartProps) {
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-1.5 sm:gap-2">
             <span className="w-2 h-2 rounded-full bg-[#0098E8] shrink-0" />
-            <span className="text-[#777980] font-inter text-[10px] sm:text-xs">Inquiries</span>
+            <span className="text-[#777980] font-inter text-[10px] sm:text-xs">Total Leads</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <span className="w-2 h-2 rounded-full bg-[#B23730] shrink-0" />
-            <span className="text-[#777980] font-inter text-[10px] sm:text-xs">Deposits</span>
+            <span className="text-[#777980] font-inter text-[10px] sm:text-xs">Converted</span>
           </div>
         </div>
       </div>
@@ -103,8 +103,8 @@ export function InquiriesChart({ data }: InquiriesChartProps) {
         <Chart
           options={options}
           series={[
-            { name: "Inquiries", data: inquiries },
-            { name: "Deposits", data: deposits },
+            { name: "Total Leads", data: total },
+            { name: "Converted", data: converted },
           ]}
           type="area"
           height="100%"

@@ -1,38 +1,21 @@
-"use client";
+'use client';
 
-import {
-	useState,
-	useMemo,
-	useCallback,
-	forwardRef,
-	useImperativeHandle,
-	useEffect,
-} from 'react';
+import { forwardRef, useImperativeHandle, useMemo, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { DataTable } from '@/components/ui/DataTable';
 import { Pagination } from '@/components/ui/Pagination';
 import { createLeadsColumns } from '@/components/pages/leads/LeadsColumns';
 import { LeadsFilters } from '@/components/pages/leads/LeadsFilters';
 import { KanbanBoard } from '@/components/pages/leads/kanban/KanbanBoard';
-import {
-	useGetLeadsQuery,
-	useUpdateLeadStageMutation,
-	useDeleteLeadMutation,
-} from '@/services/leads.api';
-import { getStages } from '@/services/stage.service';
-import { useExportExcel } from '@/hooks/useExportExcel';
-import { useLeadFilters } from '@/hooks/useLeadFilters';
-import { useLeadSelection } from '@/hooks/useLeadSelection';
-import type { Lead } from '@/types/leads';
-import type { StageOption } from '@/components/ui/StageDropdown';
-import { mapStagesToOptions } from '@/lib/stage-utils';
-import { toast } from 'react-toastify';
-
-const ITEMS_PER_PAGE = 10;
+import { useLeadsData } from '@/hooks/useLeadsData';
+import { useLeadsExport } from '@/hooks/useLeadsExport';
 
 export interface LeadsTableHandle {
+	exportExcel: () => void;
 	exportCSV: () => void;
 }
+
+const ITEMS_PER_PAGE = 10;
 
 interface LeadsTableExternalProps {
 	viewMode: 'list' | 'kanban';
@@ -43,194 +26,101 @@ interface LeadsTableExternalProps {
 }
 
 export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
-	function LeadsTable(
-		{
-			viewMode,
-			groupMode,
-			onSelectionChange,
-			groupFilter,
-			searchQuery: externalSearch,
-		},
-		ref,
-	) {
+	function LeadsTable({ viewMode, groupMode, onSelectionChange, groupFilter, searchQuery: externalSearch }, ref) {
 		const router = useRouter();
-		const { data: leads = [], isLoading, error } = useGetLeadsQuery();
-		const [updateStage] = useUpdateLeadStageMutation();
+
 		const {
-			searchQuery,
-			setSearchQuery,
+			leads,
+			totalItems,
+			totalPages,
+			isLoading,
+			isPageLoading,
+			error,
+			paginatedData,
+			currentPage,
+			setCurrentPage,
+			searchTerm,
+			setSearchTerm,
 			sourceFilter,
 			setSourceFilter,
 			depositFilter,
 			setDepositFilter,
-			filteredLeads,
 			uniqueSources,
-		} = useLeadFilters(leads);
-		const { selectedIds, handleSelectRow, handleSelectAll } = useLeadSelection();
-		const [currentPage, setCurrentPage] = useState(1);
-		const [stages, setStages] = useState<StageOption[]>([]);
-		const [deleteLead] = useDeleteLeadMutation();
-		const effectiveSearch = externalSearch !== undefined ? externalSearch : searchQuery;
+			stages,
+			refreshStages,
+			selectedIds,
+			handleSelectRow,
+			handleSelectAll,
+			handleStageChange,
+			handleDelete,
+		} = useLeadsData(externalSearch);
 
-		const groupedLeads = useMemo(() => {
-			if (groupFilter) return filteredLeads.filter((l) => groupFilter.includes(l.id));
-			return filteredLeads;
-		}, [filteredLeads, groupFilter]);
+		const { exportExcel, exportCSV } = useLeadsExport(leads, selectedIds);
 
+		useImperativeHandle(ref, () => ({ exportExcel: () => exportExcel(selectedIds), exportCSV }), [exportExcel, exportCSV, selectedIds]);
+
+		// Selection callbacks
 		useEffect(() => {
 			onSelectionChange?.(selectedIds.size, Array.from(selectedIds));
 		}, [selectedIds, onSelectionChange]);
 
-		useEffect(() => {
-			getStages().then((s) => setStages(mapStagesToOptions(s)));
-		}, []);
+		const handleSelectAllCurrentPage = useCallback(() => {
+			const allIds = leads.map((l) => l.id);
+			const allSelected = allIds.every((id) => selectedIds.has(id));
+			allIds.forEach((id) => { if (allSelected) { if (selectedIds.has(id)) handleSelectRow(id); } else { if (!selectedIds.has(id)) handleSelectRow(id); } });
+		}, [leads, selectedIds, handleSelectRow]);
 
-		const refreshStages = useCallback(async () => {
-			setStages(mapStagesToOptions(await getStages()));
-		}, []);
+		const allCurrentPageSelected = useMemo(() => leads.length > 0 && leads.every((l) => selectedIds.has(l.id)), [leads, selectedIds]);
 
-		const handleStageChange = useCallback(
-			async (id: string, stageName: string) => {
-				console.log('🔄 [LeadsTable] handleStageChange called with:', { id, stageName });
-				try {
-					const result = await updateStage({ id, stageName }).unwrap();
-					console.log('✅ [LeadsTable] updateStage success:', result);
-					toast.success('Stage updated');
-				} catch (error) {
-					console.error('❌ [LeadsTable] updateStage error:', error);
-					toast.error('Failed to update stage');
-				}
-			},
-			[updateStage],
-		);
+		const columns = useMemo(() => createLeadsColumns({
+			onStageChange: handleStageChange,
+			onView: (lead) => router.push(`/leads/${lead.id}`),
+			onDelete: handleDelete,
+			onSelectRow: handleSelectRow,
+			onSelectAll: handleSelectAllCurrentPage,
+			allSelected: allCurrentPageSelected,
+			selectedIds,
+			router,
+			stages,
+			onStageCreated: refreshStages,
+		}), [handleStageChange, handleDelete, handleSelectRow, handleSelectAllCurrentPage, allCurrentPageSelected, selectedIds, leads, router, stages, refreshStages]);
 
-		const handleDelete = useCallback(
-			async (lead: Lead) => {
-				try {
-					await deleteLead(lead.id).unwrap();
-					toast.success(`${lead.name} deleted`);
-				} catch {
-					toast.error('Failed to delete lead');
-				}
-			},
-			[deleteLead],
-		);
-
-		const totalPages = Math.max(1, Math.ceil(groupedLeads.length / ITEMS_PER_PAGE));
-		useEffect(() => {
-			if (currentPage > totalPages) setCurrentPage(1);
-		}, [totalPages, currentPage]);
-
-		const paginatedLeads = useMemo(
-			() =>
-				groupedLeads.slice(
-					(currentPage - 1) * ITEMS_PER_PAGE,
-					currentPage * ITEMS_PER_PAGE,
-				),
-			[groupedLeads, currentPage],
-		);
-
-		const exportColumns = useMemo(
-			() => [
-				{ key: 'name', header: 'Lead Name' },
-				{ key: 'service', header: 'Service' },
-				{ key: 'vehicle', header: 'Vehicle' },
-				{ key: 'source', header: 'Source' },
-				{ key: 'depositStatus', header: 'Deposit' },
-				{ key: 'stage', header: 'Stage' },
-				{ key: 'date', header: 'Date' },
-			],
-			[],
-		);
-
-		const { handleExport } = useExportExcel({
-			data: groupedLeads,
-			columns: exportColumns,
-			filename: 'leads-export',
-		});
-
-		useImperativeHandle(
-			ref,
-			() => ({ exportCSV: () => handleExport(selectedIds) }),
-			[handleExport, selectedIds],
-		);
-
-		const columns = useMemo(
-			() =>
-				createLeadsColumns({
-					onStageChange: handleStageChange,
-					onView: (lead) => router.push(`/leads/${lead.id}`),
-					onDelete: handleDelete,
-					onSelectRow: handleSelectRow,
-					onSelectAll: () => handleSelectAll(groupedLeads.map((l) => l.id)),
-					allSelected: groupedLeads.length > 0 && selectedIds.size === groupedLeads.length,
-					selectedIds,
-					router,
-					stages,
-					onStageCreated: refreshStages,
-				}),
-			[
-				handleStageChange,
-				handleDelete,
-				handleSelectRow,
-				handleSelectAll,
-				selectedIds,
-				groupedLeads,
-				router,
-				stages,
-				refreshStages,
-			],
-		);
-
-		if (isLoading)
-			return <div className='h-75 bg-gray-100 rounded-lg animate-pulse w-full' />;
-		if (error)
-			return (
-				<div className='flex items-center justify-center py-12 text-[#FF4345] font-inter'>
-					Failed to load leads.
-				</div>
-			);
+		if (isLoading && !paginatedData) return <div className='h-75 bg-gray-100 rounded-lg animate-pulse w-full' />;
+		if (error && !paginatedData) return <div className='flex items-center justify-center py-12 text-[#FF4345] font-inter'>Failed to load leads.</div>;
 
 		return (
 			<div className='flex flex-col gap-4 w-full'>
 				<LeadsFilters
-					searchQuery={effectiveSearch}
-					onSearchChange={setSearchQuery}
+					searchQuery={searchTerm}
+					onSearchChange={(val) => { setSearchTerm(val); setCurrentPage(1); }}
 					sourceFilter={sourceFilter}
-					onSourceChange={setSourceFilter}
+					onSourceChange={(val) => { setSourceFilter(val); setCurrentPage(1); }}
 					depositFilter={depositFilter}
-					onDepositChange={setDepositFilter}
+					onDepositChange={(val) => { setDepositFilter(val); setCurrentPage(1); }}
 					uniqueSources={uniqueSources}
 					groupMode={groupMode}
 				/>
 				{viewMode === 'list' ? (
 					<>
-						<div className="w-full border border-[#E8E8E9] rounded-lg overflow-visible">
-							<DataTable
-								columns={columns}
-								data={paginatedLeads}
-								rowKey={(row) => row.id}
-								className="w-full"
-							/>
+						<div className="w-full border border-[#E8E8E9] rounded-lg overflow-visible relative">
+							{isPageLoading && paginatedData && (
+								<div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-lg">
+									<div className="flex flex-col items-center gap-2">
+										<div className="w-8 h-8 border-2 border-[#0098E8] border-t-transparent rounded-full animate-spin" />
+										<span className="text-[#777980] font-inter text-sm">Loading...</span>
+									</div>
+								</div>
+							)}
+							<DataTable columns={columns} data={leads} rowKey={(row) => row.id} className="w-full" />
 						</div>
-						<Pagination
-							currentPage={currentPage}
-							totalPages={totalPages}
-							onPageChange={setCurrentPage}
-							totalItems={groupedLeads.length}
-							itemsPerPage={ITEMS_PER_PAGE}
-						/>
+						<Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={totalItems} itemsPerPage={ITEMS_PER_PAGE} isLoading={isPageLoading} />
 					</>
 				) : (
 					<div className='h-[calc(100vh-220px)] overflow-hidden'>
-						<KanbanBoard
-							leads={groupedLeads}
-							stages={stages}
-							onStageChange={handleStageChange}
-						/>
+						<KanbanBoard leads={leads} stages={stages} onStageChange={handleStageChange} />
 					</div>
 				)}
 			</div>
 		);
-	},
+	}
 );

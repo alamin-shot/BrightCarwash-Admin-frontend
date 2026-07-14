@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { toast } from "react-toastify";
-import { getAccessToken } from "@/lib/auth-client";
-import { APP_CONFIG } from "@/configs/app.config";
+import { useConnectLeadsToGroupMutation } from "@/services/leads.api";
+import axiosInstance from "@/lib/axios-instance";
 
 interface CreateGroupModalProps {
     isOpen: boolean;
@@ -17,6 +17,7 @@ interface CreateGroupModalProps {
 export function CreateGroupModal({ isOpen, onClose, selectedLeads, onGroupCreated }: CreateGroupModalProps) {
     const [groupName, setGroupName] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [connectLeads] = useConnectLeadsToGroupMutation();
 
     const handleCreate = async () => {
         if (!groupName.trim()) {
@@ -27,27 +28,30 @@ export function CreateGroupModal({ isOpen, onClose, selectedLeads, onGroupCreate
         setIsSubmitting(true);
 
         try {
-            const token = getAccessToken();
-            const response = await fetch(`${APP_CONFIG.API_BASE_URL}/admin/lead-groups`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ name: groupName.trim() }),
+            // Step 1: Create the group
+            const createResponse = await axiosInstance.post("/admin/lead-groups", {
+                name: groupName.trim(),
             });
 
-            const data = await response.json();
+            const groupId = createResponse.data.data.id;
 
-            if (!response.ok) {
-                throw new Error(data.message || "Failed to create group");
+            // Step 2: Connect leads if any selected
+            if (selectedLeads.length > 0) {
+                await connectLeads({
+                    groupId: groupId,
+                    leadIds: selectedLeads,
+                }).unwrap();
+                toast.success(`Group "${groupName.trim()}" created with ${selectedLeads.length} leads`);
+            } else {
+                toast.success(`Empty group "${groupName.trim()}" created`);
             }
 
             setGroupName("");
-            onGroupCreated?.(data.data);
+            onGroupCreated?.(createResponse.data.data);
+            onClose();
 
         } catch (error: any) {
-            toast.error(error.message || "Failed to create group");
+            toast.error(error?.response?.data?.message || error?.message || "Failed to create group");
         } finally {
             setIsSubmitting(false);
         }
@@ -58,7 +62,9 @@ export function CreateGroupModal({ isOpen, onClose, selectedLeads, onGroupCreate
             <div className="flex flex-col gap-3">
                 <div className="w-full h-px bg-[#DFE1E7]" />
                 <div>
-                    <label className="block text-[#777980] font-inter text-base font-normal leading-[130%] mb-1.5">Group Name</label>
+                    <label className="block text-[#777980] font-inter text-base font-normal leading-[130%] mb-1.5">
+                        Group Name
+                    </label>
                     <input
                         type="text"
                         value={groupName}
@@ -68,6 +74,20 @@ export function CreateGroupModal({ isOpen, onClose, selectedLeads, onGroupCreate
                         onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); }}
                     />
                 </div>
+                {selectedLeads.length > 0 && (
+                    <div>
+                        <p className="text-xs text-[#777980]">
+                            {selectedLeads.length} lead{selectedLeads.length !== 1 ? 's' : ''} will be added to this group
+                        </p>
+                    </div>
+                )}
+                {selectedLeads.length === 0 && (
+                    <div>
+                        <p className="text-xs text-[#FFAF00]">
+                            ⚠️ This group will be created empty. You can add leads later.
+                        </p>
+                    </div>
+                )}
                 <div className="flex gap-3 justify-end pt-4">
                     <Button
                         type="button"
@@ -82,8 +102,9 @@ export function CreateGroupModal({ isOpen, onClose, selectedLeads, onGroupCreate
                         isLoading={isSubmitting}
                         loadingText="Creating..."
                         className="px-6 w-auto!"
+                        disabled={!groupName.trim()}
                     >
-                        Create
+                        Create Group
                     </Button>
                 </div>
             </div>

@@ -31,7 +31,14 @@ export function AddLeadModal({
 	title,
 }: AddLeadModalProps) {
 	const [createLead, { isLoading }] = useCreateLeadMutation();
-	const { data: leads = [] } = useGetLeadsQuery();
+
+	// ✅ Fix: Extract leads array from paginated response
+	const { data: leadsResponse } = useGetLeadsQuery({
+		page: 1,
+		limit: 1000, // Get enough leads to check for duplicates
+	});
+	const leads = leadsResponse?.data || [];
+
 	const [name, setName] = useState("");
 	const [phone, setPhone] = useState("");
 	const [email, setEmail] = useState("");
@@ -67,6 +74,7 @@ export function AddLeadModal({
 			return;
 		}
 
+		// ✅ Now leads is an array, so find works
 		const existingLead = leads.find(
 			(l) => l.email.toLowerCase() === email.toLowerCase()
 		);

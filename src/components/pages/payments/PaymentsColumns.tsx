@@ -1,3 +1,4 @@
+import { formatCurrency } from '@/lib/payment-utils';
 import type { Column } from '@/components/ui/DataTable';
 import type { PaymentTransaction } from '@/types/payment';
 
@@ -53,7 +54,7 @@ export const paymentsColumns: Column<PaymentTransaction>[] = [
 		header: 'Amount',
 		render: (row) => (
 			<span className="text-[#1B1B1B] font-inter text-sm font-medium">
-				${row.amount}
+				{formatCurrency(row.amount, row.currency)}
 			</span>
 		),
 	},

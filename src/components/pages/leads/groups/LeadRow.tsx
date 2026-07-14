@@ -22,7 +22,6 @@ interface LeadRowProps {
 }
 
 export function LeadRow({ lead, stages, onStageChange, onDelete, router }: LeadRowProps) {
-    // ✅ Find the correct stage option using stageId, fallback to stage slug
     const stageOption = stages.find(s => s.stageId === lead.stageId);
     const currentStageValue = stageOption ? stageOption.value : lead.stage;
 
@@ -44,13 +43,13 @@ export function LeadRow({ lead, stages, onStageChange, onDelete, router }: LeadR
                     </span>
                 </div>
             </td>
-            <td className="py-2.5 px-4 border-r border-[#E8E8E9] text-[#1B1B1B] font-inter text-sm">
+            <td className="py-2.5 px-4 border-r border-[#E8E8E9] text-[#1B1B1B] font-inter text-sm truncate max-w-[120px]">
                 {lead.service}
             </td>
-            <td className="py-2.5 px-4 border-r border-[#E8E8E9] text-[#1B1B1B] font-inter text-sm">
-                {lead.vehicle}
+            <td className="py-2.5 px-4 border-r border-[#E8E8E9] text-[#1B1B1B] font-inter text-sm truncate max-w-[180px]">
+                {lead.email}
             </td>
-            <td className="py-2.5 px-4 border-r border-[#E8E8E9] text-[#1B1B1B] font-inter text-sm">
+            <td className="py-2.5 px-4 border-r border-[#E8E8E9] text-[#1B1B1B] font-inter text-sm truncate max-w-[120px]">
                 {lead.source}
             </td>
             <td className="py-2.5 px-4 border-r border-[#E8E8E9]">

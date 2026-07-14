@@ -86,7 +86,7 @@ export function GroupAccordionRow({
                 {isExpanded && groupLeads.length > 0 && (
                     <table className="w-full">
                         <colgroup>
-                            {["22%", "15%", "12%", "13%", "11%", "15%", "8%"].map((w, i) => (
+                            {["20%", "15%", "18%", "12%", "10%", "15%", "8%"].map((w, i) => (
                                 <col key={i} style={{ width: w }} />
                             ))}
                         </colgroup>

@@ -207,7 +207,7 @@ body {
 
 /* ========== PREMIUM GLASS DROPDOWN MENU ========== */
 .adm-glass-dropdown-menu {
-	background: rgba(255, 255, 255, 0.836);
+	background: rgb(255, 255, 255);
 	backdrop-filter: blur(9px);
 	-webkit-backdrop-filter: blur(12px);
 	border-radius: 14px;
@@ -305,4 +305,23 @@ body {
 .adm-dropdown-scrollable {
 	overflow-y: auto;
 	overflow-x: hidden;
+}
+
+/* Extra small screen breakpoint (320px+) */
+@media (min-width: 320px) {
+	.xs\:inline {
+		display: inline;
+	}
+
+	.xs\:flex {
+		display: flex;
+	}
+
+	.xs\:hidden {
+		display: none;
+	}
+
+	.xs\:block {
+		display: block;
+	}
 }

@@ -19,11 +19,16 @@ function TimelineDot({ type }: { type: ActivityType }) {
 }
 
 export function ActivityTimeline({ activities }: Props) {
-	// Sort by date descending (newest first)
+	// ✅ Filter out coupon AND staff (assignment) activities
+	// Activity Timeline shows: stage changes, notes, lead updates, etc.
+	// Assignment History handles staff/assignment activities separately
 	const sortedActivities = useMemo(() => {
-		return [...activities].sort((a, b) => {
-			return new Date(b.date).getTime() - new Date(a.date).getTime();
-		});
+		return activities
+			.filter((activity) => activity.type !== "coupon") // ✅ Hide coupon activities
+			.filter((activity) => activity.type !== "staff") // ✅ Hide assignment activities
+			.sort((a, b) => {
+				return new Date(b.date).getTime() - new Date(a.date).getTime();
+			});
 	}, [activities]);
 
 	if (sortedActivities.length === 0) {

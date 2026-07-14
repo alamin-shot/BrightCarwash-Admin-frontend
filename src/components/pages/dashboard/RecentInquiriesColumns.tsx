@@ -42,24 +42,24 @@ export function recentInquiriesColumns(stages: StageOption[]): Column<RecentInqu
       render: (row) => <span className="text-[#1B1B1B] font-inter text-sm">{row.service}</span>,
     },
     {
-      key: "vehicle",
-      header: "Vehicle",
-      render: (row) => <span className="text-[#1B1B1B] font-inter text-sm">{row.vehicle}</span>,
+      key: "email",
+      header: "Email",
+      render: (row) => <span className="text-[#1B1B1B] font-inter text-sm">{row.email}</span>,
     },
     {
       key: "source",
       header: "Source",
       render: (row) => <span className="text-[#1B1B1B] font-inter text-sm">{row.source}</span>,
     },
-    {
-      key: "deposit",
-      header: "Deposit",
-      render: (row) => (
-        <span className={`inline-flex py-[6px] px-2 justify-center items-center gap-1 rounded border text-sm capitalize ${depositStyles[row.deposit]}`}>
-          {row.deposit}
-        </span>
-      ),
-    },
+    // {
+    //   key: "deposit",
+    //   header: "Deposit",
+    //   render: (row) => (
+    //     <span className={`inline-flex py-[6px] px-2 justify-center items-center gap-1 rounded border text-sm capitalize ${depositStyles[row.deposit]}`}>
+    //       {row.deposit}
+    //     </span>
+    //   ),
+    // },
     {
       key: "stage",
       header: "Stage",

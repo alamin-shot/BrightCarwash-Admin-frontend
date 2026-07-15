@@ -30,6 +30,33 @@ body {
 	backdrop-filter: blur(2px);
 }
 
+/* ========== SIDEBAR SCROLLBAR ========== */
+/* Webkit browsers (Chrome, Safari, Edge) */
+.adm-sidebar-scroll::-webkit-scrollbar {
+	width: 4px;
+}
+
+.adm-sidebar-scroll::-webkit-scrollbar-track {
+	background: transparent;
+	border: none;
+	box-shadow: none;
+}
+
+.adm-sidebar-scroll::-webkit-scrollbar-thumb {
+	background: #4A4C56;
+	border-radius: 4px;
+}
+
+.adm-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+	background: #6A6C76;
+}
+
+/* Firefox */
+.adm-sidebar-scroll {
+	scrollbar-width: thin;
+	scrollbar-color: #4A4C56 transparent;
+}
+
 /* Extra small screen breakpoint (320px+) */
 @media (min-width: 320px) {
 	.xs\:inline {

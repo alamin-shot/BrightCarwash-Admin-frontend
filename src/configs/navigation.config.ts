@@ -24,7 +24,19 @@ export const NAVIGATION_CONFIG: NavSection[] = [
     title: "MANAGEMENT",
     items: [
       { id: "teams", label: "Teams", icon: "staffs", href: "/teams" },
-      { id: "website-cms", label: "Website CMS", icon: "website-cms", href: "/website-cms" },
+      {
+        id: "website-cms",
+        label: "Website CMS",
+        icon: "website-cms",
+        href: "/website-cms",
+        subItems: [
+          { id: "cms-hero-section", label: "Hero Section", icon: "website-cms", href: "/website-cms/hero-section" },
+          { id: "cms-testimonials", label: "Testimonials", icon: "website-cms", href: "/website-cms/testimonials" },
+          { id: "cms-news-blog", label: "News & Blog", icon: "website-cms", href: "/website-cms/news-blog" },
+          { id: "cms-gallery", label: "Gallery", icon: "website-cms", href: "/website-cms/gallery" },
+          { id: "cms-faq", label: "FAQ", icon: "faq", href: "/website-cms/faq" },
+        ]
+      },
       { id: "reports", label: "Reports", icon: "reports", href: "/reports" },
       { id: "activity-log", label: "Activity Log", icon: "activity-log", href: "/activity-log" },
       { id: "settings", label: "Settings", icon: "settings", href: "/settings" },

@@ -8,6 +8,7 @@ interface IconProps {
 	height?: number;
 	className?: string;
 	color?: string;
+	opacity?: number;
 }
 
 export function Icon({
@@ -16,14 +17,16 @@ export function Icon({
 	height = 20,
 	className = '',
 	color,
+	opacity,
 }: IconProps) {
 	if (color) {
 		return (
 			<span
-				className={`inline-block ${className}`}
+				className={`inline-block shrink-0 ${className}`}
 				style={{
 					width,
 					height,
+					opacity,
 					backgroundColor: color,
 					WebkitMask: `url(/icons/svgs/${name}.svg) no-repeat center / contain`,
 					mask: `url(/icons/svgs/${name}.svg) no-repeat center / contain`,
@@ -38,7 +41,8 @@ export function Icon({
 			alt={`${name} icon`}
 			width={width}
 			height={height}
-			className={className}
+			className={`shrink-0 ${className}`}
+			style={{ opacity }}
 			unoptimized
 		/>
 	);

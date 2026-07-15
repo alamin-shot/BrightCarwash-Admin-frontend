@@ -50,19 +50,14 @@ export function LeadInfoCard({ lead }: Props) {
 						</div>
 					</div>
 				</div>
-				<div className="flex items-center gap-2">
-					<span
-						className={`inline-flex py-1.5 px-3 rounded border text-sm capitalize ${depositStyles[lead.depositStatus] || depositStyles.NONE}`}
-					>
-						{lead.depositStatus}
-					</span>
-					<span
-						className="inline-flex py-1.5 px-3 rounded text-sm capitalize text-white"
-						style={{ backgroundColor: lead.stageColor }}
-					>
-						{lead.stage}
-					</span>
-				</div>
+
+				<span
+					className="inline-flex py-1.5 px-3 rounded text-sm capitalize text-white"
+					style={{ backgroundColor: lead.stageColor }}
+				>
+					{lead.stage}
+				</span>
+
 			</div>
 
 			<div className="w-full h-px bg-[#DFE1E7]" />

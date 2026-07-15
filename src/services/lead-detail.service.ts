@@ -18,6 +18,68 @@ async function fetchFromBackend<T>(url: string, options?: RequestInit): Promise<
 
 function mapApiToLeadDetail(data: LeadDetailApiResponse): LeadDetail {
 	const assignee = data.assigned_to || (data as any).assignee || null;
+
+	// ✅ Map activity timelines from API
+	const activityItems: ActivityItem[] = (data.activity_timelines || []).map((item: any) => {
+		// Determine activity type based on description
+		let type: ActivityItem['type'] = 'lead';
+		const desc = item.description?.toLowerCase() || '';
+
+		if (desc.includes('stage')) {
+			type = 'stage';
+		} else if (desc.includes('assigned') || desc.includes('unassigned')) {
+			type = 'staff';
+		}
+
+		const userName = item.user
+			? `${item.user.first_name || ''} ${item.user.last_name || ''}`.trim() || 'Unknown'
+			: 'System';
+
+		return {
+			id: item.id,
+			type: type,
+			title: item.description || 'Activity',
+			subtitle: item.user ? `by ${userName}` : undefined,
+			description: undefined,
+			user: userName,
+			date: new Date(item.created_at).toLocaleDateString('en-US', {
+				day: 'numeric',
+				month: 'short',
+				year: 'numeric',
+			}),
+		};
+	});
+
+	// ✅ Map assignment history from API
+	const assignmentItems: ActivityItem[] = (data.assignment_history || []).map((item: any) => {
+		const assigneeName = item.assignee
+			? `${item.assignee.first_name || ''} ${item.assignee.last_name || ''}`.trim() || 'Unknown'
+			: null;
+		const assignerName = item.assigner
+			? `${item.assigner.first_name || ''} ${item.assigner.last_name || ''}`.trim() || 'Unknown'
+			: 'System';
+
+		return {
+			id: item.id,
+			type: 'staff',
+			title: item.assigned_to_id ? 'Lead assigned' : 'Lead unassigned',
+			subtitle: item.assigned_to_id ? `to ${assigneeName}` : undefined,
+			description: undefined,
+			user: assignerName,
+			date: new Date().toLocaleDateString('en-US', {
+				day: 'numeric',
+				month: 'short',
+				year: 'numeric',
+			}),
+		};
+	});
+
+	// ✅ Combine and sort all activities by date (newest first)
+	const allActivities = [...activityItems, ...assignmentItems];
+	allActivities.sort((a, b) => {
+		return new Date(b.date).getTime() - new Date(a.date).getTime();
+	});
+
 	return {
 		id: data.id,
 		name: data.name,
@@ -50,6 +112,7 @@ function mapApiToLeadDetail(data: LeadDetailApiResponse): LeadDetail {
 			};
 		}),
 		date: data.created_at?.split("T")[0] || "",
+		activities: allActivities, // ✅ Add mapped activities to LeadDetail
 	};
 }
 
@@ -58,15 +121,11 @@ export async function getLeadDetail(id: string): Promise<LeadDetail> {
 	return mapApiToLeadDetail(json.data);
 }
 
-// ✅ Activities: Call real endpoint if available, otherwise return empty array
 export async function getLeadActivities(id: string): Promise<ActivityItem[]> {
 	try {
-		// If you have a real endpoint for activities, uncomment and use it:
-		// const json = await fetchFromBackend<{ success: boolean; data: ActivityItem[] }>(`/admin/lead/${id}/activities`);
-		// return json.data || [];
-
-		// For now, return empty array since we don't have an activities endpoint
-		return [];
+		// ✅ Fetch lead detail to get activities
+		const lead = await getLeadDetail(id);
+		return lead.activities || [];
 	} catch (error) {
 		console.warn('Failed to fetch activities, returning empty array:', error);
 		return [];
@@ -95,15 +154,12 @@ export async function addLeadNote(id: string, content: string): Promise<void> {
 }
 
 export async function deleteLeadNote(leadId: string, noteContent: string): Promise<void> {
-	// 1. Fetch current lead to get all notes
 	const lead = await getLeadDetail(leadId);
 
-	// 2. Filter out the note by content (not by id)
 	const notesContent = lead.notes
 		.filter(n => n.content !== noteContent)
 		.map(n => n.content);
 
-	// 3. Send the updated array to the backend
 	const token = getAccessToken();
 	const formData = new FormData();
 	notesContent.forEach((note) => formData.append("notes", note));
@@ -202,7 +258,6 @@ export async function updateLeadDetails(
 		throw new Error(error.message || 'Failed to update lead');
 	}
 
-	// After update, refetch the lead details
 	const updated = await getLeadDetail(leadId);
 	return updated;
 }

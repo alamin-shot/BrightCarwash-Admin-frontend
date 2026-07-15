@@ -7,7 +7,7 @@ export interface Lead {
 	service: string;
 	vehicle: string;
 	source: string;
-	priority: 'LOW' | 'MEDIUM' | 'HIGH';
+	priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 	deposit: number;
 	depositStatus: 'PENDING' | 'PAID' | 'NONE';
 	stage: string;

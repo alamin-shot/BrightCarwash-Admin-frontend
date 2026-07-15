@@ -41,6 +41,8 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 			setSearchTerm,
 			sourceFilter,
 			setSourceFilter,
+			priorityFilter,
+			setPriorityFilter,
 			depositFilter,
 			setDepositFilter,
 			uniqueSources,
@@ -50,19 +52,17 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 			handleSelectRow,
 			handleSelectAll,
 			handleStageChange,
+			handlePriorityChange,
 			handleDelete,
+			handleSearchSubmit,
 		} = useLeadsData(externalSearch);
 
-		// ✅ Build filters for export
-		const exportFilters = useMemo(() => ({
+		const { exportExcel, exportCSV } = useLeadsExport(leads, selectedIds, {
 			search: searchTerm || externalSearch || undefined,
 			source: sourceFilter || undefined,
+			priority: priorityFilter || undefined,
 			depositStatus: depositFilter || undefined,
-			sortBy: 'created_at',
-			sortOrder: 'desc',
-		}), [searchTerm, externalSearch, sourceFilter, depositFilter]);
-
-		const { exportExcel, exportCSV } = useLeadsExport(leads, selectedIds, exportFilters);
+		});
 
 		useImperativeHandle(ref, () => ({
 			exportExcel: () => exportExcel(),
@@ -83,6 +83,7 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 
 		const columns = useMemo(() => createLeadsColumns({
 			onStageChange: handleStageChange,
+			onPriorityChange: handlePriorityChange,
 			onView: (lead) => router.push(`/leads/${lead.id}`),
 			onDelete: handleDelete,
 			onSelectRow: handleSelectRow,
@@ -92,7 +93,7 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 			router,
 			stages,
 			onStageCreated: refreshStages,
-		}), [handleStageChange, handleDelete, handleSelectRow, handleSelectAllCurrentPage, allCurrentPageSelected, selectedIds, leads, router, stages, refreshStages]);
+		}), [handleStageChange, handlePriorityChange, handleDelete, handleSelectRow, handleSelectAllCurrentPage, allCurrentPageSelected, selectedIds, leads, router, stages, refreshStages]);
 
 		if (isLoading && !paginatedData) return <div className='h-75 bg-gray-100 rounded-lg animate-pulse w-full' />;
 		if (error && !paginatedData) return <div className='flex items-center justify-center py-12 text-[#FF4345] font-inter'>Failed to load leads.</div>;
@@ -101,9 +102,12 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 			<div className='flex flex-col gap-4 w-full'>
 				<LeadsFilters
 					searchQuery={searchTerm}
-					onSearchChange={(val) => { setSearchTerm(val); setCurrentPage(1); }}
+					onSearchChange={setSearchTerm}
+					onSearchSubmit={handleSearchSubmit}
 					sourceFilter={sourceFilter}
 					onSourceChange={(val) => { setSourceFilter(val); setCurrentPage(1); }}
+					priorityFilter={priorityFilter}
+					onPriorityChange={(val) => { setPriorityFilter(val); setCurrentPage(1); }}
 					depositFilter={depositFilter}
 					onDepositChange={(val) => { setDepositFilter(val); setCurrentPage(1); }}
 					uniqueSources={uniqueSources}
@@ -124,7 +128,7 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 								data={leads}
 								rowKey={(row) => row.id}
 								className="w-full"
-								onRowClick={(row) => router.push(`/leads/${row.id}`)} // ✅ Added
+								onRowClick={(row) => router.push(`/leads/${row.id}`)}
 							/>
 						</div>
 						<Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={totalItems} itemsPerPage={ITEMS_PER_PAGE} isLoading={isPageLoading} />

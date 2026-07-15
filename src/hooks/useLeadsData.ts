@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useGetLeadsQuery, useUpdateLeadStageMutation, useDeleteLeadMutation } from '@/services/leads.api';
+import { useGetLeadsQuery, useUpdateLeadStageMutation, useDeleteLeadMutation, useUpdateLeadPriorityMutation } from '@/services/leads.api';
 import { getStages } from '@/services/stage.service';
 import { mapStagesToOptions } from '@/lib/stage-utils';
 import { useLeadSelection } from '@/hooks/useLeadSelection';
@@ -12,7 +12,9 @@ export function useLeadsData(externalSearch?: string) {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [sourceFilter, setSourceFilter] = useState('');
+    const [priorityFilter, setPriorityFilter] = useState(''); // ✅ Added
     const [depositFilter, setDepositFilter] = useState('');
+    const [searchSubmitted, setSearchSubmitted] = useState(false);
 
     const {
         data: paginatedData,
@@ -23,12 +25,14 @@ export function useLeadsData(externalSearch?: string) {
     } = useGetLeadsQuery({
         page: currentPage,
         limit: ITEMS_PER_PAGE,
-        search: searchTerm || externalSearch || undefined,
+        search: searchSubmitted ? (searchTerm || externalSearch || undefined) : undefined,
         source: sourceFilter || undefined,
+        priority: priorityFilter || undefined, // ✅ Added
         depositStatus: depositFilter || undefined,
     });
 
     const [updateStage] = useUpdateLeadStageMutation();
+    const [updatePriority] = useUpdateLeadPriorityMutation(); // ✅ Added
     const [deleteLead] = useDeleteLeadMutation();
     const { selectedIds, handleSelectRow, handleSelectAll } = useLeadSelection();
     const [stages, setStages] = useState<StageOption[]>([]);
@@ -50,7 +54,12 @@ export function useLeadsData(externalSearch?: string) {
 
     useEffect(() => {
         refetch();
-    }, [currentPage, searchTerm, sourceFilter, depositFilter, refetch]);
+    }, [currentPage, searchSubmitted, searchTerm, externalSearch, sourceFilter, priorityFilter, depositFilter, refetch]);
+
+    const handleSearchSubmit = useCallback(() => {
+        setSearchSubmitted(true);
+        setCurrentPage(1);
+    }, []);
 
     const handleStageChange = useCallback(async (id: string, stageName: string) => {
         try {
@@ -61,6 +70,16 @@ export function useLeadsData(externalSearch?: string) {
             toast.error('Failed to update stage');
         }
     }, [updateStage, refetch]);
+
+    const handlePriorityChange = useCallback(async (id: string, priority: string) => {
+        try {
+            await updatePriority({ id, priority }).unwrap();
+            toast.success('Priority updated');
+            refetch();
+        } catch {
+            toast.error('Failed to update priority');
+        }
+    }, [updatePriority, refetch]);
 
     const handleDelete = useCallback(async (lead: any) => {
         try {
@@ -86,6 +105,8 @@ export function useLeadsData(externalSearch?: string) {
         setSearchTerm,
         sourceFilter,
         setSourceFilter,
+        priorityFilter,
+        setPriorityFilter, // ✅ Added
         depositFilter,
         setDepositFilter,
         uniqueSources,
@@ -95,6 +116,8 @@ export function useLeadsData(externalSearch?: string) {
         handleSelectRow,
         handleSelectAll,
         handleStageChange,
+        handlePriorityChange, // ✅ Added
         handleDelete,
+        handleSearchSubmit,
     };
 }

@@ -391,13 +391,46 @@ export const leadsApi = createApi({
 				}
 			},
 		}),
-	}),
+		updateLeadPriority: builder.mutation<Lead, { id: string; priority: string }>({
+			queryFn: async ({ id, priority }) => {
+				try {
+					const token = getAccessToken();
+					const formData = new FormData();
+					formData.append('priority', priority);
 
+					const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/lead/${id}`, {
+						method: 'PATCH',
+						headers: { Authorization: `Bearer ${token}` },
+						body: formData,
+					});
+
+					if (!res.ok) throw new Error('Failed to update priority');
+					const json = await res.json();
+					return { data: mapApiToLead(json.data) };
+				} catch (error) {
+					return { error: { status: 500, data: error instanceof Error ? error.message : 'Failed to update priority' } };
+				}
+			},
+			async onQueryStarted({ id, priority }, { dispatch, queryFulfilled }) {
+				const patchResult = dispatch(
+					leadsApi.util.updateQueryData("getLeads", { page: 1, limit: 10 }, (draft) => {
+						const lead = draft.data.find((l) => l.id === id);
+						if (lead) {
+							lead.priority = priority as 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+						}
+					})
+				);
+				try { await queryFulfilled; } catch { patchResult.undo(); }
+			},
+			invalidatesTags: ["Leads"],
+		}),
+	}),
 });
 
 export const {
 	useGetLeadsQuery,
 	useUpdateLeadStageMutation,
+	useUpdateLeadPriorityMutation,
 	useCreateLeadMutation,
 	useGetLeadGroupsQuery,
 	useDeleteLeadMutation,

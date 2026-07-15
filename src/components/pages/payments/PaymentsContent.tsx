@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useCallback } from 'react';
 import { Icon } from '@/components/ui/Icon';
 import { Button } from '@/components/ui/Button';
 import { MetricCard } from '@/components/ui/MetricCard';
@@ -18,14 +19,21 @@ import { toast } from 'react-toastify';
 export function PaymentsContent() {
 	const { page, search, status, setPage, setSearch, setStatus } =
 		usePaymentPageState();
+	const [searchSubmitted, setSearchSubmitted] = useState(false);
+	const [searchValue, setSearchValue] = useState(search);
 
 	const { data: stats, isLoading: statsLoading } = useGetPaymentStatsQuery();
 	const {
 		data: txData,
 		isLoading: txLoading,
-		isFetching, // ✅ Added isFetching for background loading
+		isFetching,
 		error: txError,
-	} = useGetPaymentTransactionsQuery({ page, limit: 10, search, status });
+	} = useGetPaymentTransactionsQuery({
+		page,
+		limit: 10,
+		search: searchSubmitted ? searchValue : undefined,
+		status,
+	});
 
 	const { exportCSV } = useExportCSV();
 	const { handleExport } = useExportExcel({
@@ -49,7 +57,19 @@ export function PaymentsContent() {
 		}
 	};
 
-	// ✅ Show loading only on initial load, not on page change
+	// ✅ Handle search submit
+	const handleSearchSubmit = useCallback(() => {
+		setSearch(searchValue); // ✅ Update the global search state
+		setSearchSubmitted(true);
+		setPage(1);
+	}, [searchValue, setSearch, setPage]);
+
+	// ✅ Handle search change (update local input value)
+	const handleSearchChange = useCallback((value: string) => {
+		setSearchValue(value);
+		setSearchSubmitted(false);
+	}, []);
+
 	if (statsLoading || (txLoading && !txData)) {
 		return (
 			<div className="flex flex-col gap-6 w-full">
@@ -100,13 +120,14 @@ export function PaymentsContent() {
 			<PaymentsTable
 				payments={txData?.transactions || []}
 				meta={txData?.meta}
-				search={search}
+				search={searchValue}
 				status={status}
-				onSearchChange={setSearch}
+				onSearchChange={handleSearchChange}
+				onSearchSubmit={handleSearchSubmit}
 				onStatusChange={setStatus}
 				currentPage={page}
 				onPageChange={setPage}
-				isLoading={isFetching} // ✅ Pass isFetching for loading overlay
+				isLoading={isFetching}
 			/>
 		</div>
 	);

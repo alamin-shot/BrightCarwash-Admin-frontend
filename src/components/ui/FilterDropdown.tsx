@@ -28,12 +28,13 @@ export function FilterDropdown({
 	buttonClassName = '',
 	dropdownOffsetX = 0,
 	scrollable = false,
-	maxHeight = 200
+	maxHeight = 200,
 }: FilterDropdownProps) {
 	const [open, setOpen] = useState(false);
 	const [dropdownStyle, setDropdownStyle] = useState<Record<string, string>>(
 		{},
 	);
+	const [position, setPosition] = useState<'bottom' | 'top'>('bottom');
 	const containerRef = useRef<HTMLDivElement>(null);
 	const btnRef = useRef<HTMLButtonElement>(null);
 	const dropdownMenuRef = useRef<HTMLDivElement>(null);
@@ -59,16 +60,29 @@ export function FilterDropdown({
 	useEffect(() => {
 		if (open && btnRef.current) {
 			const rect = btnRef.current.getBoundingClientRect();
+			const dropdownHeight = Math.min(maxHeight, 300); // Approximate max height
+			const spaceBelow = window.innerHeight - rect.bottom - 10;
+			const spaceAbove = rect.top - 10;
+
+			// ✅ Determine if dropdown should go up or down
+			const shouldGoUp = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
+			const finalPosition = shouldGoUp ? 'top' : 'bottom';
+			setPosition(finalPosition);
+
 			setDropdownStyle({
 				position: 'fixed',
-				top: `${rect.bottom + 4}px`,
+				top:
+					finalPosition === 'bottom'
+						? `${rect.bottom + 4}px`
+						: `${rect.top - dropdownHeight - 4}px`,
 				left: `${rect.left + dropdownOffsetX}px`,
 				width: fullWidth ? `${rect.width}px` : 'auto',
 				minWidth: fullWidth ? 'auto' : '160px',
+				maxHeight: `${dropdownHeight}px`,
 				zIndex: '200',
 			});
 		}
-	}, [open, fullWidth, dropdownOffsetX]);
+	}, [open, fullWidth, dropdownOffsetX, maxHeight]);
 
 	const selectedLabel = value
 		? options.find((o) => o.value === value)?.label || label
@@ -76,6 +90,9 @@ export function FilterDropdown({
 
 	const defaultBtnClass =
 		'border-[#E8E8E9] bg-white text-[#1B1B1B] hover:bg-[#F8FAFB]';
+
+	// ✅ Determine if dropdown should be positioned at top or bottom
+	const dropdownPositionClass = position === 'top' ? 'bottom-full' : '';
 
 	return (
 		<div
@@ -86,8 +103,9 @@ export function FilterDropdown({
 				ref={btnRef}
 				type='button'
 				onClick={() => setOpen(!open)}
-				className={`flex px-4 py-3 items-center gap-2 rounded-lg border text-sm font-inter cursor-pointer transition-colors ${fullWidth ? 'w-full justify-between' : 'whitespace-nowrap'
-					} ${buttonClassName || defaultBtnClass}`}
+				className={`flex px-4 py-3 items-center gap-2 rounded-lg border text-sm font-inter cursor-pointer transition-colors ${
+					fullWidth ? 'w-full justify-between' : 'whitespace-nowrap'
+				} ${buttonClassName || defaultBtnClass}`}
 			>
 				<span
 					className={
@@ -98,8 +116,9 @@ export function FilterDropdown({
 				</span>
 				<ChevronDown
 					size={16}
-					className={`transition-transform duration-200 shrink-0 ${open ? 'rotate-180' : ''
-						} ${buttonClassName ? 'text-inherit' : 'text-[#777980]'}`}
+					className={`transition-transform duration-200 shrink-0 ${
+						open ? 'rotate-180' : ''
+					} ${buttonClassName ? 'text-inherit' : 'text-[#777980]'}`}
 				/>
 			</button>
 
@@ -107,7 +126,7 @@ export function FilterDropdown({
 				createPortal(
 					<div
 						ref={dropdownMenuRef}
-						className={`adm-glass-dropdown-menu ${scrollable ? 'adm-dropdown-scrollable max-h-[240px]' : ''}`}
+						className={`adm-glass-dropdown-menu ${scrollable ? 'adm-dropdown-scrollable' : ''}`}
 						style={dropdownStyle}
 					>
 						<Button
@@ -117,10 +136,11 @@ export function FilterDropdown({
 								onChange('');
 								setOpen(false);
 							}}
-							className={`flex w-full py-2.5 px-4 items-center text-sm text-left cursor-pointer transition-colors ${!value
-								? 'bg-[#0098E8] text-white'
-								: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
-								}`}
+							className={`flex w-full py-2.5 px-4 items-center text-sm text-left cursor-pointer transition-colors ${
+								!value
+									? 'bg-[#0098E8] text-white'
+									: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
+							}`}
 						>
 							{label}
 						</Button>
@@ -133,10 +153,11 @@ export function FilterDropdown({
 									onChange(option.value);
 									setOpen(false);
 								}}
-								className={`flex w-full py-2.5 px-4 items-center text-sm text-left cursor-pointer transition-colors capitalize ${value === option.value
-									? 'bg-[#0098E8] text-white'
-									: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
-									}`}
+								className={`flex w-full py-2.5 px-4 items-center text-sm text-left cursor-pointer transition-colors capitalize ${
+									value === option.value
+										? 'bg-[#0098E8] text-white'
+										: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
+								}`}
 							>
 								{option.label}
 							</Button>

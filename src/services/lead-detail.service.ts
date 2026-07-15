@@ -21,7 +21,6 @@ function mapApiToLeadDetail(data: LeadDetailApiResponse): LeadDetail {
 
 	// ✅ Map activity timelines from API
 	const activityItems: ActivityItem[] = (data.activity_timelines || []).map((item: any) => {
-		// Determine activity type based on description
 		let type: ActivityItem['type'] = 'lead';
 		const desc = item.description?.toLowerCase() || '';
 
@@ -39,7 +38,7 @@ function mapApiToLeadDetail(data: LeadDetailApiResponse): LeadDetail {
 			id: item.id,
 			type: type,
 			title: item.description || 'Activity',
-			subtitle: item.user ? `by ${userName}` : undefined,
+			subtitle: item.user ? ` by ${userName}` : undefined,
 			description: undefined,
 			user: userName,
 			date: new Date(item.created_at).toLocaleDateString('en-US', {
@@ -63,10 +62,10 @@ function mapApiToLeadDetail(data: LeadDetailApiResponse): LeadDetail {
 			id: item.id,
 			type: 'staff',
 			title: item.assigned_to_id ? 'Lead assigned' : 'Lead unassigned',
-			subtitle: item.assigned_to_id ? `to ${assigneeName}` : undefined,
+			subtitle: item.assigned_to_id ? ` to ${assigneeName}` : undefined,
 			description: undefined,
 			user: assignerName,
-			date: new Date().toLocaleDateString('en-US', {
+			date: new Date(item.created_at || Date.now()).toLocaleDateString('en-US', {
 				day: 'numeric',
 				month: 'short',
 				year: 'numeric',
@@ -79,6 +78,46 @@ function mapApiToLeadDetail(data: LeadDetailApiResponse): LeadDetail {
 	allActivities.sort((a, b) => {
 		return new Date(b.date).getTime() - new Date(a.date).getTime();
 	});
+
+	const mappedAttachments = (() => {
+
+		if (data.attachments_url_paths && data.attachments_url_paths.length > 0) {
+			return (data.attachments_url_paths as any[]).map((a, index) => ({
+				id: `att_${index}_${Date.now()}`,
+				url: a.url || '',
+				fileName: a.filename || a.url?.split('/').pop() || `file_${index}`,
+				fileSize: 0,
+				mimeType: '',
+				uploadedAt: new Date().toISOString(),
+			}));
+		}
+
+		// Fallback: old format (attachments array with strings or objects)
+		if (!data.attachments || data.attachments.length === 0) return [];
+
+		if (typeof data.attachments[0] === 'string') {
+			return (data.attachments as string[]).map((url, index) => {
+				const fileName = url.split('/').pop() || `file_${index}`;
+				return {
+					id: `att_${index}_${Date.now()}`,
+					url: url,
+					fileName: fileName,
+					fileSize: 0,
+					mimeType: '',
+					uploadedAt: new Date().toISOString(),
+				};
+			});
+		} else {
+			return (data.attachments as any[]).map((a) => ({
+				id: a.id || a.url || `att_${Date.now()}`,
+				url: a.url || '',
+				fileName: a.fileName || 'file',
+				fileSize: a.fileSize || 0,
+				mimeType: a.mimeType || '',
+				uploadedAt: a.uploadedAt || new Date().toISOString(),
+			}));
+		}
+	})();
 
 	return {
 		id: data.id,
@@ -111,8 +150,9 @@ function mapApiToLeadDetail(data: LeadDetailApiResponse): LeadDetail {
 				date: n.created_at?.split("T")[0] || "",
 			};
 		}),
+		attachments: mappedAttachments,
 		date: data.created_at?.split("T")[0] || "",
-		activities: allActivities, // ✅ Add mapped activities to LeadDetail
+		activities: allActivities,
 	};
 }
 
@@ -123,7 +163,6 @@ export async function getLeadDetail(id: string): Promise<LeadDetail> {
 
 export async function getLeadActivities(id: string): Promise<ActivityItem[]> {
 	try {
-		// ✅ Fetch lead detail to get activities
 		const lead = await getLeadDetail(id);
 		return lead.activities || [];
 	} catch (error) {
@@ -230,10 +269,13 @@ export async function updateLeadDetails(
 		deposit_status?: string;
 		notes?: string[];
 		stage_name?: string;
+		files?: File[];
 	}
 ): Promise<LeadDetail> {
 	const token = getAccessToken();
 	const formData = new FormData();
+
+	// Text fields
 	if (data.name) formData.append('name', data.name);
 	if (data.email) formData.append('email', data.email);
 	if (data.phone) formData.append('phone', data.phone);
@@ -246,6 +288,13 @@ export async function updateLeadDetails(
 		data.notes.forEach((note) => formData.append('notes', note));
 	}
 	if (data.stage_name) formData.append('stage_name', data.stage_name);
+
+	// ✅ Append files
+	if (data.files && data.files.length > 0) {
+		data.files.forEach((file) => {
+			formData.append('files', file);
+		});
+	}
 
 	const res = await fetch(`${APP_CONFIG.API_BASE_URL}/admin/lead/${leadId}`, {
 		method: 'PATCH',

@@ -15,6 +15,7 @@ export interface LeadDetail {
 	assignedToName: string | null;
 	avatar: string;
 	notes: { id: string; content: string; author: string; date: string }[];
+	attachments: { id: string; url: string; fileName: string; fileSize: number; mimeType: string; uploadedAt?: string }[];
 	date: string;
 	activities: ActivityItem[];
 }
@@ -24,6 +25,15 @@ export interface Note {
 	content: string;
 	author: string;
 	date: string;
+}
+
+export interface Attachment {
+	id: string;
+	url: string;
+	fileName: string;
+	fileSize: number;
+	mimeType: string;
+	uploadedAt?: string;
 }
 
 export type ActivityType = 'lead' | 'stage' | 'staff' | 'coupon';
@@ -53,8 +63,9 @@ export interface LeadDetailApiResponse {
 	assigned_to_id?: string | null;
 	assigned_to?: { id: string; first_name: string; last_name: string } | null;
 	notes?: string[] | { id: string; content: string; author: { first_name: string; last_name: string } | null; created_at: string }[];
+	attachments?: string[] | { id: string; url: string; fileName: string; fileSize: number; mimeType: string }[];
+	attachments_url_paths?: { filename: string; url: string }[]; // ✅ New field
 	created_at: string;
-	// ✅ Add these fields
 	activity_timelines?: {
 		id: string;
 		description: string;

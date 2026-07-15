@@ -29,7 +29,7 @@ export function MetricCard({ data }: MetricCardProps) {
             className="sm:w-4 sm:h-4"
           />
           <span className={`text-xs sm:text-sm font-medium ${isPositive ? "text-[#006F1F]" : "text-[#FF4345]"}`}>
-            {isPositive ? "+" : ""}
+            {isPositive}
             {data.changePercent}
           </span>
         </div>

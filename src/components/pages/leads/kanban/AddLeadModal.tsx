@@ -20,6 +20,16 @@ interface AddLeadModalProps {
 	title?: string;
 }
 
+// ✅ Priority options should match what backend expects
+// These come from the backend, but we define them here for the dropdown
+// Make sure these match the backend's priority values
+const PRIORITY_OPTIONS = [
+	{ value: "LOW", label: "Low" },
+	{ value: "MEDIUM", label: "Medium" },
+	{ value: "HIGH", label: "High" },
+	{ value: "URGENT", label: "Urgent" },
+];
+
 export function AddLeadModal({
 	isOpen,
 	onClose,
@@ -32,10 +42,9 @@ export function AddLeadModal({
 }: AddLeadModalProps) {
 	const [createLead, { isLoading }] = useCreateLeadMutation();
 
-	// ✅ Fix: Extract leads array from paginated response
 	const { data: leadsResponse } = useGetLeadsQuery({
 		page: 1,
-		limit: 1000, // Get enough leads to check for duplicates
+		limit: 100,
 	});
 	const leads = leadsResponse?.data || [];
 
@@ -47,6 +56,7 @@ export function AddLeadModal({
 	const [source, setSource] = useState("");
 	const [deposit, setDeposit] = useState<number>(0);
 	const [depositStatus, setDepositStatus] = useState<LeadDepositStatus>("NONE");
+	const [priority, setPriority] = useState<string>("MEDIUM");
 
 	const [currentStageId, setCurrentStageId] = useState(stageId);
 	const [currentStageLabel, setCurrentStageLabel] = useState(stage);
@@ -74,7 +84,6 @@ export function AddLeadModal({
 			return;
 		}
 
-		// ✅ Now leads is an array, so find works
 		const existingLead = leads.find(
 			(l) => l.email.toLowerCase() === email.toLowerCase()
 		);
@@ -91,6 +100,7 @@ export function AddLeadModal({
 			: `+880${phone.trim()}`;
 
 		try {
+			// ✅ Type assertion to match the Lead type
 			const result = await createLead({
 				name,
 				email,
@@ -98,7 +108,7 @@ export function AddLeadModal({
 				service,
 				vehicle,
 				source,
-				priority: "MEDIUM",
+				priority: priority as 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT',
 				deposit_status: depositStatus,
 				stage_name: currentStageLabel,
 				stage: currentStageLabel.toLowerCase().replace(/\s+/g, "_"),
@@ -113,6 +123,7 @@ export function AddLeadModal({
 			setSource("");
 			setDeposit(0);
 			setDepositStatus("NONE");
+			setPriority("MEDIUM");
 			setCurrentStageId(stageId);
 			setCurrentStageLabel(stage);
 			onClose();
@@ -228,23 +239,20 @@ export function AddLeadModal({
 						/>
 					</div>
 					<div>
-						<label htmlFor="deposit" className="block text-sm font-medium text-[#1B1B1B] mb-1.5">
-							Deposit ($)
+						<label className="block text-sm font-medium text-[#1B1B1B] mb-1.5">
+							Priority
 						</label>
-						<input
-							id="deposit"
-							type="number"
-							min="0"
-							step="1"
-							value={deposit}
-							onChange={(e) => setDeposit(Number(e.target.value))}
-							placeholder="0"
-							className={inputClass}
+						<FilterDropdown
+							label="Medium"
+							options={PRIORITY_OPTIONS}
+							value={priority}
+							onChange={(val: string) => setPriority(val)}
+							fullWidth
 						/>
 					</div>
 					<div>
 						<label className="block text-sm font-medium text-[#1B1B1B] mb-1.5">
-							Status
+							Deposit
 						</label>
 						<FilterDropdown
 							label="None"

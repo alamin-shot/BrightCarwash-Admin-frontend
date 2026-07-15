@@ -15,6 +15,8 @@ import { mapStagesToOptions } from "@/lib/stage-utils";
 import type { StageOption } from "@/components/ui/StageDropdown";
 import { toast } from "react-toastify";
 import { EditLeadModal } from "@/components/ui/EditLeadModal";
+import { getAccessToken } from "@/lib/auth-client";
+import { APP_CONFIG } from "@/configs/app.config";
 
 interface Props {
 	leadId: string;
@@ -60,6 +62,146 @@ export function LeadDetailContent({ leadId }: Props) {
 		}
 	};
 
+	// ✅ Handle file upload
+	const handleUpload = async (files: File[]) => {
+		try {
+			await updateLeadDetails(leadId, { files });
+
+			const now = new Date();
+			const dateStr = now.toLocaleDateString("en-US", {
+				day: "numeric",
+				month: "short",
+				year: "numeric",
+			});
+			addLocalActivity({
+				id: `local_${Date.now()}`,
+				type: "lead",
+				title: `${files.length} file(s) uploaded`,
+				subtitle: "by You",
+				user: "You",
+				date: dateStr,
+			});
+
+			toast.success(`${files.length} file(s) uploaded successfully`);
+			triggerRefresh();
+		} catch {
+			toast.error("Failed to upload files");
+		}
+	};
+
+
+	// ✅ Handle attachment delete
+	const handleDeleteAttachment = async (attachmentId: string) => {
+		try {
+			// Find the attachment to get the filename
+			const attachment = lead?.attachments?.find((a) => a.id === attachmentId);
+			if (!attachment) {
+				toast.error('Attachment not found');
+				return;
+			}
+
+			const token = getAccessToken();
+
+			// Try different payload formats that the backend might expect
+			// Option 1: Send as { path: "filename" }
+			const payload = { path: attachment.fileName };
+
+			// Option 2: If that fails, try sending the full URL path
+			// const payload = { path: attachment.url };
+
+			// Option 3: Try sending as { filename: "filename" }
+			// const payload = { filename: attachment.fileName };
+
+			const response = await fetch(
+				`${APP_CONFIG.API_BASE_URL}/admin/lead/${leadId}/attachments`,
+				{
+					method: 'DELETE',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify(payload),
+				}
+			);
+
+			const responseData = await response.json().catch(() => ({}));
+
+			if (!response.ok) {
+				throw new Error(responseData.message || responseData.error || 'Failed to delete attachment');
+			}
+
+			// ✅ Add local activity for deletion
+			const now = new Date();
+			const dateStr = now.toLocaleDateString("en-US", {
+				day: "numeric",
+				month: "short",
+				year: "numeric",
+			});
+			addLocalActivity({
+				id: `local_${Date.now()}`,
+				type: "lead",
+				title: `File deleted: ${attachment.fileName}`,
+				subtitle: "by You",
+				user: "You",
+				date: dateStr,
+			});
+
+			toast.success(`"${attachment.fileName}" deleted`);
+			triggerRefresh();
+		} catch (error: any) {
+			toast.error(error.message || 'Failed to delete attachment');
+		}
+	};
+
+	// ✅ Handle attachment download
+	// ✅ Handle attachment download - triggers actual file download
+	const handleDownloadAttachment = async (attachmentId: string) => {
+		try {
+			const attachment = lead?.attachments?.find((a) => a.id === attachmentId);
+			if (!attachment) {
+				toast.error('File not found');
+				return;
+			}
+
+			// ✅ Fetch the file and trigger download
+			const token = getAccessToken();
+			const response = await fetch(attachment.url, {
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to download file');
+			}
+
+			// Get the blob from response
+			const blob = await response.blob();
+
+			// Extract filename from Content-Disposition header or use the stored filename
+			const contentDisposition = response.headers.get('Content-Disposition');
+			let fileName = attachment.fileName;
+			if (contentDisposition) {
+				const match = contentDisposition.match(/filename="?(.+?)"?$/);
+				if (match) fileName = match[1];
+			}
+
+			// Create download link
+			const url = window.URL.createObjectURL(blob);
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = fileName;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			window.URL.revokeObjectURL(url);
+
+			toast.success(`Downloading ${fileName}`);
+		} catch (error: any) {
+			toast.error(error.message || 'Failed to download file');
+		}
+	};
+
 	const handleEditSave = async (data: any) => {
 		await updateLeadDetails(leadId, data);
 
@@ -100,8 +242,12 @@ export function LeadDetailContent({ leadId }: Props) {
 					<NotesSection
 						leadId={leadId}
 						notes={lead.notes}
+						attachments={lead.attachments || []}
 						onNoteAdded={handleNoteAdded}
 						onDeleteNote={handleDeleteNote}
+						onUpload={handleUpload}
+						onDeleteAttachment={handleDeleteAttachment}
+						onDownloadAttachment={handleDownloadAttachment}
 					/>
 				</div>
 

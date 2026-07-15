@@ -307,7 +307,6 @@ body {
 	overflow-x: hidden;
 }
 
-/* Extra small screen breakpoint (320px+) */
 @media (min-width: 320px) {
 	.xs\:inline {
 		display: inline;

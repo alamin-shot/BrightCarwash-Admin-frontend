@@ -1,11 +1,14 @@
 import Image from 'next/image';
 import { StageDropdown, type StageOption } from '@/components/ui/StageDropdown';
 import { ActionsDropdown } from '@/components/ui/ActionsDropdown';
+import { FilterDropdown } from '@/components/ui/FilterDropdown';
+import { getPriorityConfig } from '@/lib/priority-utils';
 import type { Column } from '@/components/ui/DataTable';
 import type { Lead } from '@/types/leads';
 
 interface LeadsColumnsParams {
 	onStageChange: (id: string, stageId: string) => void;
+	onPriorityChange: (id: string, priority: string) => void;
 	onView: (lead: Lead) => void;
 	onDelete: (lead: Lead) => void;
 	onSelectRow: (id: string) => void;
@@ -24,8 +27,16 @@ const truncateToMaxWords = (text: string, maxWords: number = 8): string => {
 	return words.slice(0, maxWords).join(' ') + '...';
 };
 
+const PRIORITY_OPTIONS = [
+	{ value: 'LOW', label: 'Low' },
+	{ value: 'MEDIUM', label: 'Medium' },
+	{ value: 'HIGH', label: 'High' },
+	{ value: 'URGENT', label: 'Urgent' },
+];
+
 export function createLeadsColumns({
 	onStageChange,
+	onPriorityChange,
 	onDelete,
 	onSelectRow,
 	onSelectAll,
@@ -107,9 +118,31 @@ export function createLeadsColumns({
 			),
 		},
 		{
+			key: 'priority',
+			header: 'Priority',
+			className: 'no-row-click',
+			render: (row) => {
+				const config = getPriorityConfig(row.priority);
+				return (
+					<FilterDropdown
+						label={config.label}
+						options={PRIORITY_OPTIONS}
+						value={row.priority}
+						onChange={(val) => onPriorityChange(row.id, val)}
+						buttonClassName={`text-xs font-medium capitalize px-2 py-1 rounded-full border ${row.priority === 'URGENT' ? 'border-[#FF4345] text-[#FF4345] bg-[#FFE6E6]' :
+								row.priority === 'HIGH' ? 'border-[#FF6B00] text-[#FF6B00] bg-[#FFF0E6]' :
+									row.priority === 'MEDIUM' ? 'border-[#FFAF00] text-[#FFAF00] bg-[#FFF7E6]' :
+										'border-[#DFE1E7] text-[#777980] bg-[#F1F1F1]'
+							}`}
+						dropdownOffsetX={-20}
+					/>
+				);
+			},
+		},
+		{
 			key: 'stage',
 			header: 'Stage',
-			className: 'no-row-click', // ✅ Prevents row click on stage dropdown
+			className: 'no-row-click',
 			render: (row) => (
 				<StageDropdown
 					currentStage={row.stage}
@@ -131,7 +164,7 @@ export function createLeadsColumns({
 		{
 			key: 'actions',
 			header: '',
-			className: 'w-12 no-row-click', // ✅ Prevents row click on actions dropdown
+			className: 'w-12 no-row-click',
 			render: (row) => (
 				<ActionsDropdown
 					items={[

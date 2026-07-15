@@ -34,7 +34,7 @@ export function InquiriesChart({ data }: InquiriesChartProps) {
       curve: "smooth",
       width: 2,
     },
-    colors: ["#0098E8", "#B23730"],
+    colors: ["#0098E8", "#007e2aff"],
     fill: {
       type: "gradient",
       gradient: {
@@ -48,8 +48,8 @@ export function InquiriesChart({ data }: InquiriesChartProps) {
             { offset: 100, color: "#0098E8", opacity: 0 },
           ],
           [
-            { offset: 0, color: "#B23730", opacity: 0.5 },
-            { offset: 100, color: "#B23730", opacity: 0 },
+            { offset: 0, color: "#007e2aff", opacity: 0.5 },
+            { offset: 100, color: "#007e2aff", opacity: 0 },
           ],
         ],
       },

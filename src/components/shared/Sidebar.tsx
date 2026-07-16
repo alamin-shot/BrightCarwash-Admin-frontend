@@ -102,8 +102,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                               href={item.href}
                               onClick={onClose}
                               className={`flex-1 flex py-2.5 sm:py-[14px] px-3 sm:px-4 items-center gap-2 sm:gap-3 rounded-lg font-inter text-sm sm:text-base font-normal leading-[124%] tracking-[0.08px] no-underline transition-colors duration-200 cursor-pointer ${isParentActive
-                                  ? "bg-[#B23730] text-white"
-                                  : "text-white/80 hover:bg-white/5"
+                                ? "bg-[#B23730] text-white"
+                                : "text-white/80 hover:bg-white/5"
                                 }`}
                             >
                               <Icon
@@ -151,8 +151,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                       href={subItem.href}
                                       onClick={onClose}
                                       className={`flex py-2.5 px-3 items-center gap-3 self-stretch rounded-lg font-inter text-sm font-normal leading-[124%] tracking-[0.08px] no-underline transition-colors duration-200 cursor-pointer ${isSubActive
-                                          ? "bg-[#B23730] text-white"
-                                          : "text-white/80 hover:bg-white/5"
+                                        ? "bg-[#B23730] text-white"
+                                        : "text-white/80 hover:bg-white/5"
                                         }`}
                                     >
                                       {/* L-shaped branch line */}
@@ -162,7 +162,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                         height={32}
                                         className={iconClass}
                                         color="white"
-                                        opacity={0.5}
+
                                       />
                                       {/* Sub-item icon */}
                                       <Icon
@@ -171,7 +171,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                         height={18}
                                         className="flex-shrink-0"
                                         color="white"
-                                        opacity={0.8}
+
                                       />
                                       <span className="truncate">{subItem.label}</span>
                                     </Link>

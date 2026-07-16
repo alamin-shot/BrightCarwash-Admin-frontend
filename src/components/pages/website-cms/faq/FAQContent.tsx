@@ -25,7 +25,7 @@ export function FAQContent() {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchInput, setSearchInput] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
-    const [sortFilter, setSortFilter] = useState('display_order_asc');
+    const [sortFilter, setSortFilter] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingFAQ, setEditingFAQ] = useState<FAQ | null>(null);
     const [localFAQs, setLocalFAQs] = useState<FAQ[]>([]);

@@ -22,7 +22,7 @@ export function NewsContent() {
     const [searchInput, setSearchInput] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('');
-    const [sortFilter, setSortFilter] = useState('created_at_desc');
+    const [sortFilter, setSortFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);

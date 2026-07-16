@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/Button';
 import { FilterDropdown } from '@/components/ui/FilterDropdown';
 
 const STATUS_OPTIONS = [
-
     { value: 'true', label: 'Published' },
     { value: 'false', label: 'Draft' },
 ];
@@ -72,7 +71,7 @@ export function GalleryFilters({
                 />
 
                 <FilterDropdown
-                    label="Newest"
+                    label="Sort by"
                     options={SORT_OPTIONS}
                     value={sortFilter}
                     onChange={onSortChange}

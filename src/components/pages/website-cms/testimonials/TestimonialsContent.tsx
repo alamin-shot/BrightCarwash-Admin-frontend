@@ -1,42 +1,42 @@
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Pagination } from '@/components/ui/Pagination';
-import { GalleryHeader } from './GalleryHeader';
-import { GalleryFilters } from './GalleryFilters';
-import { GalleryGridView } from './GalleryGridView';
-import { GalleryListView } from './GalleryListView';
-import { GalleryModal } from './GalleryModal';
-import { useGetGalleryQuery, useDeleteGalleryMutation } from '@/services/gallery.api';
-import type { GalleryItem } from '@/types/gallery';
+import { TestimonialsHeader } from './TestimonialsHeader';
+import { TestimonialsFilters } from './TestimonialsFilters';
+import { TestimonialsGridView } from './TestimonialsGridView';
+import { TestimonialsListView } from './TestimonialsListView';
+import { TestimonialsModal } from './TestimonialsModal';
+import { useGetTestimonialsQuery, useDeleteTestimonialMutation } from '@/services/testimonial.api';
+import type { Testimonial } from '@/types/testimonial';
 import { toast } from 'react-toastify';
 
 const ITEMS_PER_PAGE = 10;
 
-export function GalleryContent() {
+export function TestimonialsContent() {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchInput, setSearchInput] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     const [sortFilter, setSortFilter] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingItem, setEditingItem] = useState<GalleryItem | null>(null);
+    const [editingItem, setEditingItem] = useState<Testimonial | null>(null);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-    const [sortBy, sortOrder] = sortFilter.includes('name')
-        ? ['name', sortFilter.includes('asc') ? 'asc' : 'desc']
+    const [sortBy, sortOrder] = sortFilter.includes('rating')
+        ? ['rating', sortFilter.includes('asc') ? 'asc' : 'desc']
         : ['created_at', sortFilter.includes('asc') ? 'asc' : 'desc'];
 
-    const { data: items = [], isLoading, refetch } = useGetGalleryQuery({
+    const { data: items = [], isLoading, refetch } = useGetTestimonialsQuery({
         search: searchQuery || undefined,
-        is_published: statusFilter ? statusFilter === 'true' : undefined,
+        is_active: statusFilter ? statusFilter === 'true' : undefined,
         sort_by: sortBy,
         sort_order: sortOrder,
         page: currentPage,
         limit: ITEMS_PER_PAGE,
     });
 
-    const [deleteGallery] = useDeleteGalleryMutation();
+    const [deleteTestimonial] = useDeleteTestimonialMutation();
 
     const handleSearchKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
@@ -50,19 +50,19 @@ export function GalleryContent() {
         setCurrentPage(1);
     };
 
-    const handleEdit = (item: GalleryItem) => {
+    const handleEdit = (item: Testimonial) => {
         setEditingItem(item);
         setIsModalOpen(true);
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this gallery item?')) return;
+        if (!confirm('Are you sure you want to delete this testimonial?')) return;
         try {
-            await deleteGallery(id).unwrap();
-            toast.success('Gallery item deleted successfully');
+            await deleteTestimonial(id).unwrap();
+            toast.success('Testimonial deleted successfully');
             refetch();
         } catch {
-            toast.error('Failed to delete gallery item');
+            toast.error('Failed to delete testimonial');
         }
     };
 
@@ -76,8 +76,7 @@ export function GalleryContent() {
         handleModalClose();
     };
 
-    // Get total from API response or fallback
-    const totalItems = items.length > 0 ? 6 : 0; // TODO: Use actual meta from API
+    const totalItems = items.length > 0 ? items.length : 0;
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
     if (isLoading) {
@@ -96,9 +95,9 @@ export function GalleryContent() {
 
     return (
         <div className="flex flex-col gap-6 w-full">
-            <GalleryHeader onAddClick={() => setIsModalOpen(true)} />
+            <TestimonialsHeader onAddClick={() => setIsModalOpen(true)} />
 
-            <GalleryFilters
+            <TestimonialsFilters
                 searchInput={searchInput}
                 onSearchChange={setSearchInput}
                 onSearchSubmit={handleSearchSubmit}
@@ -112,13 +111,12 @@ export function GalleryContent() {
             />
 
             {viewMode === 'grid' ? (
-                <GalleryGridView
+                <TestimonialsGridView
                     items={items}
                     onEdit={handleEdit}
-                    onDelete={handleDelete}
                 />
             ) : (
-                <GalleryListView
+                <TestimonialsListView
                     items={items}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
@@ -133,7 +131,7 @@ export function GalleryContent() {
                 itemsPerPage={ITEMS_PER_PAGE}
             />
 
-            <GalleryModal
+            <TestimonialsModal
                 isOpen={isModalOpen}
                 onClose={handleModalClose}
                 item={editingItem}

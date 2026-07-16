@@ -15,6 +15,8 @@ import { faqApi } from '@/services/faq.api';
 import { galleryApi } from '@/services/gallery.api';
 import { newsApi } from '@/services/news.api';
 import { categoryApi } from '@/services/category.api';
+import { testimonialApi } from '@/services/testimonial.api';
+import { heroApi } from '@/services/hero.api';
 export const store = configureStore({
 	reducer: {
 		auth: authReducer,
@@ -32,6 +34,8 @@ export const store = configureStore({
 		[galleryApi.reducerPath]: galleryApi.reducer,
 		[newsApi.reducerPath]: newsApi.reducer,
 		[categoryApi.reducerPath]: categoryApi.reducer,
+		[testimonialApi.reducerPath]: testimonialApi.reducer,
+		[heroApi.reducerPath]: heroApi.reducer,
 
 	},
 	middleware: (getDefaultMiddleware) =>
@@ -49,6 +53,8 @@ export const store = configureStore({
 			galleryApi.middleware,
 			newsApi.middleware,
 			categoryApi.middleware,
+			testimonialApi.middleware,
+			heroApi.middleware
 
 		),
 });

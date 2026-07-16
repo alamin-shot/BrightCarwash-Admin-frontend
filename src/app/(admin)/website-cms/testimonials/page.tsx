@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/pages/website-cms/ComingSoon";
+import { TestimonialsContent } from '@/components/pages/website-cms/testimonials/TestimonialsContent';
 
 export default function TestimonialsPage() {
-    return <ComingSoon title="Testimonials" description="Manage customer testimonials and reviews displayed on your website." />;
+    return <TestimonialsContent />;
 }

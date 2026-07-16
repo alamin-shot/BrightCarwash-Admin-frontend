@@ -1,5 +1,5 @@
-import { ComingSoon } from "@/components/pages/website-cms/ComingSoon";
+import { HeroContent } from '@/components/pages/website-cms/hero/HeroContent';
 
 export default function HeroSectionPage() {
-    return <ComingSoon title="Hero Section" description="Manage the hero section of your website. Add, edit, or remove hero banners and content." />;
+    return <HeroContent />;
 }

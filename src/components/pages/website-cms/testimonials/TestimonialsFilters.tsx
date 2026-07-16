@@ -12,54 +12,45 @@ const STATUS_OPTIONS = [
 
 const SORT_OPTIONS = [
     { value: 'created_at_desc', label: 'Newest' },
-    { value: 'created_at_asc', label: 'Oldest' }
-    ,
+    { value: 'created_at_asc', label: 'Oldest' },
+
 ];
 
-interface NewsFiltersProps {
+interface TestimonialsFiltersProps {
     searchInput: string;
     onSearchChange: (value: string) => void;
     onSearchSubmit: () => void;
     onSearchKeyDown: (e: React.KeyboardEvent) => void;
     statusFilter: string;
     onStatusChange: (value: string) => void;
-    categoryFilter: string;
-    onCategoryChange: (value: string) => void;
-    categories: { id: string; name: string }[];
     sortFilter: string;
     onSortChange: (value: string) => void;
     viewMode: 'grid' | 'list';
     onViewModeChange: (mode: 'grid' | 'list') => void;
 }
 
-export function NewsFilters({
+export function TestimonialsFilters({
     searchInput,
     onSearchChange,
     onSearchSubmit,
     onSearchKeyDown,
     statusFilter,
     onStatusChange,
-    categoryFilter,
-    onCategoryChange,
-    categories,
     sortFilter,
     onSortChange,
     viewMode,
     onViewModeChange,
-}: NewsFiltersProps) {
-    const categoryOptions = [
-        ...categories.map((c) => ({ value: c.id, label: c.name })),
-    ];
-
+}: TestimonialsFiltersProps) {
     return (
         <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
+                {/* Search */}
                 <div className="flex">
                     <div className="flex px-4 py-3 items-center gap-3 rounded-l-lg border border-[#E8E8E9] bg-white flex-1 border-r-0 w-56">
                         <Icon name="search" width={20} height={20} color="#777980" />
                         <input
                             type="text"
-                            placeholder="Search posts..."
+                            placeholder="Search testimonials…"
                             value={searchInput}
                             onChange={(e) => onSearchChange(e.target.value)}
                             onKeyDown={onSearchKeyDown}
@@ -82,13 +73,6 @@ export function NewsFilters({
                 />
 
                 <FilterDropdown
-                    label="All Categories"
-                    options={categoryOptions}
-                    value={categoryFilter}
-                    onChange={onCategoryChange}
-                />
-
-                <FilterDropdown
                     label="Sort by"
                     options={SORT_OPTIONS}
                     value={sortFilter}
@@ -96,6 +80,7 @@ export function NewsFilters({
                 />
             </div>
 
+            {/* View Toggle */}
             <div className="flex p-1 bg-[#F1F1F1] rounded-lg border border-[#DFE1E7]">
                 <Button
                     variant="icon"

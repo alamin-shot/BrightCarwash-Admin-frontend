@@ -5,5 +5,5 @@
             "use": "@vercel/next"
         }
     ],
-    "buildCommand": "next build --no-lint"
+    "buildCommand": "npm install --legacy-peer-deps && next build --no-lint"
 }

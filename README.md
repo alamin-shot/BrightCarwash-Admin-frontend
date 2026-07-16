@@ -2,7 +2,9 @@
 
 ## Project Overview
 
-Next.js 15+ admin dashboard with complete authentication system. Built with Redux Toolkit, RTK Query, Axios interceptors, and silent token refresh.
+Next.js 15+ admin dashboard with complete authentication system. Built with Redux Toolkit, RTK Query, Axios interceptors, and silent token refresh......
+
+
 
 ---
 

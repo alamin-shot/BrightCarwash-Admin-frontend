@@ -4,7 +4,8 @@ export interface HeroContent {
     subtext: string;
     background_image_url?: string;
     backgroundImageUrl?: string;
-    banner_image_url?: string;
+    bannerImageUrl?: string;
+    banner_image_url?: string;  // ✅ Add snake_case version
     star_rating: string;
     cars_washed: string;
     avg_time: string;

@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useGetHeroSectionQuery, useUpdateHeroSectionMutation, uploadHeroImage } from '@/services/hero.api';
+import { useMemo } from 'react';
+import {
+    useGetHeroSectionQuery,
+    useUpdateHeroSectionMutation,
+    uploadHeroImage,
+} from '@/services/hero.api';
 import { toast } from 'react-toastify';
 
 export interface HeroFormData {
@@ -12,40 +16,45 @@ export interface HeroFormData {
     carsWashed: string;
     avgTime: string;
     backgroundImageUrl?: string;
+    bannerImageUrl?: string;
     status: 'form' | 'banner' | 'hidden';
 }
 
 export function useHeroData() {
     const { data: hero, isLoading, refetch } = useGetHeroSectionQuery();
-    const [updateHero, { isLoading: isUpdating }] = useUpdateHeroSectionMutation();
+    const [updateHero, { isLoading: isUpdating }] =
+        useUpdateHeroSectionMutation();
 
-    const [initialData, setInitialData] = useState<HeroFormData>({
-        eyebrowText: '',
-        mainHeadline: '',
-        subtext: '',
-        starRating: '4.9',
-        carsWashed: '12K+',
-        avgTime: '15-Min Average',
-        backgroundImageUrl: undefined,
-        status: 'form',
-    });
-
-    useEffect(() => {
-        if (hero?.content) {
-            setInitialData({
-                eyebrowText: hero.content.eyebrow_text || '',
-                mainHeadline: hero.content.main_headline || '',
-                subtext: hero.content.subtext || '',
-                starRating: hero.content.star_rating || '4.9',
-                carsWashed: hero.content.cars_washed || '12K+',
-                avgTime: hero.content.avg_time || '15-Min Average',
-                backgroundImageUrl: hero.content.backgroundImageUrl,
-                status: hero.content.status || (hero.is_active ? 'form' : 'hidden'),
-            });
+    const initialData = useMemo<HeroFormData>(() => {
+        if (!hero?.content) {
+            return {
+                eyebrowText: '',
+                mainHeadline: '',
+                subtext: '',
+                starRating: '4.9',
+                carsWashed: '12K+',
+                avgTime: '15-Min Average',
+                backgroundImageUrl: undefined,
+                bannerImageUrl: undefined,
+                status: 'form',
+            };
         }
+
+        return {
+            eyebrowText: hero.content.eyebrow_text || '',
+            mainHeadline: hero.content.main_headline || '',
+            subtext: hero.content.subtext || '',
+            starRating: hero.content.star_rating || '4.9',
+            carsWashed: hero.content.cars_washed || '12K+',
+            avgTime: hero.content.avg_time || '15-Min Average',
+            backgroundImageUrl:
+                hero.content.backgroundImageUrl || hero.content.background_image_url,
+            // ✅ Try both camelCase and snake_case from backend
+            bannerImageUrl: hero.content.bannerImageUrl || hero.content.banner_image_url || hero.content.bannerImageUrl,
+            status: hero.content.status || (hero.is_active ? 'form' : 'hidden'),
+        };
     }, [hero]);
 
-    // ✅ Returns Promise<string> not void
     const handleImageUpload = async (file: File): Promise<string> => {
         const imagePath = await uploadHeroImage(file);
         toast.success('Image uploaded successfully');
@@ -54,7 +63,7 @@ export function useHeroData() {
 
     const handleSave = async (data: HeroFormData) => {
         try {
-            const content: any = {
+            const content: Record<string, string | boolean | undefined> = {
                 eyebrow_text: data.eyebrowText,
                 main_headline: data.mainHeadline,
                 subtext: data.subtext,
@@ -67,6 +76,14 @@ export function useHeroData() {
             if (data.backgroundImageUrl) {
                 content.backgroundImageUrl = data.backgroundImageUrl;
             }
+
+            // ✅ Try sending as both camelCase and snake_case
+            if (data.bannerImageUrl) {
+                content.bannerImageUrl = data.bannerImageUrl;
+                content.banner_image_url = data.bannerImageUrl; // ✅ Try snake_case too
+            }
+
+            console.log('📤 Sending content to backend:', content);
 
             await updateHero({
                 key: 'home_hero',

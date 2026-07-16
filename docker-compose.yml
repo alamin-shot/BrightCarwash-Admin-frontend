@@ -6,7 +6,7 @@ services:
     image: dashboard-frontend-car-wash-admin
     container_name: dashboard-frontend-car-wash-admin
     ports:
-      - "3001:3001"
+      - "3001:3000"
     env_file:
       - .env
     working_dir: /usr/src/app

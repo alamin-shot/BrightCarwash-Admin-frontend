@@ -18,6 +18,7 @@ import { categoryApi } from '@/services/category.api';
 import { testimonialApi } from '@/services/testimonial.api';
 import { heroApi } from '@/services/hero.api';
 import { emailListApi } from '@/services/email-list.api';
+import { settingsApi } from '@/services/settings.api';
 export const store = configureStore({
 	reducer: {
 		auth: authReducer,
@@ -37,7 +38,8 @@ export const store = configureStore({
 		[categoryApi.reducerPath]: categoryApi.reducer,
 		[testimonialApi.reducerPath]: testimonialApi.reducer,
 		[heroApi.reducerPath]: heroApi.reducer,
-		[emailListApi.reducerPath]: emailListApi.reducer
+		[emailListApi.reducerPath]: emailListApi.reducer,
+		[settingsApi.reducerPath]: settingsApi.reducer,
 
 	},
 	middleware: (getDefaultMiddleware) =>
@@ -57,7 +59,8 @@ export const store = configureStore({
 			categoryApi.middleware,
 			testimonialApi.middleware,
 			heroApi.middleware,
-			emailListApi.middleware
+			emailListApi.middleware,
+			settingsApi.middleware
 
 		),
 });

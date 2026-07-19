@@ -99,8 +99,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                           {/* ✅ Parent Item */}
                           <div className="flex items-center gap-0 w-full">
                             {hasSubItems ? (
-                              // ✅ Items with sub-items: Marketing & Website CMS
-                              // No active bg on parent, chevron inside the button
+
                               <button
                                 onClick={() => toggleExpand(item.id)}
                                 className={`flex flex-1 py-2.5 sm:py-[14px] px-3 sm:px-4 items-center justify-between rounded-lg font-inter text-sm sm:text-base font-normal leading-[124%] tracking-[0.08px] no-underline transition-colors duration-200 cursor-pointer ${isExpanded ? "bg-white/5 text-white" : "text-white/80 hover:bg-white/5"
@@ -121,13 +120,13 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                 />
                               </button>
                             ) : (
-                              // ✅ No sub-items: Normal link with active bg
+
                               <Link
                                 href={item.href}
                                 onClick={onClose}
                                 className={`flex-1 flex py-2.5 sm:py-[14px] px-3 sm:px-4 items-center gap-2 sm:gap-3 rounded-lg font-inter text-sm sm:text-base font-normal leading-[124%] tracking-[0.08px] no-underline transition-colors duration-200 cursor-pointer ${isParentActive
-                                    ? "bg-[#B23730] text-white"
-                                    : "text-white/80 hover:bg-white/5"
+                                  ? "bg-[#B23730] text-white"
+                                  : "text-white/80 hover:bg-white/5"
                                   }`}
                               >
                                 <Icon
@@ -141,52 +140,63 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                             )}
                           </div>
 
-                          {/* ✅ Sub-items */}
+
                           {hasSubItems && isExpanded && (
-                            <div className="flex flex-col items-start gap-0 self-stretch pl-4 sm:pl-5">
+                            <div className="flex flex-col pl-10 mt-3">
                               {item.subItems?.map((subItem, index) => {
                                 const isSubActive = pathname.startsWith(subItem.href);
                                 const isLast = index === (item.subItems?.length || 0) - 1;
-                                const isFirst = index === 0;
-
-                                let iconName = "l-shape-middle";
-                                let iconClass = "flex-shrink-0";
-
-                                if (isFirst) {
-                                  iconName = "l-shape-first";
-                                  iconClass = "flex-shrink-0 mt-2";
-                                } else if (isLast) {
-                                  iconName = "l-shape-last";
-                                  iconClass = "flex-shrink-0";
-                                }
 
                                 return (
-                                  <div key={subItem.id} className="flex flex-col items-start self-stretch">
+                                  <div
+                                    key={subItem.id}
+                                    className="relative flex items-center min-h-10"
+                                  >
+                                    <svg
+                                      className="absolute -left-[11px] top-0"
+                                      width="20"
+                                      height="40"
+                                      viewBox="0 0 20 40"
+                                    >
+                                      {/* Vertical line */}
+                                      {!isLast && (
+                                        <line
+                                          x1="1"
+                                          y1="11"
+                                          x2="1"
+                                          y2="40"
+                                          stroke="white"
+                                          strokeWidth="1.5"
+                                          strokeLinecap="round"
+                                        />
+                                      )}
+
+                                      {/* Curved connector */}
+                                      <g transform="translate(0,0)">
+                                        <path
+                                          d="M1 0 V10 Q1 18 9 18 H16"
+                                          stroke="white"
+                                          strokeWidth="1.5"
+                                          fill="none"
+                                        />
+                                      </g>
+                                    </svg>
+
                                     <Link
                                       href={subItem.href}
                                       onClick={onClose}
-                                      className={`flex py-1.5 px-2 items-center gap-2 self-stretch rounded-lg font-inter text-xs font-normal leading-[124%] tracking-[0.08px] no-underline transition-colors duration-200 cursor-pointer ${isSubActive
-                                          ? "bg-[#B23730] text-white"
-                                          : "text-white/70 hover:bg-white/5 hover:text-white"
+                                      className={`flex flex-1 ml-2 py-2 px-3 items-center gap-2 rounded-lg transition-colors ${isSubActive
+                                        ? "bg-[#B23730] text-white"
+                                        : "text-white/80 hover:bg-white/5 hover:text-white"
                                         }`}
                                     >
                                       <Icon
-                                        name={iconName}
-                                        width={18}
-                                        height={24}
-                                        className={iconClass}
-                                        color="white"
-                                        opacity={0.4}
-                                      />
-                                      <Icon
                                         name={subItem.icon}
-                                        width={14}
-                                        height={14}
-                                        className="flex-shrink-0"
+                                        width={18}
+                                        height={18}
                                         color="white"
-                                        opacity={0.6}
                                       />
-                                      <span className="text-xs leading-3">{subItem.label}</span>
+                                      <span>{subItem.label}</span>
                                     </Link>
                                   </div>
                                 );

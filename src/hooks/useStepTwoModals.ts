@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type ModalType = "sender" | "subject" | "recipients" | null;
+type ModalType = "subject" | "recipients" | null;
 
 export function useStepTwoModals() {
     const [activeModal, setActiveModal] = useState<ModalType>(null);
@@ -11,7 +11,6 @@ export function useStepTwoModals() {
     const closeModal = () => setActiveModal(null);
 
     return {
-        senderModalOpen: activeModal === "sender",
         subjectModalOpen: activeModal === "subject",
         recipientsModalOpen: activeModal === "recipients",
         openModal,

@@ -8,6 +8,8 @@ export interface TeamMember {
     role: string;
     roleId: string;
     createdAt: string;
+    first_name?: string;
+    last_name?: string
 }
 
 export interface TeamRole {
@@ -46,8 +48,13 @@ export interface TeamMemberResponse {
     roleUsers: {
         user_id: string;
         role_id: string;
-        role: { id: string; name: string };
+        role: {
+            id: string; name: string;
+
+        };
     }[];
+    first_name?: string;
+    last_name?: string
 }
 
 export interface MembersApiResponse {

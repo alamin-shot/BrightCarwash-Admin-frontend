@@ -17,12 +17,9 @@ interface StepTwoTemplateProps {
 	selectedGroupId?: string | null;
 	selectedGroupName?: string | null;
 	onRecipientsSave?: (groupId: string, groupName: string) => void;
-	senderName?: string;
-	senderEmail?: string;
 	subject?: string;
 	previewText?: string;
-	filled?: { sender: boolean; recipients: boolean; subject: boolean; design: boolean };
-	onSenderSave?: (name: string, email: string) => void;
+	filled?: { recipients: boolean; subject: boolean; design: boolean };
 	onSubjectSave?: (subject: string, preview: string) => void;
 	tags?: string[];
 }
@@ -37,12 +34,9 @@ export function StepTwoTemplate({
 	selectedGroupId,
 	selectedGroupName,
 	onRecipientsSave,
-	senderName = "Foysal Hasan",
-	senderEmail = "foysalhasan.bdcalling@gmail.com",
 	subject = "",
 	previewText = "",
 	filled: initialFilled,
-	onSenderSave,
 	onSubjectSave,
 	tags = [],
 }: StepTwoTemplateProps) {
@@ -60,15 +54,6 @@ export function StepTwoTemplate({
 		}
 	};
 
-	const handleSenderSave = (name: string, email: string) => {
-		if (onSenderSave) {
-			onSenderSave(name, email);
-		}
-		if (!filled.sender) {
-			toggleFilled("sender");
-		}
-	};
-
 	const handleSubjectSave = (subj: string, preview: string) => {
 		if (onSubjectSave) {
 			onSubjectSave(subj, preview);
@@ -83,8 +68,6 @@ export function StepTwoTemplate({
 		tags: tags,
 		subject: subject,
 		templateId: templateId || "",
-		senderName: senderName,
-		senderEmail: senderEmail,
 		leadGroupId: selectedGroupId,
 	};
 
@@ -107,11 +90,8 @@ export function StepTwoTemplate({
 				selectedGroupId={selectedGroupId}
 				selectedGroupName={selectedGroupName}
 				onRecipientsSave={handleRecipientsSave}
-				senderName={senderName}
-				senderEmail={senderEmail}
 				subject={subject}
 				previewText={previewText}
-				onSenderSave={handleSenderSave}
 				onSubjectSave={handleSubjectSave}
 			/>
 		</div>

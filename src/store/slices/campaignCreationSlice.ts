@@ -9,12 +9,9 @@ interface CampaignCreationState {
     designFilled: boolean;
     selectedGroupId: string | null;
     selectedGroupName: string | null;
-    senderName: string;
-    senderEmail: string;
     subject: string;
     previewText: string;
     filled: {
-        sender: boolean;
         recipients: boolean;
         subject: boolean;
         design: boolean;
@@ -28,16 +25,13 @@ const initialState: CampaignCreationState = {
     tags: [],
     tagInput: '',
     selectedTemplateName: '',
-    templateId: null, // ✅ ADD THIS
+    templateId: null,
     designFilled: false,
     selectedGroupId: null,
     selectedGroupName: null,
-    senderName: 'Foysal Hasan',
-    senderEmail: 'foysalhasan.bdcalling@gmail.com',
     subject: '',
     previewText: '',
     filled: {
-        sender: false,
         recipients: false,
         subject: false,
         design: false,
@@ -93,12 +87,6 @@ const campaignCreationSlice = createSlice({
             state.filled.recipients = true;
         },
 
-        setSender: (state, action: PayloadAction<{ name: string; email: string }>) => {
-            state.senderName = action.payload.name;
-            state.senderEmail = action.payload.email;
-            state.filled.sender = true;
-        },
-
         setSubject: (state, action: PayloadAction<{ subject: string; preview: string }>) => {
             state.subject = action.payload.subject;
             state.previewText = action.payload.preview;
@@ -123,7 +111,6 @@ export const {
     setTemplateId,
     setDesignFilled,
     setSelectedGroup,
-    setSender,
     setSubject,
     loadCampaignForEdit,
 } = campaignCreationSlice.actions;

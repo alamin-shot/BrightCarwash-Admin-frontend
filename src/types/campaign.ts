@@ -1,5 +1,5 @@
 export type CampaignType = "All Campaign" | "E-mail Template";
-export type CampaignStatus = "DRAFT" | "SCHEDULED" | "ACTIVE" | "COMPLETED" | "SUSPENDED";
+export type CampaignStatus = "DRAFT" | "SCHEDULED" | "RUNNING" | "ACTIVE" | "COMPLETED" | "SUSPENDED";
 export type CampaignChannelType = "EMAIL" | "SMS" | "PUSH";
 
 // ✅ Constants for filters
@@ -52,9 +52,9 @@ export interface CreateCampaignRequest {
 	subject: string;
 	templateId?: string;
 	senderName?: string;
-	senderEmail: string;
+	senderEmail?: string;
 	leadGroupId: string;
-	scheduledAt?: string;
+	scheduledAt?: string | null;
 }
 
 export interface UpdateCampaignRequest extends Partial<CreateCampaignRequest> { }

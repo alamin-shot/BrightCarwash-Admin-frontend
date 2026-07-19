@@ -1,14 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useMemo } from 'react';
-import { DataTable } from '@/components/ui/DataTable';
-import { Pagination } from '@/components/ui/Pagination';
-import { FilterDropdown } from '@/components/ui/FilterDropdown';
-import { paymentsColumns } from '@/components/pages/payments/PaymentsColumns';
-import type { PaymentTransaction } from '@/types/payment';
-import { Search } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { useState } from "react";
+import { DataTable } from "@/components/ui/DataTable";
+import { Pagination } from "@/components/ui/Pagination";
+import { FilterDropdown } from "@/components/ui/FilterDropdown";
+import { paymentsColumns } from "@/components/pages/payments/PaymentsColumns";
+import type { PaymentTransaction } from "@/types/payment";
+import { Search } from "lucide-react";
 
 interface Props {
 	payments: PaymentTransaction[];
@@ -16,7 +14,7 @@ interface Props {
 	search: string;
 	status: string;
 	onSearchChange: (value: string) => void;
-	onSearchSubmit: () => void; // ✅ Added
+	onSearchSubmit: () => void;
 	onStatusChange: (value: string) => void;
 	currentPage: number;
 	onPageChange: (page: number) => void;
@@ -26,10 +24,10 @@ interface Props {
 const ITEMS_PER_PAGE = 10;
 
 const STATUS_OPTIONS = [
-	{ value: 'PAID', label: 'Paid' },
-	{ value: 'PENDING', label: 'Pending' },
-	{ value: 'FAILED', label: 'Failed' },
-	{ value: 'REFUNDED', label: 'Refunded' },
+	{ value: "PAID", label: "Paid" },
+	{ value: "PENDING", label: "Pending" },
+	{ value: "FAILED", label: "Failed" },
+	{ value: "REFUNDED", label: "Refunded" },
 ];
 
 export function PaymentsTable({
@@ -47,12 +45,11 @@ export function PaymentsTable({
 	const [inputValue, setInputValue] = useState(search);
 	const totalPages = meta?.totalPages || 1;
 	const totalItems = meta?.totalItems || payments.length;
-
 	const hasData = payments.length > 0;
 	const showLoadingOverlay = isLoading && hasData;
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === 'Enter') {
+		if (e.key === "Enter") {
 			onSearchChange(inputValue);
 			onSearchSubmit();
 		}
@@ -66,25 +63,22 @@ export function PaymentsTable({
 	return (
 		<div className="flex flex-col gap-4 w-full">
 			<div className="flex justify-between items-center gap-4">
-				{/* Search Input with Button */}
-				<div className="flex flex-1 max-w-[400px]">
-					<div className="flex px-4 py-3 items-center gap-3 rounded-l-lg border border-[#E8E8E9] bg-white flex-1 border-r-0">
-						<Search size={20} className="text-[#777980] shrink-0" />
-						<input
-							type="text"
-							placeholder="Search payments..."
-							value={inputValue}
-							onChange={(e) => setInputValue(e.target.value)}
-							onKeyDown={handleKeyDown}
-							className="flex-1 border-none outline-none text-sm text-[#1B1B1B] placeholder-[#777980] font-inter bg-transparent"
-						/>
-					</div>
-					<Button
+				<div className="relative flex-1 max-w-[400px]">
+					<input
+						type="text"
+						placeholder="Search payments..."
+						value={inputValue}
+						onChange={(e) => setInputValue(e.target.value)}
+						onKeyDown={handleKeyDown}
+						className="w-full pl-4 pr-12 py-3 border border-[#E8E8E9] rounded-lg bg-white text-sm text-[#1B1B1B] placeholder-[#777980] font-inter outline-none focus:border-[#0098E8]"
+					/>
+					<button
+						type="button"
 						onClick={handleSearchClick}
-						className="rounded-l-none rounded-r-lg px-4 py-3 bg-[#0098E8] text-white hover:bg-[#0088D8] transition-colors whitespace-nowrap"
+						className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-md bg-[#0098E8] text-white hover:bg-[#0088D8] transition-colors"
 					>
-						Search
-					</Button>
+						<Search size={16} />
+					</button>
 				</div>
 
 				<FilterDropdown
@@ -96,7 +90,6 @@ export function PaymentsTable({
 				/>
 			</div>
 
-			{/* Table with loading overlay */}
 			<div className="w-full border border-[#E8E8E9] rounded-lg overflow-visible relative">
 				{showLoadingOverlay && (
 					<div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-lg">

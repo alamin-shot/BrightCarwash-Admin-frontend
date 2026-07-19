@@ -1,7 +1,7 @@
 'use client';
 
 import { StageFilterButton } from './StageFilterButton';
-import type { StageVisibility } from './LeadStageBreakdownChart';
+import type { StageVisibility } from '@/types/reports';
 
 const STAGE_META = [
     { key: 'converted', label: 'Converted', color: '#0f7a3c' },

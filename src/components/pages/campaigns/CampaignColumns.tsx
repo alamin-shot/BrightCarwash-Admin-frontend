@@ -6,6 +6,7 @@ const STATUS_STYLES: Record<string, string> = {
 	ACTIVE: "bg-[#DCF7EA] text-[#006F1F]",
 	COMPLETED: "bg-[#EBF5FF] text-[#0098E8]",
 	DRAFT: "bg-[#F8FAFB] text-[#777980]",
+	RUNNING: "bg-[#E8F5E9] text-[#2E7D32]",
 	SCHEDULED: "bg-[#FFF7E6] text-[#FFAF00]",
 	SUSPENDED: "bg-[#FFE6E6] text-[#FF4345]",
 };
@@ -24,12 +25,7 @@ export function createCampaignColumns({
 	onStatusAction,
 }: CampaignColumnsParams): Column<Campaign>[] {
 	return [
-		{
-			key: "checkbox",
-			header: <Checkbox />,
-			className: "w-12",
-			render: () => <Checkbox />,
-		},
+
 		{
 			key: "name",
 			header: "Campaign Name",

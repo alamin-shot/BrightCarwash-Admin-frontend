@@ -23,9 +23,9 @@ export interface LeadSourcesResponse {
     totalLeads: number;
     eachCount: LeadSourceItem[];
 }
-
+export type StageVisibility = Record<string, boolean>;
 export interface ReportsState {
-    tab: 'lead-conversion' | 'deposit-revenue' | 'campaign-performance' | 'member-activity';
+    tab: 'lead-conversion' | 'campaign-performance' | 'member-activity';
     period: string;
 }
 

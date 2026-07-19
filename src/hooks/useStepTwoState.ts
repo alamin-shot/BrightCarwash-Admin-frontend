@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 
 interface CardState {
-    sender: boolean;
     recipients: boolean;
     subject: boolean;
     design: boolean;
@@ -16,7 +15,7 @@ interface StepTwoStateProps {
 
 export function useStepTwoState({ designFilled = false, initialFilled }: StepTwoStateProps) {
     const [filled, setFilled] = useState<CardState>(
-        initialFilled || { sender: false, recipients: false, subject: false, design: designFilled }
+        initialFilled || { recipients: false, subject: false, design: designFilled }
     );
 
     useEffect(() => {
@@ -29,7 +28,7 @@ export function useStepTwoState({ designFilled = false, initialFilled }: StepTwo
         setFilled((prev) => ({ ...prev, [key]: !prev[key] }));
     };
 
-    const allFilled = filled.sender && filled.recipients && filled.subject && filled.design;
+    const allFilled = filled.recipients && filled.subject && filled.design;
 
     return { filled, toggleFilled, allFilled };
 }

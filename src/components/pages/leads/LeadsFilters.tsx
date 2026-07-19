@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from 'react';
-import { Search } from 'lucide-react';
-import { FilterDropdown } from '@/components/ui/FilterDropdown';
-import { Button } from '@/components/ui/Button';
+import { useState } from "react";
+import { Search } from "lucide-react";
+import { FilterDropdown } from "@/components/ui/FilterDropdown";
 
 interface LeadsFiltersProps {
 	searchQuery: string;
@@ -19,18 +18,10 @@ interface LeadsFiltersProps {
 }
 
 const PRIORITY_OPTIONS = [
-	{ value: 'LOW', label: 'Low' },
-	{ value: 'MEDIUM', label: 'Medium' },
-	{ value: 'HIGH', label: 'High' },
-	{ value: 'URGENT', label: 'Urgent' },
-];
-
-const DEPOSIT_OPTIONS = [
-	{ value: '', label: 'All Deposits' },
-	{ value: 'PAID', label: 'Paid' },
-	{ value: 'PENDING', label: 'Pending' },
-	{ value: 'REFUNDED', label: 'Refunded' },
-	{ value: 'NONE', label: 'None' },
+	{ value: "LOW", label: "Low" },
+	{ value: "MEDIUM", label: "Medium" },
+	{ value: "HIGH", label: "High" },
+	{ value: "URGENT", label: "Urgent" },
 ];
 
 export function LeadsFilters({
@@ -41,14 +32,13 @@ export function LeadsFilters({
 	onSourceChange,
 	priorityFilter,
 	onPriorityChange,
-	depositFilter,
-	onDepositChange,
 	uniqueSources,
 }: LeadsFiltersProps) {
 	const [inputValue, setInputValue] = useState(searchQuery);
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === 'Enter') {
+		if (e.key === "Enter") {
+			onSearchChange(inputValue);
 			onSearchSubmit();
 		}
 	};
@@ -59,30 +49,27 @@ export function LeadsFilters({
 	};
 
 	return (
-		<div className='flex items-center gap-2 flex-1 min-w-0 flex-wrap'>
-			{/* Search Input with Button */}
-			<div className='flex flex-1 min-w-[200px] max-w-[400px]'>
-				<div className='flex px-4 py-3 items-center gap-3 rounded-l-lg border border-[#E8E8E9] bg-white flex-1 border-r-0'>
-					<Search size={20} className='text-[#777980] shrink-0' />
-					<input
-						type='text'
-						placeholder='Search leads...'
-						value={inputValue}
-						onChange={(e) => setInputValue(e.target.value)}
-						onKeyDown={handleKeyDown}
-						className='flex-1 border-none outline-none text-sm text-[#1B1B1B] placeholder-[#777980] font-inter bg-transparent'
-					/>
-				</div>
-				<Button
+		<div className="flex items-center gap-2 flex-1 min-w-0 flex-wrap">
+			<div className="relative flex-1 min-w-[200px] max-w-[400px]">
+				<input
+					type="text"
+					placeholder="Search leads..."
+					value={inputValue}
+					onChange={(e) => setInputValue(e.target.value)}
+					onKeyDown={handleKeyDown}
+					className="w-full pl-4 pr-12 py-3 border border-[#E8E8E9] rounded-lg bg-white text-sm text-[#1B1B1B] placeholder-[#777980] font-inter outline-none focus:border-[#0098E8]"
+				/>
+				<button
+					type="button"
 					onClick={handleSearchClick}
-					className='rounded-l-none rounded-r-lg px-4 py-3 bg-[#0098E8] text-white hover:bg-[#0088D8] transition-colors whitespace-nowrap'
+					className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-md bg-[#0098E8] text-white hover:bg-[#0088D8] transition-colors"
 				>
-					Search
-				</Button>
+					<Search size={16} />
+				</button>
 			</div>
 
 			<FilterDropdown
-				label='All sources'
+				label="All sources"
 				options={uniqueSources.map((s) => ({ value: s, label: s }))}
 				value={sourceFilter}
 				onChange={onSourceChange}
@@ -91,18 +78,11 @@ export function LeadsFilters({
 			/>
 
 			<FilterDropdown
-				label='All Priorities'
+				label="All Priorities"
 				options={PRIORITY_OPTIONS}
 				value={priorityFilter}
 				onChange={onPriorityChange}
 			/>
-			{/* 
-			<FilterDropdown
-				label='All Deposits'
-				options={DEPOSIT_OPTIONS}
-				value={depositFilter}
-				onChange={onDepositChange}
-			/> */}
 		</div>
 	);
 }

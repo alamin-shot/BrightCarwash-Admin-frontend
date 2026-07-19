@@ -43,7 +43,6 @@ export function ReportsContent() {
             </div>
             <ReportTabSwitcher activeTab={tab} onChange={setTab} />
             {tab === 'lead-conversion' && <LeadConversionContent startDate={startDate} endDate={endDate} />}
-            {tab === 'deposit-revenue' && <DepositRevenueContent />}
             {tab === 'campaign-performance' && <CampaignPerformanceContent startDate={startDate} endDate={endDate} />}
             {tab === 'member-activity' && <MemberActivityContent startDate={startDate} endDate={endDate} />}
         </div>

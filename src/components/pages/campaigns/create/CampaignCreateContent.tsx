@@ -32,7 +32,6 @@ export function CampaignCreateContent() {
 
 	const campaign = useCampaignCreation();
 
-	// Load edit data
 	useEffect(() => {
 		if (isEdit) {
 			const tagsParam = searchParams.get("tags");
@@ -41,13 +40,10 @@ export function CampaignCreateContent() {
 			dispatch(loadCampaignForEdit({
 				campaignName: searchParams.get("name") || "",
 				tags: tags,
-				senderName: searchParams.get("senderName") || "Foysal Hasan",
-				senderEmail: searchParams.get("senderEmail") || "foysalhasan.bdcalling@gmail.com",
 				subject: searchParams.get("subject") || "",
 				selectedGroupId: searchParams.get("leadGroupId") || null,
 				selectedGroupName: searchParams.get("leadGroupName") || null,
 				filled: {
-					sender: !!searchParams.get("senderName"),
 					recipients: !!searchParams.get("leadGroupId"),
 					subject: !!searchParams.get("subject"),
 					design: false,
@@ -124,12 +120,9 @@ export function CampaignCreateContent() {
 					selectedGroupId={campaign.selectedGroupId}
 					selectedGroupName={campaign.selectedGroupName}
 					onRecipientsSave={campaign.setSelectedGroup}
-					senderName={campaign.senderName}
-					senderEmail={campaign.senderEmail}
 					subject={campaign.subject}
 					previewText={campaign.previewText}
 					filled={campaign.filled}
-					onSenderSave={campaign.setSender}
 					onSubjectSave={campaign.setSubject}
 					tags={campaign.tags}
 				/>

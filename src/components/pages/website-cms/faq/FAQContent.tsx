@@ -143,23 +143,23 @@ export function FAQContent() {
             <div className="flex items-center gap-2 flex-1 min-w-0 flex-wrap self-stretch">
                 {/* Search Input with Button */}
                 <div className="flex flex-1 min-w-[200px] max-w-[400px]">
-                    <div className="flex px-4 py-3 items-center gap-3 rounded-l-lg border border-[#E8E8E9] bg-white flex-1 border-r-0">
-                        <Icon name="search" width={20} height={20} color="#777980" />
+                    <div className="relative flex-1 min-w-[200px] max-w-[400px]">
                         <input
                             type="text"
                             placeholder="Search FAQs..."
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
                             onKeyDown={handleSearchKeyDown}
-                            className="flex-1 border-none outline-none text-sm text-[#1B1B1B] placeholder-[#777980] font-inter bg-transparent"
+                            className="w-full pl-4 pr-12 py-3 border border-[#E8E8E9] rounded-lg bg-white text-sm text-[#1B1B1B] placeholder-[#777980] font-inter outline-none focus:border-[#0098E8]"
                         />
+                        <Button
+                            variant="icon"
+                            onClick={handleSearchClick}
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-md bg-[#0098E8] hover:bg-[#0088D8] transition-colors"
+                        >
+                            <Icon name="search" width={16} height={16} color="white" />
+                        </Button>
                     </div>
-                    <Button
-                        onClick={handleSearchClick}
-                        className="rounded-l-none rounded-r-lg px-4 py-3 bg-[#0098E8] text-white hover:bg-[#0088D8] transition-colors whitespace-nowrap"
-                    >
-                        Search
-                    </Button>
                 </div>
 
                 <FilterDropdown

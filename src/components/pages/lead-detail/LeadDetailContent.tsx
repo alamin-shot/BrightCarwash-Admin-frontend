@@ -62,7 +62,6 @@ export function LeadDetailContent({ leadId }: Props) {
 		}
 	};
 
-	// ✅ Handle file upload
 	const handleUpload = async (files: File[]) => {
 		try {
 			await updateLeadDetails(leadId, { files });
@@ -90,10 +89,9 @@ export function LeadDetailContent({ leadId }: Props) {
 	};
 
 
-	// ✅ Handle attachment delete
+
 	const handleDeleteAttachment = async (attachmentId: string) => {
 		try {
-			// Find the attachment to get the filename
 			const attachment = lead?.attachments?.find((a) => a.id === attachmentId);
 			if (!attachment) {
 				toast.error('Attachment not found');
@@ -101,17 +99,7 @@ export function LeadDetailContent({ leadId }: Props) {
 			}
 
 			const token = getAccessToken();
-
-			// Try different payload formats that the backend might expect
-			// Option 1: Send as { path: "filename" }
 			const payload = { path: attachment.fileName };
-
-			// Option 2: If that fails, try sending the full URL path
-			// const payload = { path: attachment.url };
-
-			// Option 3: Try sending as { filename: "filename" }
-			// const payload = { filename: attachment.fileName };
-
 			const response = await fetch(
 				`${APP_CONFIG.API_BASE_URL}/admin/lead/${leadId}/attachments`,
 				{
@@ -153,8 +141,7 @@ export function LeadDetailContent({ leadId }: Props) {
 		}
 	};
 
-	// ✅ Handle attachment download
-	// ✅ Handle attachment download - triggers actual file download
+
 	const handleDownloadAttachment = async (attachmentId: string) => {
 		try {
 			const attachment = lead?.attachments?.find((a) => a.id === attachmentId);
@@ -175,10 +162,9 @@ export function LeadDetailContent({ leadId }: Props) {
 				throw new Error('Failed to download file');
 			}
 
-			// Get the blob from response
+
 			const blob = await response.blob();
 
-			// Extract filename from Content-Disposition header or use the stored filename
 			const contentDisposition = response.headers.get('Content-Disposition');
 			let fileName = attachment.fileName;
 			if (contentDisposition) {
@@ -186,7 +172,6 @@ export function LeadDetailContent({ leadId }: Props) {
 				if (match) fileName = match[1];
 			}
 
-			// Create download link
 			const url = window.URL.createObjectURL(blob);
 			const link = document.createElement('a');
 			link.href = url;
@@ -231,6 +216,7 @@ export function LeadDetailContent({ leadId }: Props) {
 		<div className="flex flex-col gap-4 w-full">
 			{/* ✅ Header with buttons */}
 			<LeadDetailHeader
+				leadEmail={lead.email}
 				onAssignClick={() => setAssignModalOpen(true)}
 				onEditClick={() => setEditModalOpen(true)}
 			/>

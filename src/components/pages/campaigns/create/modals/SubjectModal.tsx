@@ -24,14 +24,12 @@ export function SubjectModal({
   onSave,
 }: SubjectModalProps) {
   const [subject, setSubject] = useState(initialSubject);
-  const [preview, setPreview] = useState(initialPreview);
 
   useEffect(() => {
     if (isOpen) {
       setSubject(initialSubject);
-      setPreview(initialPreview);
     }
-  }, [isOpen, initialSubject, initialPreview]);
+  }, [isOpen, initialSubject]);
 
   const modalTitle = (
     <div className="flex flex-col gap-1">
@@ -42,7 +40,7 @@ export function SubjectModal({
 
   const handleSave = () => {
     if (onSave) {
-      onSave(subject, preview);
+      onSave(subject, "");
     }
     onClose();
   };
@@ -53,7 +51,6 @@ export function SubjectModal({
         <div className="w-full h-px bg-[#DFE1E7]" />
 
         <FormInput id="subject" label="Subject Text" type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Enter subject line" labelClassName={labelClass} className={inputClass} />
-        <FormInput id="preview" label="Preview Text" type="text" value={preview} onChange={(e) => setPreview(e.target.value)} placeholder="Enter preview text" labelClassName={labelClass} className={inputClass} />
 
         <div>
           <label className={labelClass}>Preview</label>
@@ -61,7 +58,7 @@ export function SubjectModal({
             <span className="text-[#1D1F2C] font-inter text-sm font-bold leading-[140%] break-words">
               {subject.length > 100 ? subject.slice(0, 100) + '...' : (subject || "Subject line")}
             </span>
-            <span className="text-[#777980] font-inter text-xs leading-[140%] break-words">{preview || "Preview text appears here..."}</span>
+            <span className="text-[#777980] font-inter text-xs leading-[140%]">Preview text appears here...</span>
           </div>
         </div>
 

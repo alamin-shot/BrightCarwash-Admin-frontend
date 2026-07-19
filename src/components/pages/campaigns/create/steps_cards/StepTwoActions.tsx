@@ -8,10 +8,17 @@ import { getAccessToken } from '@/lib/auth-client';
 import { toast } from 'react-toastify';
 import { useCreateCampaignMutation, useLaunchCampaignMutation } from '@/services/campaign.api';
 import { ScheduleModal } from '@/components/pages/campaigns/create/modals/ScheduleModal';
+import type { CreateCampaignRequest } from '@/types/campaign';
 
 interface StepTwoActionsProps {
 	allFilled: boolean;
-	campaignData?: any;
+	campaignData?: {
+		name: string;
+		tags: string[];
+		subject: string;
+		templateId: string;
+		leadGroupId: string | null | undefined;
+	};
 }
 
 export function StepTwoActions({
@@ -25,7 +32,14 @@ export function StepTwoActions({
 	const [isScheduling, setIsScheduling] = useState(false);
 	const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
 
-	console.log("🎯 StepTwoActions - campaignData:", campaignData);
+	const buildPayload = (overrides: Partial<CreateCampaignRequest> = {}): CreateCampaignRequest => ({
+		name: campaignData?.name || '',
+		tags: campaignData?.tags || [],
+		subject: campaignData?.subject || '',
+		templateId: campaignData?.templateId || '',
+		leadGroupId: campaignData?.leadGroupId || '',
+		...overrides,
+	});
 
 	const handleSendNow = async () => {
 		const token = getAccessToken();
@@ -42,19 +56,13 @@ export function StepTwoActions({
 
 		if (!campaignData?.templateId) {
 			toast.error('Please select a template first');
-			console.error("❌ No templateId in campaignData:", campaignData);
 			return;
 		}
 
 		setIsSending(true);
 		try {
-			const campaign = await createCampaign({
-				...campaignData,
-				scheduledAt: null,
-			}).unwrap();
-
+			const campaign = await createCampaign(buildPayload({ scheduledAt: null })).unwrap();
 			await launchCampaign(campaign.id).unwrap();
-
 			toast.success('Campaign sent successfully!');
 			router.push('/campaigns');
 		} catch (error: any) {
@@ -90,11 +98,8 @@ export function StepTwoActions({
 
 		setIsScheduling(true);
 		try {
-			await createCampaign({
-				...campaignData,
-				scheduledAt,
-			}).unwrap();
-
+			const campaign = await createCampaign(buildPayload({ scheduledAt })).unwrap();
+			await launchCampaign(campaign.id).unwrap();
 			toast.success(`Campaign scheduled for ${new Date(scheduledAt).toLocaleString()}`);
 			router.push("/campaigns");
 		} catch (error: any) {

@@ -106,7 +106,7 @@ export function useLeadsData(externalSearch?: string) {
         sourceFilter,
         setSourceFilter,
         priorityFilter,
-        setPriorityFilter, // ✅ Added
+        setPriorityFilter,
         depositFilter,
         setDepositFilter,
         uniqueSources,
@@ -116,7 +116,7 @@ export function useLeadsData(externalSearch?: string) {
         handleSelectRow,
         handleSelectAll,
         handleStageChange,
-        handlePriorityChange, // ✅ Added
+        handlePriorityChange,
         handleDelete,
         handleSearchSubmit,
     };

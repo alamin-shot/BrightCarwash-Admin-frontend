@@ -44,23 +44,23 @@ export function GalleryFilters({
             <div className="flex items-center gap-3">
                 {/* Search */}
                 <div className="flex">
-                    <div className="flex px-4 py-3 items-center gap-3 rounded-l-lg border border-[#E8E8E9] bg-white flex-1 border-r-0 w-56">
-                        <Icon name="search" width={20} height={20} color="#777980" />
+                    <div className="relative w-56">
                         <input
                             type="text"
                             placeholder="Search gallery…"
                             value={searchInput}
                             onChange={(e) => onSearchChange(e.target.value)}
                             onKeyDown={onSearchKeyDown}
-                            className="flex-1 border-none outline-none text-sm text-[#1B1B1B] placeholder-[#777980] font-inter bg-transparent"
+                            className="w-full pl-4 pr-12 py-3 border border-[#E8E8E9] rounded-lg bg-white text-sm text-[#1B1B1B] placeholder-[#777980] font-inter outline-none focus:border-[#0098E8]"
                         />
+                        <Button
+                            variant="icon"
+                            onClick={onSearchSubmit}
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-md bg-[#0098E8] hover:bg-[#0088D8] transition-colors"
+                        >
+                            <Icon name="search" width={16} height={16} color="white" />
+                        </Button>
                     </div>
-                    <Button
-                        onClick={onSearchSubmit}
-                        className="rounded-l-none rounded-r-lg px-4 py-3 bg-[#0098E8] text-white hover:bg-[#0088D8] transition-colors whitespace-nowrap"
-                    >
-                        Search
-                    </Button>
                 </div>
 
                 <FilterDropdown

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/Button";
@@ -32,7 +32,8 @@ export function TeamsMembersSection({
     onToggleBlock,
     onAddMember,
 }: TeamsMembersSectionProps) {
-    const totalPages = Math.max(1, Math.ceil(members.length / ITEMS_PER_PAGE));
+    const [inputValue, setInputValue] = useState(searchQuery);
+    // const totalPages = Math.max(1, Math.ceil(members.length / ITEMS_PER_PAGE));
     const paginated = useMemo(
         () => members.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE),
         [members, currentPage]
@@ -50,18 +51,24 @@ export function TeamsMembersSection({
                     Teams
                 </h2>
                 <div className="flex items-center gap-3">
-                    <div className="flex px-4 py-3 items-center gap-3 rounded-lg border border-[#E8E8E9] bg-white min-w-[260px]">
-                        <Search size={20} className="text-[#777980] shrink-0" />
+                    <div className="relative min-w-[260px]">
                         <input
                             type="text"
                             placeholder="Search members..."
-                            value={searchQuery}
-                            onChange={(e) => {
-                                onSearchChange(e.target.value);
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            className="w-full pl-4 pr-12 py-3 border border-[#E8E8E9] rounded-lg bg-white text-sm text-[#1B1B1B] placeholder-[#777980] font-inter outline-none focus:border-[#0098E8]"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => {
+                                onSearchChange(inputValue);
                                 onPageChange(1);
                             }}
-                            className="flex-1 border-none outline-none text-sm text-[#1B1B1B] placeholder-[#777980] font-inter bg-transparent"
-                        />
+                            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-md bg-[#0098E8] text-white hover:bg-[#0088D8] transition-colors"
+                        >
+                            <Search size={16} />
+                        </button>
                     </div>
                     <Button
                         className="flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto!"
@@ -82,13 +89,13 @@ export function TeamsMembersSection({
                 />
             </div>
 
-            <Pagination
+            {/* <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
                 onPageChange={onPageChange}
                 totalItems={members.length}
                 itemsPerPage={ITEMS_PER_PAGE}
-            />
+            /> */}
         </div>
     );
 }

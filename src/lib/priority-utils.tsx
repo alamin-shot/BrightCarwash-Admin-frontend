@@ -55,7 +55,7 @@ export function getPriorityBorderColor(priority: string): string {
     return getPriorityConfig(priority).borderColor;
 }
 
-// ✅ Priority Badge Component
+
 export function PriorityBadge({ priority }: { priority: string }) {
     const config = getPriorityConfig(priority);
     return (

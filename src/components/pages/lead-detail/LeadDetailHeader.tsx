@@ -1,15 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, Pencil, UserPlus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ChevronRight, Pencil, UserPlus, Mail } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 interface LeadDetailHeaderProps {
+    leadEmail: string;
     onAssignClick: () => void;
     onEditClick: () => void;
 }
 
-export function LeadDetailHeader({ onAssignClick, onEditClick }: LeadDetailHeaderProps) {
+export function LeadDetailHeader({ leadEmail, onAssignClick, onEditClick }: LeadDetailHeaderProps) {
+    const router = useRouter();
+
+    const handleSendEmail = () => {
+        const params = new URLSearchParams({ to: leadEmail });
+        router.push(`/marketing/email-list/create?${params.toString()}`);
+    };
+
     return (
         <div className="flex flex-col justify-between items-start self-stretch">
             <div>
@@ -29,8 +38,16 @@ export function LeadDetailHeader({ onAssignClick, onEditClick }: LeadDetailHeade
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                     <Button
-                        onClick={onAssignClick}
+                        onClick={handleSendEmail}
                         className="flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto!"
+                    >
+                        <Mail size={16} />
+                        Send Email
+                    </Button>
+                    <Button
+                        onClick={onAssignClick}
+                        variant="outline"
+                        className="flex py-2.5 px-4 items-center gap-2 rounded border border-[#DFE1E7] text-[#1B1B1B] font-inter text-sm hover:bg-[#F8FAFB] transition-colors w-auto!"
                     >
                         <UserPlus size={16} />
                         Assign Member
@@ -45,7 +62,6 @@ export function LeadDetailHeader({ onAssignClick, onEditClick }: LeadDetailHeade
                     </Button>
                 </div>
             </div>
-
         </div>
     );
 }

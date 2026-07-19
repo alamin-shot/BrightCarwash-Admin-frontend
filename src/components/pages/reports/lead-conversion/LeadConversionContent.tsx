@@ -5,7 +5,6 @@ import { useGetStageSummaryQuery, useGetStageBreakdownQuery, useGetLeadSourcesQu
 import { LeadConversionStats } from './LeadConversionStats';
 import { LeadStageBreakdownChart } from './LeadStageBreakdownChart';
 import { LeadSourcesChart } from './LeadSourcesChart';
-import { mockLeadStageData } from '@/mocks/reports.mock'; // TODO: replace with API
 
 interface Props {
     startDate: string;
@@ -17,7 +16,6 @@ export function LeadConversionContent({ startDate, endDate }: Props) {
         stageName: 'Converted', startDate, endDate,
     });
 
-    // We'll keep the stage breakdown call for overall counts, but the chart uses mock monthly data for now
     const stages = ['Converted', 'Contacted', 'Lost'];
     const { data: breakdown, isLoading: breakdownLoading } = useGetStageBreakdownQuery({ stages });
 
@@ -32,7 +30,7 @@ export function LeadConversionContent({ startDate, endDate }: Props) {
             <LeadConversionStats summary={summary!} />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
-                    <LeadStageBreakdownChart data={mockLeadStageData} />
+                    <LeadStageBreakdownChart data={breakdown!} />
                 </div>
                 <LeadSourcesChart data={sources!} />
             </div>

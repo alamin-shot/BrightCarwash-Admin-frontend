@@ -12,7 +12,6 @@ import {
     setTemplateId,
     setDesignFilled,
     setSelectedGroup,
-    setSender,
     setSubject,
     resetCampaignCreation,
 } from "@/store/slices/campaignCreationSlice";
@@ -22,10 +21,8 @@ export function useCampaignCreation() {
     const state = useSelector((state: RootState) => state.campaignCreation);
 
     return {
-        // State
         ...state,
 
-        // Actions
         setCampaignName: (name: string) => dispatch(setCampaignName(name)),
         setTags: (tags: string[]) => dispatch(setTags(tags)),
         addTag: (tag: string) => dispatch(addTag(tag)),
@@ -37,8 +34,6 @@ export function useCampaignCreation() {
         setDesignFilled: (filled: boolean) => dispatch(setDesignFilled(filled)),
         setSelectedGroup: (id: string, name: string) =>
             dispatch(setSelectedGroup({ id, name })),
-        setSender: (name: string, email: string) =>
-            dispatch(setSender({ name, email })),
         setSubject: (subject: string, preview: string) =>
             dispatch(setSubject({ subject, preview })),
         reset: () => dispatch(resetCampaignCreation()),

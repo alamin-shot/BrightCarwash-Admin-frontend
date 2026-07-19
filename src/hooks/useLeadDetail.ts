@@ -40,15 +40,10 @@ export function useLeadDetail(leadId: string) {
             getLeadActivities(leadId),
         ]);
 
-        // Filter deleted notes using sessionStorage (already in deleteNote)
-        // But we also need to apply the filter here if we store deleted IDs persistently.
-        // We'll keep the deleted notes logic in deleteNote and also filter on fetch.
-        // However, now we also have local activities to merge.
 
-        // Load local activities
         const localActivities = loadLocalActivities();
 
-        // Merge server + local, avoid duplicates by id
+
         const merged = [...a];
         localActivities.forEach((localAct) => {
             if (!merged.some((act) => act.id === localAct.id)) {
@@ -93,15 +88,12 @@ export function useLeadDetail(leadId: string) {
     );
 
     const addLocalActivity = useCallback((activity: ActivityItem) => {
-        // Load current local activities, add new, save
         const currentLocal = loadLocalActivities();
         const updated = [activity, ...currentLocal];
-        // Remove duplicates by id
         const unique = updated.filter(
             (act, index, self) => index === self.findIndex((a) => a.id === act.id)
         );
         saveLocalActivities(unique);
-        // Update the displayed activities as well
         setActivities((prev) => {
             const merged = [activity, ...prev];
             merged.sort((x, y) => new Date(y.date).getTime() - new Date(x.date).getTime());

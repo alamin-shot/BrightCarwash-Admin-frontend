@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { toast } from 'react-toastify';
+import { getFullImageUrl } from '@/lib/image-url';
 
 interface HeroBackgroundImageProps {
     initialImageUrl?: string;
@@ -97,26 +98,6 @@ export function HeroBackgroundImage({
         }
     };
 
-    const getFullImageUrl = (url: string) => {
-        if (!url) return '';
-        if (
-            /^https?:\/\//i.test(url) ||
-            /^data:/i.test(url) ||
-            /^blob:/i.test(url)
-        ) {
-            return url;
-        }
-
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
-        if (!baseUrl) {
-            return url.startsWith('/') ? url : `/${url}`;
-        }
-
-        const normalizedBase = baseUrl.replace(/\/$/, '');
-        const normalizedPath = url.startsWith('/') ? url : `/${url}`;
-        return `${normalizedBase}${normalizedPath}`;
-    };
-
     const fullUrl = imageUrl ? getFullImageUrl(imageUrl) : '';
     const displayUrl = previewUrl || fullUrl;
     const isPreviewMode = !!previewUrl;
@@ -165,7 +146,7 @@ export function HeroBackgroundImage({
                     ) : (
                         <Button
                             variant='outline'
-                            className='w-auto! py-2.5 px-4 text-[#777980]'
+                            className='w-auto! flex! py-2.5 px-4 text-[#777980]'
                             onClick={() => fileInputRef.current?.click()}
                             disabled={isLoading}
                         >
@@ -183,7 +164,6 @@ export function HeroBackgroundImage({
                 />
             </div>
 
-            {/* Image preview with overlay */}
             <div
                 className={`h-80 rounded-lg border-2 border-dashed transition-all overflow-hidden bg-[#F1F1F1] flex items-center justify-center relative ${isDragging ? 'border-[#0098E8] bg-[#EBF5FF]' : 'border-[#DFE1E7]'
                     } ${!displayUrl ? 'cursor-pointer' : ''}`}
@@ -204,7 +184,6 @@ export function HeroBackgroundImage({
                         </span>
                     </div>
                 ) : displayUrl && !imageError ? (
-                    // ✅ Show image with dark overlay and upload prompt
                     <div className='relative w-full h-full'>
                         <img
                             src={displayUrl}
@@ -217,7 +196,6 @@ export function HeroBackgroundImage({
                                 setImageError(false);
                             }}
                         />
-                        {/* Dark overlay with upload icon and text */}
                         <div
                             className='absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-black/50 transition-all'
                             onClick={(event) => {
@@ -239,7 +217,6 @@ export function HeroBackgroundImage({
                         </div>
                     </div>
                 ) : (
-                    // ✅ Empty state / fallback
                     <div className='flex flex-col items-center gap-3'>
                         <Icon name='upload' width={48} height={48} color='#A5A5AB' />
                         <div className='text-center'>

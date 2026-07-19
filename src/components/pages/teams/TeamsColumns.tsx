@@ -1,5 +1,3 @@
-import { Shield, ShieldOff } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import { ActionsDropdown } from "@/components/ui/ActionsDropdown";
 import type { Column } from "@/components/ui/DataTable";
 import type { TeamMember } from "@/types/team";
@@ -26,12 +24,17 @@ export function createTeamsColumns({ onEditRole, onToggleBlock }: TeamsColumnsPa
         {
             key: "name",
             header: "Member",
-            render: (row) => (
-                <div>
-                    <span className="text-[#1B1B1B] font-inter text-sm font-medium block">{row.name || row.username || "—"}</span>
-                    <span className="text-[#777980] font-inter text-xs">{row.email}</span>
-                </div>
-            ),
+            render: (row) => {
+                console.log('Team member:', row.first_name, row.last_name, row.name);
+                return (
+                    <div>
+                        <span className="text-[#1B1B1B] font-inter text-sm font-medium block">
+                            {row.first_name || row.name || row.username || "—"}
+                        </span>
+                        <span className="text-[#777980] font-inter text-xs">{row.email}</span>
+                    </div>
+                );
+            },
         },
         {
             key: "role",

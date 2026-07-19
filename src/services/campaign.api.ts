@@ -125,7 +125,7 @@ export const campaignApi = createApi({
 							emailConfig: {
 								subject: campaignData.subject,
 								senderName: campaignData.senderName,
-								senderEmail: campaignData.senderEmail,
+								senderEmail: campaignData.senderEmail || '',
 								leadGroup: { name: 'Mock Group' },
 							},
 							analytics: {

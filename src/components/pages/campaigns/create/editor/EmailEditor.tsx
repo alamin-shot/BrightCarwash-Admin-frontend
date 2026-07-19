@@ -27,6 +27,23 @@ export function EmailEditor() {
 	const [createTemplate] = useCreateTemplateMutation();
 	const [uploadImage] = useUploadTemplateImageMutation();
 
+	const onEditorLoad = () => {
+		const mergeTags = {
+			first_name: {
+				name: 'First Name',
+				value: '{% if contact.FIRSTNAME %}{{ contact.FIRSTNAME }}{% else %}{{ params.FIRSTNAME }}{% endif %}',
+			},
+			last_name: {
+				name: 'Last Name',
+				value: '{% if contact.LASTNAME %}{{ contact.LASTNAME }}{% else %}{{ params.LASTNAME }}{% endif %}',
+			},
+		};
+
+		if (emailEditorRef.current?.editor) {
+			emailEditorRef.current.editor.setMergeTags(mergeTags);
+		}
+	};
+
 	const handleSave = () => {
 		const name =
 			templateName.trim() || `Template ${new Date().toLocaleDateString()}`;
@@ -36,12 +53,11 @@ export function EmailEditor() {
 				try {
 					const htmlContent = data.html || '<p>Empty template</p>';
 
-					// Upload any embedded images and replace with hosted URLs
 					const processedHtml = await uploadImagesInHtml(
 						htmlContent,
 						async (file) => {
 							const result = await uploadImage(file).unwrap();
-							return result; // { url: string }
+							return result;
 						}
 					);
 
@@ -102,7 +118,11 @@ export function EmailEditor() {
 				</div>
 			</div>
 			<div className='rounded-xl border border-[#DFE1E7] overflow-hidden'>
-				<EmailEditorComponent ref={emailEditorRef} minHeight='80vh' />
+				<EmailEditorComponent
+					ref={emailEditorRef}
+					minHeight='80vh'
+					onLoad={onEditorLoad}
+				/>
 			</div>
 		</div>
 	);

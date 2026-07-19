@@ -28,7 +28,7 @@ export const NAVIGATION_CONFIG: NavSection[] = [
         id: "website-cms",
         label: "Website CMS",
         icon: "website-cms",
-        href: "", // ✅ Empty href - not clickable as page
+        href: "",
         subItems: [
           { id: "cms-hero-section", label: "Hero Section", icon: "hero", href: "/website-cms/hero-section" },
           { id: "cms-testimonials", label: "Testimonials", icon: "testimonials", href: "/website-cms/testimonials" },

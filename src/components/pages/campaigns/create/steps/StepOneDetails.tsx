@@ -103,7 +103,7 @@ export function StepOneDetails({
 				</div>
 				<Button
 					onClick={onContinue}
-					disabled={!campaignName.trim() || tags.length === 0}
+					disabled={!campaignName.trim()}
 					className='flex py-2.5 px-4 justify-center items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto disabled:opacity-50 disabled:cursor-not-allowed'
 				>
 					Continue

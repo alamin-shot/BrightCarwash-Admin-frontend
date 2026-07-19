@@ -24,11 +24,13 @@ function delay(ms: number): Promise<void> {
 function mapMember(data: MembersApiResponse["data"][0]): TeamMember {
     return {
         id: data.id,
-        name: data.name,
-        username: data.username,
+        name: `${data.first_name || ""} ${data.last_name || ""}`.trim() || null,
+        username: null,
         email: data.email,
         avatar: data.avatar,
         status: data.status,
+        first_name: data.first_name,
+        last_name: data.last_name,
         role: data.roleUsers?.[0]?.role?.name || "Staff",
         roleId: data.roleUsers?.[0]?.role?.id || "",
         createdAt: data.created_at?.split("T")[0] || "",

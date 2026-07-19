@@ -17,7 +17,7 @@ interface KanbanColumnProps {
 	title: string;
 	borderColor: string;
 	stageColor: string;
-	icon: string; // could be URL or icon name
+	icon: string;
 	items: Lead[];
 	stages: StageOption[];
 }

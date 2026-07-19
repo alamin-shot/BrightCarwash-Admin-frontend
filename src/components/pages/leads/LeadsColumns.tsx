@@ -72,7 +72,7 @@ export function createLeadsColumns({
 			header: 'Lead Name',
 			render: (row) => (
 				<div className='flex items-center gap-2'>
-					<div className='w-6 h-6 rounded-full overflow-hidden border border-white shrink-0'>
+					{/* <div className='w-6 h-6 rounded-full overflow-hidden border border-white shrink-0'>
 						<Image
 							src={row.avatar}
 							alt={row.name}
@@ -80,7 +80,7 @@ export function createLeadsColumns({
 							height={24}
 							className='object-cover'
 						/>
-					</div>
+					</div> */}
 					<span className='text-[#1B1B1B] font-inter text-sm font-normal leading-[150%] truncate max-w-32'>
 						{row.name}
 					</span>
@@ -130,9 +130,9 @@ export function createLeadsColumns({
 						value={row.priority}
 						onChange={(val) => onPriorityChange(row.id, val)}
 						buttonClassName={`text-xs font-medium capitalize px-2 py-1 rounded-full border ${row.priority === 'URGENT' ? 'border-[#FF4345] text-[#FF4345] bg-[#FFE6E6]' :
-								row.priority === 'HIGH' ? 'border-[#FF6B00] text-[#FF6B00] bg-[#FFF0E6]' :
-									row.priority === 'MEDIUM' ? 'border-[#FFAF00] text-[#FFAF00] bg-[#FFF7E6]' :
-										'border-[#DFE1E7] text-[#777980] bg-[#F1F1F1]'
+							row.priority === 'HIGH' ? 'border-[#FF6B00] text-[#FF6B00] bg-[#FFF0E6]' :
+								row.priority === 'MEDIUM' ? 'border-[#FFAF00] text-[#FFAF00] bg-[#FFF7E6]' :
+									'border-[#DFE1E7] text-[#777980] bg-[#F1F1F1]'
 							}`}
 						dropdownOffsetX={-20}
 					/>

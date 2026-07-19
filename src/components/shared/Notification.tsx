@@ -8,7 +8,7 @@ import Link from "next/link";
 export default function Notification() {
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const notification = false
+  const notification = true
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -31,7 +31,7 @@ export default function Notification() {
         onClick={() => setIsOpen((prev) => !prev)}
         className="cursor-pointer rounded-lg border border-[#DFE1E7] p-2 duration-300 hover:bg-gray-50"
       >
-        <BellIcon className={notification ? "text-red-500": "text-red-600"} />
+        <BellIcon />
       </button>
 
       <div

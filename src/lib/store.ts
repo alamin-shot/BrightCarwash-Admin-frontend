@@ -40,9 +40,8 @@ export const store = configureStore({
 		[testimonialApi.reducerPath]: testimonialApi.reducer,
 		[heroApi.reducerPath]: heroApi.reducer,
 		[emailListApi.reducerPath]: emailListApi.reducer,
-		[settingsApi.reducerPath]: settingsApi.reducer,,
+		[settingsApi.reducerPath]: settingsApi.reducer,
 		[notificationApi.reducerPath]: notificationApi.reducer
-
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware().concat(
@@ -64,7 +63,6 @@ export const store = configureStore({
 			emailListApi.middleware,
 			settingsApi.middleware,
 			notificationApi.middleware
-
 		),
 });
 

@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // experimental: { appDir: true }, // removed due to Next.js config change
+  experimental: { appDir: true },
   transpilePackages: [
+    '@tiptap/core',
+    '@tiptap/pm',
     '@tiptap/react',
     '@tiptap/extension-placeholder',
     '@tiptap/starter-kit',

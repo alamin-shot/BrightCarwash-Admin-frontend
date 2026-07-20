@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import BellIcon from "../../../public/icons/custom/BellIcon";
 import GoArrowRight from "../../../public/icons/custom/GoArrowRight";
 import Link from "next/link";
+import { useReadAllNotificationMutation } from "@/services/notification.api";
 
 export default function Notification() {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,10 +25,18 @@ export default function Notification() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const [readAll, { isLoading, error }] = useReadAllNotificationMutation();
+
+  const handleReadAll = async () => {
+    await readAll();
+  };
+
   return (
     <div ref={wrapperRef} className="relative">
       <button
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={() => {
+          (setIsOpen((prev) => !prev), handleReadAll());
+        }}
         className="cursor-pointer rounded-lg border border-[#DFE1E7] p-2 duration-300 hover:bg-gray-50"
       >
         <BellIcon />

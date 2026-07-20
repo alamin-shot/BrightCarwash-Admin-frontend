@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import type { notificationInterfece } from "@/types/notification";
 import axiosInstance from "@/lib/axios-instance";
+import { ReadAllNotificationInterface } from "@/types/navigation";
 
 export interface GetNotificationParams {
   page?: number;
@@ -12,7 +13,10 @@ export const notificationApi = createApi({
   baseQuery: async () => ({ data: null }),
   tagTypes: ["Notification"],
   endpoints: (builder) => ({
-    getNotification: builder.query<notificationInterfece, GetNotificationParams>({
+    getNotification: builder.query<
+      notificationInterfece,
+      GetNotificationParams
+    >({
       queryFn: async (params = { page: 1, limit: 10 }) => {
         try {
           const { data } = await axiosInstance.get<notificationInterfece>(
@@ -23,7 +27,9 @@ export const notificationApi = createApi({
           return {
             error: {
               status: error?.response?.status || 500,
-              data: error?.response?.data?.message || "Failed to fetch notifications",
+              data:
+                error?.response?.data?.message ||
+                "Failed to fetch notifications",
             },
           };
         }
@@ -31,7 +37,28 @@ export const notificationApi = createApi({
       providesTags: ["Notification"],
       keepUnusedDataFor: 60,
     }),
+
+    readAllNotification: builder.mutation<ReadAllNotificationInterface, void>({
+      queryFn: async () => {
+        try {
+          const response = await axiosInstance.patch<ReadAllNotificationInterface>(
+            `/admin/notifications/read/all`,
+          );
+          return { data: response.data };
+        } catch (error: any) {
+          return {
+            error: {
+              status: error?.response?.status || 500,
+              data:
+                error?.response?.data?.message ||
+                "Failed to read all notifications",
+            },
+          };
+        }
+      },
+      invalidatesTags: ["Notification"],
+    }),
   }),
 });
 
-export const { useGetNotificationQuery } = notificationApi;
+export const { useGetNotificationQuery, useReadAllNotificationMutation } = notificationApi;

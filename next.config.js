@@ -5,9 +5,10 @@ const nextConfig = {
   transpilePackages: [
     '@tiptap/core',
     '@tiptap/pm',
+    '@tiptap/extensions',
     '@tiptap/react',
-    '@tiptap/extension-placeholder',
     '@tiptap/starter-kit',
+    '@tiptap/extension-placeholder',
     '@tiptap/extension-underline',
     '@tiptap/extension-link',
     '@tiptap/extension-image',
@@ -17,6 +18,7 @@ const nextConfig = {
     '@tiptap/extension-table-row',
     '@tiptap/extension-text-align',
     '@tiptap/extension-color',
+    '@tiptap/extension-text-style',
   ],
 };
 

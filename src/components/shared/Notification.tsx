@@ -4,7 +4,12 @@ import React, { useEffect, useRef, useState } from "react";
 import BellIcon from "../../../public/icons/custom/BellIcon";
 import GoArrowRight from "../../../public/icons/custom/GoArrowRight";
 import Link from "next/link";
-import { useReadAllNotificationMutation } from "@/services/notification.api";
+import {
+  GetNotificationParams,
+  useGetNotificationQuery,
+  useReadAllNotificationMutation,
+} from "@/services/notification.api";
+import { formatNotificationTime } from "@/lib/formatNotificationTime";
 
 export default function Notification() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +30,15 @@ export default function Notification() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const [readAll, { isLoading, error }] = useReadAllNotificationMutation();
+  const { data, isLoading, error } = useGetNotificationQuery({
+    page: 1,
+    limit: 5,
+  } as GetNotificationParams);
+
+  const notifications = data?.data?.items || [];
+  console.log("notifications", notifications);
+
+  const [readAll] = useReadAllNotificationMutation();
 
   const handleReadAll = async () => {
     await readAll();
@@ -35,7 +48,8 @@ export default function Notification() {
     <div ref={wrapperRef} className="relative">
       <button
         onClick={() => {
-          (setIsOpen((prev) => !prev), handleReadAll());
+          setIsOpen((prev) => !prev);
+          handleReadAll();
         }}
         className="cursor-pointer rounded-lg border border-[#DFE1E7] p-2 duration-300 hover:bg-gray-50"
       >
@@ -49,22 +63,22 @@ export default function Notification() {
             : "invisible -translate-y-2 scale-95 opacity-0"
         }`}
       >
-        <div className="">
-          {Array.from({ length: 5 }).map((_, index) => (
+        <div>
+          {notifications?.map((notification) => (
             <p
-              key={index}
+              key={notification?.id}
               className="flex items-center justify-between text-sm border-b border-[#E5E7EB] py-3"
             >
               <div className="space-y-2">
                 <p className="text-sm lg:text-base font-semibold">
-                  Meeting Scheduled
+                  {notification?.title}
                 </p>
-                <p className="text-[#777980] text-xs lg:text-sm">
-                  You have a new lead from the website!
+                <p className="text-[#777980] text-xs lg:text-sm line-clamp-1">
+                  {notification?.body}
                 </p>
               </div>
               <span className="text-xs text-[#4B5563] text-nowrap">
-                15 mins ago
+                {formatNotificationTime(notification?.created_at)}
               </span>
             </p>
           ))}

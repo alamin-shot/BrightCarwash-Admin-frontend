@@ -39,7 +39,9 @@ export const store = configureStore({
 		[categoryApi.reducerPath]: categoryApi.reducer,
 		[testimonialApi.reducerPath]: testimonialApi.reducer,
 		[heroApi.reducerPath]: heroApi.reducer,
-		[emailListApi.reducerPath]: emailListApi.reducer
+		[emailListApi.reducerPath]: emailListApi.reducer,
+		[settingsApi.reducerPath]: settingsApi.reducer,,
+		[notificationApi.reducerPath]: notificationApi.reducer
 
 	},
 	middleware: (getDefaultMiddleware) =>
@@ -59,7 +61,9 @@ export const store = configureStore({
 			categoryApi.middleware,
 			testimonialApi.middleware,
 			heroApi.middleware,
-			emailListApi.middleware
+			emailListApi.middleware,
+			settingsApi.middleware,
+			notificationApi.middleware
 
 		),
 });

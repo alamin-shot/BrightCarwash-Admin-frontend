@@ -8,7 +8,6 @@ import Link from "next/link";
 export default function Notification() {
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const notification = true
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -41,25 +40,29 @@ export default function Notification() {
             : "invisible -translate-y-2 scale-95 opacity-0"
         }`}
       >
-        <div className="space-y-4">
-          {Array.from({ length: 8 }).map((_, index) => (
+        <div className="">
+          {Array.from({ length: 5 }).map((_, index) => (
             <p
               key={index}
-              className="flex items-center justify-between text-sm"
+              className="flex items-center justify-between text-sm border-b border-[#E5E7EB] py-3"
             >
-              <span className="text-[#777980]">
-                You have a new lead from the website!
-              </span>
+              <div className="space-y-2">
+                <p className="text-sm lg:text-base font-semibold">
+                  Meeting Scheduled
+                </p>
+                <p className="text-[#777980] text-xs lg:text-sm">
+                  You have a new lead from the website!
+                </p>
+              </div>
               <span className="text-xs text-[#4B5563] text-nowrap">
                 15 mins ago
               </span>
             </p>
           ))}
         </div>
-        <div className="border-t border-[#E5E7EB] my-4" />
         <Link
           href="/notifications"
-          className="text-[#B23730] hover:text-[#B23730]/80 duration-300 text-sm font-semibold flex justify-center items-center gap-1 w-full cursor-pointer "
+          className="text-[#B23730] hover:text-[#B23730]/80 duration-300 text-sm font-semibold flex justify-center items-center gap-1 w-full cursor-pointer mt-4 "
         >
           View all <GoArrowRight />
         </Link>

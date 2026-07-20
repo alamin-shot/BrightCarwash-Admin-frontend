@@ -64,24 +64,32 @@ export default function Notification() {
         }`}
       >
         <div>
-          {notifications?.map((notification) => (
-            <p
-              key={notification?.id}
-              className="flex items-center justify-between text-sm border-b border-[#E5E7EB] py-3"
-            >
-              <div className="space-y-2">
-                <p className="text-sm lg:text-base font-semibold">
-                  {notification?.title}
+          {notifications?.length > 0 ? (
+            <div>
+              {notifications?.map((notification) => (
+                <p
+                  key={notification?.id}
+                  className="flex items-center justify-between text-sm border-b border-[#E5E7EB] py-3"
+                >
+                  <div className="space-y-2">
+                    <p className="text-sm lg:text-base font-semibold">
+                      {notification?.title}
+                    </p>
+                    <p className="text-[#777980] text-xs lg:text-sm line-clamp-1">
+                      {notification?.body}
+                    </p>
+                  </div>
+                  <span className="text-xs text-[#4B5563] text-nowrap">
+                    {formatNotificationTime(notification?.created_at)}
+                  </span>
                 </p>
-                <p className="text-[#777980] text-xs lg:text-sm line-clamp-1">
-                  {notification?.body}
-                </p>
-              </div>
-              <span className="text-xs text-[#4B5563] text-nowrap">
-                {formatNotificationTime(notification?.created_at)}
-              </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-[#777980] text-xs lg:text-sm">
+              No notifications
             </p>
-          ))}
+          )}
         </div>
         <Link
           href="/notifications"

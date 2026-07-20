@@ -25,9 +25,7 @@ const ITEMS_PER_PAGE = 10;
 
 const STATUS_OPTIONS = [
 	{ value: "PAID", label: "Paid" },
-	{ value: "PENDING", label: "Pending" },
 	{ value: "FAILED", label: "Failed" },
-	{ value: "REFUNDED", label: "Refunded" },
 ];
 
 export function PaymentsTable({

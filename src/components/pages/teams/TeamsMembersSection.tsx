@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/ui/DataTable";
 import { Pagination } from "@/components/ui/Pagination";
 import { createTeamsColumns } from "@/components/pages/teams/TeamsColumns";
-import type { TeamMember } from "@/types/team";
+import type { TeamMember, TeamRole } from "@/types/team";
 
 const ITEMS_PER_PAGE = 10;
 
 interface TeamsMembersSectionProps {
     members: TeamMember[];
+    roles: TeamRole[];
     searchQuery: string;
     onSearchChange: (val: string) => void;
     currentPage: number;
@@ -20,10 +21,13 @@ interface TeamsMembersSectionProps {
     onEditRole: (member: TeamMember) => void;
     onToggleBlock: (member: TeamMember) => void;
     onAddMember: () => void;
+    currentUserId: string;
+    currentUserRole: string;
 }
 
 export function TeamsMembersSection({
     members,
+    roles,
     searchQuery,
     onSearchChange,
     currentPage,
@@ -31,17 +35,18 @@ export function TeamsMembersSection({
     onEditRole,
     onToggleBlock,
     onAddMember,
+    currentUserId,
+    currentUserRole,
 }: TeamsMembersSectionProps) {
     const [inputValue, setInputValue] = useState(searchQuery);
-    // const totalPages = Math.max(1, Math.ceil(members.length / ITEMS_PER_PAGE));
     const paginated = useMemo(
         () => members.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE),
         [members, currentPage]
     );
 
     const columns = useMemo(
-        () => createTeamsColumns({ onEditRole, onToggleBlock }),
-        [onEditRole, onToggleBlock]
+        () => createTeamsColumns({ onEditRole, onToggleBlock, currentUserId, currentUserRole, roles }),
+        [onEditRole, onToggleBlock, currentUserId, currentUserRole, roles]
     );
 
     return (
@@ -79,7 +84,6 @@ export function TeamsMembersSection({
                 </div>
             </div>
 
-            {/* Scrollable table – max 4 rows visible */}
             <div className="max-h-79 overflow-y-auto rounded-lg border border-[#E8E8E9]">
                 <DataTable
                     columns={columns}
@@ -88,14 +92,6 @@ export function TeamsMembersSection({
                     className="border-0 rounded-none"
                 />
             </div>
-
-            {/* <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={onPageChange}
-                totalItems={members.length}
-                itemsPerPage={ITEMS_PER_PAGE}
-            /> */}
         </div>
     );
 }

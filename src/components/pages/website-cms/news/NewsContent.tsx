@@ -134,6 +134,7 @@ export function NewsContent() {
                     items={items}
                     categories={categories}
                     onEdit={handleEdit}
+                    onDelete={handleDelete}
                 />
             ) : (
                 <NewsListView
@@ -152,7 +153,6 @@ export function NewsContent() {
                 itemsPerPage={ITEMS_PER_PAGE}
             />
 
-            {/* Edit Modal */}
             <NewsModal
                 isOpen={isModalOpen}
                 onClose={handleModalClose}

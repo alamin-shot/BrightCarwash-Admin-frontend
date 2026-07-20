@@ -31,7 +31,7 @@ export function KanbanCard({ lead }: KanbanCardProps) {
 		<div className='flex w-full p-3 flex-col items-start gap-3 rounded-lg border border-[#DFE1E7] bg-white adm-kanban-card'>
 			<div className='flex justify-between items-center self-stretch'>
 				<div className='flex items-center gap-2 flex-1 min-w-0'>
-					<div className='w-9 h-9 rounded-full overflow-hidden shrink-0'>
+					{/* <div className='w-9 h-9 rounded-full overflow-hidden shrink-0'>
 						<Image
 							src={lead.avatar}
 							alt={lead.name}
@@ -39,7 +39,7 @@ export function KanbanCard({ lead }: KanbanCardProps) {
 							height={36}
 							className='object-cover'
 						/>
-					</div>
+					</div> */}
 					<div className='flex flex-col justify-center items-start gap-1 flex-1 min-w-0'>
 						<span className='text-[#4A4C56] font-inter text-base font-normal leading-[100%] tracking-[-0.24px] truncate self-stretch'>
 							{lead.name}

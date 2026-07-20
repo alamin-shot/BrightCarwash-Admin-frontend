@@ -4,9 +4,7 @@ import type { PaymentTransaction } from '@/types/payment';
 
 const statusStyles: Record<string, string> = {
 	PAID: 'text-[#006F1F] border-[#E8E8E9] bg-white',
-	PENDING: 'text-[#FFAF00] border-[#E8E8E9] bg-white',
 	FAILED: 'text-[#FF4345] border-[#E8E8E9] bg-white',
-	REFUNDED: 'text-[#FF4345] border-[#E8E8E9] bg-white',
 };
 
 function getInitials(name: string): string {

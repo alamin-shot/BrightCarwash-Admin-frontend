@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
 import { TeamsMembersSection } from "@/components/pages/teams/TeamsMembersSection";
 import { TeamsRolesSection } from "@/components/pages/teams/TeamsRolesSection";
 import { TeamsModals } from "@/components/pages/teams/TeamsModals";
@@ -8,6 +9,7 @@ import { EditMemberRoleModal } from "@/components/pages/teams/EditMemberRoleModa
 import { useGetTeamMembersQuery, useGetTeamRolesQuery, useGetPermissionsQuery, useGetRoleByIdQuery, useBlockMemberMutation, useUnblockMemberMutation } from "@/services/team.api";
 import { useTeamFilters } from "@/hooks/useTeamFilters";
 import { useTeamPermissions } from "@/hooks/useTeamPermissions";
+import type { RootState } from "@/lib/store";
 import type { TeamMember, TeamRole } from "@/types/team";
 import { toast } from "react-toastify";
 
@@ -25,6 +27,8 @@ export function TeamsContent() {
     const [addMemberOpen, setAddMemberOpen] = useState(false);
     const [createRoleOpen, setCreateRoleOpen] = useState(false);
     const [editMemberRoleTarget, setEditMemberRoleTarget] = useState<TeamMember | null>(null);
+
+    const currentUser = useSelector((state: RootState) => state.auth.user);
 
     const { data: rolePerms = [] } = useGetRoleByIdQuery(editRole?.name || "", { skip: !editRole });
     const { handleSavePermissions } = useTeamPermissions();
@@ -69,6 +73,7 @@ export function TeamsContent() {
         <div className="flex flex-col gap-6 w-full">
             <TeamsMembersSection
                 members={filteredMembers}
+                roles={roles}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
                 currentPage={currentPage}
@@ -76,6 +81,8 @@ export function TeamsContent() {
                 onEditRole={handleEditRole}
                 onToggleBlock={handleToggleBlock}
                 onAddMember={() => setAddMemberOpen(true)}
+                currentUserId={currentUser?.id || ""}
+                currentUserRole={currentUser?.role || ""}
             />
 
             <TeamsRolesSection

@@ -351,3 +351,7 @@ body {
 		display: block;
 	}
 }
+
+.adm-l-shape-icon {
+	filter: brightness(0) invert(1);
+}

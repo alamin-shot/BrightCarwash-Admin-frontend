@@ -15,7 +15,6 @@ import {
 } from "@/mocks/team.mock";
 import axiosInstance from "@/lib/axios-instance";
 import { getAccessToken } from "@/lib/auth-client";
-import { Template } from "@/types/template";
 
 function delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -36,15 +35,7 @@ function mapMember(data: MembersApiResponse["data"][0]): TeamMember {
         createdAt: data.created_at?.split("T")[0] || "",
     };
 }
-function transformTemplate(apiTemplate: any): Template {
-    return {
-        ...apiTemplate,
-        // For TemplateCard component - uses html prop
-        html: apiTemplate.emailBody?.htmlContent || '<p>No content</p>',
-        // For backward compatibility
-        subject: apiTemplate.emailBody?.subject || '',
-    };
-}
+
 function mapPermissions(data: PermissionsMap): Permission[] {
     const result: Permission[] = [];
     for (const [module, items] of Object.entries(data)) {
@@ -236,26 +227,22 @@ export const teamApi = createApi({
             invalidatesTags: (_result, _error, { id }) => [{ type: "TeamRoles", id }],
         }),
 
-        updateMemberRole: builder.mutation<
-            void,
-            { id: string; roleNames: string[] }
-        >({
+        updateMemberRole: builder.mutation<{ success: boolean }, { id: string; roleNames: string[] }>({
             queryFn: async ({ id, roleNames }) => {
                 try {
                     if (APP_CONFIG.MOCK_MODE) {
                         await delay(APP_CONFIG.MOCK_DELAY_MS);
                         const member = mockTeamMembers.find((m) => m.id === id);
                         if (member) member.role = roleNames[0] || member.role;
-                        return { data: undefined };
+                        return { data: { success: true } };
                     }
                     await axiosInstance.put(`/admin/members/${id}/roles`, { roleNames });
-                    return { data: undefined };
+                    return { data: { success: true } };
                 } catch (error) {
                     return {
                         error: {
                             status: 500,
-                            data:
-                                error instanceof Error ? error.message : "Failed to update role",
+                            data: error instanceof Error ? error.message : "Failed to update role",
                         },
                     };
                 }
@@ -263,23 +250,22 @@ export const teamApi = createApi({
             invalidatesTags: ["TeamMembers"],
         }),
 
-        blockMember: builder.mutation<void, string>({
+        blockMember: builder.mutation<{ success: boolean }, string>({
             queryFn: async (id) => {
                 try {
                     if (APP_CONFIG.MOCK_MODE) {
                         await delay(APP_CONFIG.MOCK_DELAY_MS);
                         const member = mockTeamMembers.find((m) => m.id === id);
                         if (member) member.status = 0;
-                        return { data: undefined };
+                        return { data: { success: true } };
                     }
                     await axiosInstance.put(`/admin/members/${id}/block`);
-                    return { data: undefined };
+                    return { data: { success: true } };
                 } catch (error) {
                     return {
                         error: {
                             status: 500,
-                            data:
-                                error instanceof Error ? error.message : "Failed to block member",
+                            data: error instanceof Error ? error.message : "Failed to block member",
                         },
                     };
                 }
@@ -287,23 +273,22 @@ export const teamApi = createApi({
             invalidatesTags: ["TeamMembers"],
         }),
 
-        unblockMember: builder.mutation<void, string>({
+        unblockMember: builder.mutation<{ success: boolean }, string>({
             queryFn: async (id) => {
                 try {
                     if (APP_CONFIG.MOCK_MODE) {
                         await delay(APP_CONFIG.MOCK_DELAY_MS);
                         const member = mockTeamMembers.find((m) => m.id === id);
                         if (member) member.status = 1;
-                        return { data: undefined };
+                        return { data: { success: true } };
                     }
                     await axiosInstance.put(`/admin/members/${id}/unblock`);
-                    return { data: undefined };
+                    return { data: { success: true } };
                 } catch (error) {
                     return {
                         error: {
                             status: 500,
-                            data:
-                                error instanceof Error ? error.message : "Failed to unblock member",
+                            data: error instanceof Error ? error.message : "Failed to unblock member",
                         },
                     };
                 }

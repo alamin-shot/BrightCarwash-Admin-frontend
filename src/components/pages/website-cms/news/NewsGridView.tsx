@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from '@/components/ui/Icon';
 import type { NewsItem } from '@/types/news';
 import type { Category } from '@/types/news';
 
@@ -7,9 +8,10 @@ interface NewsGridViewProps {
     items: NewsItem[];
     categories: Category[];
     onEdit: (item: NewsItem) => void;
+    onDelete: (id: string) => void;
 }
 
-export function NewsGridView({ items, categories, onEdit }: NewsGridViewProps) {
+export function NewsGridView({ items, categories, onEdit, onDelete }: NewsGridViewProps) {
     const getCategoryName = (categoryId: string) => {
         const cat = categories.find((c) => c.id === categoryId);
         return cat?.name || 'Uncategorized';
@@ -45,13 +47,32 @@ export function NewsGridView({ items, categories, onEdit }: NewsGridViewProps) {
                         )}
                         <div className="absolute top-3 left-3">
                             <span
-                                className={`px-3 py-1.5 rounded bg-white text-sm font-inter leading-5 ${item.is_published
-                                        ? 'text-[#006F1F]'
-                                        : 'text-[#777980]'
+                                className={`px-3 py-1.5 rounded bg-white text-sm font-inter leading-5 ${item.is_published ? 'text-[#006F1F]' : 'text-[#777980]'
                                     }`}
                             >
                                 {item.is_published ? 'Published' : 'Draft'}
                             </span>
+                        </div>
+                        {/* Actions - visible on hover */}
+                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEdit(item);
+                                }}
+                                className="p-2 bg-white/90 rounded-lg hover:bg-white transition-colors"
+                            >
+                                <Icon name="edit" width={16} height={16} color="#1B1B1B" />
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(item.id);
+                                }}
+                                className="p-2 bg-white/90 rounded-lg hover:bg-[#FFE6E6] transition-colors"
+                            >
+                                <Icon name="delete" width={16} height={16} color="#FF4345" />
+                            </button>
                         </div>
                     </div>
 

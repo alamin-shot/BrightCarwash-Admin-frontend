@@ -1,6 +1,16 @@
 import { ActionsDropdown } from "@/components/ui/ActionsDropdown";
 import type { Column } from "@/components/ui/DataTable";
-import type { TeamMember } from "@/types/team";
+import type { TeamMember, TeamRole } from "@/types/team";
+
+// Roles table থেকেই "super admin" role name dynamically বের করে আনা হচ্ছে (case-insensitive),
+// কোনো হার্ডকোড স্ট্রিং লাগবে না। "Super Admin", "Super User", "super_admin" — সবই ম্যাচ করবে।
+function resolveSuperAdminRoleName(roles: TeamRole[]): string | null {
+    const match = roles.find((r) => {
+        const normalized = r.name.toLowerCase().replace(/[\s_-]/g, "");
+        return normalized === "superadmin" || normalized === "superuser";
+    });
+    return match ? match.name : null;
+}
 
 const roleStyles: Record<string, string> = {
     Admin: "bg-[#FFE6E6] text-[#FF4345]",
@@ -17,24 +27,51 @@ const statusStyles: Record<number, string> = {
 interface TeamsColumnsParams {
     onEditRole: (member: TeamMember) => void;
     onToggleBlock: (member: TeamMember) => void;
+    currentUserId: string;
+    currentUserRole: string;
+    roles: TeamRole[]; // 👈 roles table পাস করো, এখান থেকেই super admin role name বের হবে
 }
 
-export function createTeamsColumns({ onEditRole, onToggleBlock }: TeamsColumnsParams): Column<TeamMember>[] {
+export function createTeamsColumns({
+    onEditRole,
+    onToggleBlock,
+    currentUserId,
+    currentUserRole,
+    roles,
+}: TeamsColumnsParams): Column<TeamMember>[] {
+
+    const superAdminRole = resolveSuperAdminRoleName(roles);
+
+    // Role can be edited for anyone — no restriction here.
+    const canEditRole = (): boolean => true;
+
+    // Block/Unblock disabled if: it's yourself, OR the target is Super Admin/Admin.
+    const canBlockMember = (member: TeamMember): boolean => {
+        const isSelf = String(member.id) === String(currentUserId);
+        const targetIsSuperAdmin = !!superAdminRole && member.role === superAdminRole;
+        const targetIsAdmin = member.role === "Admin";
+
+        if (isSelf) return false;
+        if (targetIsSuperAdmin) return false;
+        if (targetIsAdmin) return false;
+
+        return true;
+    };
+
     return [
         {
             key: "name",
             header: "Member",
-            render: (row) => {
-                console.log('Team member:', row.first_name, row.last_name, row.name);
-                return (
-                    <div>
-                        <span className="text-[#1B1B1B] font-inter text-sm font-medium block">
-                            {row.first_name || row.name || row.username || "—"}
-                        </span>
-                        <span className="text-[#777980] font-inter text-xs">{row.email}</span>
-                    </div>
-                );
-            },
+            render: (row) => (
+                <div>
+                    <span className="text-[#1B1B1B] font-inter text-sm font-medium block">
+                        {row.first_name && row.last_name
+                            ? `${row.first_name} ${row.last_name}`
+                            : row.name || row.username || "—"}
+                    </span>
+                    <span className="text-[#777980] font-inter text-xs">{row.email}</span>
+                </div>
+            ),
         },
         {
             key: "role",
@@ -58,12 +95,25 @@ export function createTeamsColumns({ onEditRole, onToggleBlock }: TeamsColumnsPa
             key: "actions",
             header: "",
             className: "w-12",
-            render: (row) => (
-                <ActionsDropdown items={[
-                    { label: "Edit Role", onClick: () => onEditRole(row) },
-                    { label: row.status === 1 ? "Block" : "Unblock", onClick: () => onToggleBlock(row), variant: row.status === 1 ? "danger" as const : "default" as const },
-                ]} />
-            ),
+            render: (row) => {
+                const items: { label: string; onClick: () => void; disabled?: boolean }[] = [];
+
+                if (canEditRole()) {
+                    items.push({ label: "Edit Role", onClick: () => onEditRole(row) });
+                }
+
+                // Block/Unblock সবসময় দেখানো হবে, permission না থাকলে শুধু disabled থাকবে
+                const blockAllowed = canBlockMember(row);
+                items.push({
+                    label: row.status === 1 ? "Block" : "Unblock",
+                    onClick: () => onToggleBlock(row),
+                    disabled: !blockAllowed,
+                });
+
+                if (items.length === 0) return null;
+
+                return <ActionsDropdown items={items} />;
+            },
         },
     ];
 }

@@ -5,7 +5,7 @@ export interface NavItem {
   label: string;
   icon: string;
   href: string;
-  subItems?: NavItem[];
+  subItems?: NavItem[] | undefined;
 }
 
 export interface NavSection {

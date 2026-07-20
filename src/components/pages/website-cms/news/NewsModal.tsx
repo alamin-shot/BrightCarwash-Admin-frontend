@@ -164,13 +164,11 @@ export function NewsModal({ isOpen, onClose, item, onSuccess }: NewsModalProps) 
     return (
         <>
             <div
-                className={`fixed inset-0 bg-black/40 z-50 transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'
-                    }`}
+                className={`fixed inset-0 bg-black/40 z-50 transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
                 onClick={handleClose}
             />
             <div
-                className={`fixed top-0 right-0 h-full w-full max-w-[560px] bg-white z-50 shadow-xl transition-transform duration-300 ease-out ${isVisible ? 'translate-x-0' : 'translate-x-full'
-                    }`}
+                className={`fixed top-0 right-0 h-full w-full max-w-[560px] bg-white z-50 shadow-xl transition-transform duration-300 ease-out ${isVisible ? 'translate-x-0' : 'translate-x-full'}`}
                 ref={modalRef}
             >
                 <div className="flex flex-col h-full p-6">
@@ -189,14 +187,10 @@ export function NewsModal({ isOpen, onClose, item, onSuccess }: NewsModalProps) 
                     </div>
 
                     <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4 py-4 overflow-y-auto">
-                        {/* Cover Image */}
                         <div className="flex flex-col gap-2">
                             <label className="text-[#777980] font-inter text-base font-normal leading-5">Cover Image</label>
                             <div
-                                className={`relative border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-all ${preview
-                                    ? 'border-[#0098E8] bg-[#F0F8FF]'
-                                    : 'border-[#DFE1E7] bg-[#F8FAFB] hover:border-[#0098E8] hover:bg-[#F0F8FF]'
-                                    }`}
+                                className={`relative border-2 border-dashed rounded-lg p-5 text-center cursor-pointer transition-all ${preview ? 'border-[#0098E8] bg-[#F0F8FF]' : 'border-[#DFE1E7] bg-[#F8FAFB] hover:border-[#0098E8] hover:bg-[#F0F8FF]'}`}
                                 onDrop={handleDrop}
                                 onDragOver={handleDragOver}
                                 onClick={() => fileInputRef.current?.click()}
@@ -228,13 +222,7 @@ export function NewsModal({ isOpen, onClose, item, onSuccess }: NewsModalProps) 
                                         </p>
                                     </div>
                                 )}
-                                <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleFileChange}
-                                    className="hidden"
-                                />
+                                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
                             </div>
                         </div>
 
@@ -262,7 +250,6 @@ export function NewsModal({ isOpen, onClose, item, onSuccess }: NewsModalProps) 
                             </div>
                         </div>
 
-                        {/* Content */}
                         <div className="flex flex-col gap-2 flex-1">
                             <label className="text-[#777980] font-inter text-base font-normal leading-5">Content</label>
                             <textarea
@@ -274,22 +261,36 @@ export function NewsModal({ isOpen, onClose, item, onSuccess }: NewsModalProps) 
                             />
                         </div>
 
-                        {/* Buttons */}
+                        {/* Publish / Draft Toggle */}
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[#777980] font-inter text-base font-normal leading-[130%]">Status</label>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsPublished(false)}
+                                    className={`flex-1 flex items-center gap-2 px-4 py-3 rounded-lg border transition-all ${!isPublished ? 'bg-[#F7EBEA] border-[#B23730]' : 'bg-white border-[#ECEFF3] hover:border-[#DFE1E7]'}`}
+                                >
+                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${!isPublished ? 'border-[#B23730]' : 'border-[#E8E8E9]'}`}>
+                                        {!isPublished && <div className="w-2.5 h-2.5 rounded-full bg-[#B23730]" />}
+                                    </div>
+                                    <span className="text-[#1D1F2C] font-inter text-lg font-normal leading-[132%]">Draft</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsPublished(true)}
+                                    className={`flex-1 flex items-center gap-2 px-4 py-3 rounded-lg border transition-all ${isPublished ? 'bg-[#DCF7EA] border-[#006F1F]' : 'bg-white border-[#ECEFF3] hover:border-[#DFE1E7]'}`}
+                                >
+                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isPublished ? 'border-[#006F1F]' : 'border-[#E8E8E9]'}`}>
+                                        {isPublished && <div className="w-2.5 h-2.5 rounded-full bg-[#006F1F]" />}
+                                    </div>
+                                    <span className="text-[#1D1F2C] font-inter text-lg font-normal leading-[132%]">Published</span>
+                                </button>
+                            </div>
+                        </div>
+
                         <div className="flex gap-3 pt-4 border-t border-[#DFE1E7]">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={handleClose}
-                                className="flex-1 py-3"
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                type="submit"
-                                isLoading={isSubmitting}
-                                loadingText={isEditing ? 'Saving...' : 'Creating...'}
-                                className="flex-1 py-3"
-                            >
+                            <Button type="button" variant="outline" onClick={handleClose} className="flex-1 py-3">Cancel</Button>
+                            <Button type="submit" isLoading={isSubmitting} loadingText={isEditing ? 'Saving...' : 'Creating...'} className="flex-1 py-3">
                                 {isEditing ? 'Update Post' : 'Publish'}
                             </Button>
                         </div>

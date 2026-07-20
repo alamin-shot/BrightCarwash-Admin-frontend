@@ -16,13 +16,19 @@ async function fetchFromBackend<T>(url: string, options?: RequestInit): Promise<
     return res.json();
 }
 
+export interface GalleryQueryResult {
+    items: GalleryItem[];
+    totalItems: number;
+    totalPages: number;
+    currentPage: number;
+}
+
 export const galleryApi = createApi({
     reducerPath: 'galleryApi',
     baseQuery: async () => ({ data: null }),
     tagTypes: ['Gallery'],
     endpoints: (builder) => ({
-        // Get all gallery items
-        getGallery: builder.query<GalleryItem[], { search?: string; is_published?: boolean; sort_by?: string; sort_order?: string; page?: number; limit?: number }>({
+        getGallery: builder.query<GalleryQueryResult, { search?: string; is_published?: boolean; sort_by?: string; sort_order?: string; page?: number; limit?: number }>({
             queryFn: async (params = {}) => {
                 try {
                     const queryParams = new URLSearchParams();
@@ -35,7 +41,14 @@ export const galleryApi = createApi({
 
                     const url = `/admin/gallery${queryParams.toString() ? `?${queryParams}` : ''}`;
                     const json = await fetchFromBackend<GalleryListResponse>(url);
-                    return { data: json.data.galleries || [] };
+                    return {
+                        data: {
+                            items: json.data.galleries || [],
+                            totalItems: json.data.meta?.total_items || 0,
+                            totalPages: json.data.meta?.total_pages || 1,
+                            currentPage: json.data.meta?.current_page || 1,
+                        },
+                    };
                 } catch (error) {
                     return {
                         error: {
@@ -48,7 +61,6 @@ export const galleryApi = createApi({
             providesTags: ['Gallery'],
         }),
 
-        // Get single gallery item
         getGalleryById: builder.query<GalleryItem, string>({
             queryFn: async (id) => {
                 try {
@@ -66,7 +78,6 @@ export const galleryApi = createApi({
             providesTags: (_result, _error, id) => [{ type: 'Gallery', id }],
         }),
 
-        // Create gallery item
         createGallery: builder.mutation<GalleryItem, CreateGalleryRequest>({
             queryFn: async (body) => {
                 try {
@@ -98,7 +109,6 @@ export const galleryApi = createApi({
             invalidatesTags: ['Gallery'],
         }),
 
-        // Update gallery item
         updateGallery: builder.mutation<GalleryItem, { id: string; data: UpdateGalleryRequest }>({
             queryFn: async ({ id, data }) => {
                 try {
@@ -130,7 +140,6 @@ export const galleryApi = createApi({
             invalidatesTags: (_result, _error, { id }) => ['Gallery', { type: 'Gallery', id }],
         }),
 
-        // Delete gallery item
         deleteGallery: builder.mutation<{ success: boolean }, string>({
             queryFn: async (id) => {
                 try {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { Pagination } from '@/components/ui/Pagination';
 import { GalleryHeader } from './GalleryHeader';
 import { GalleryFilters } from './GalleryFilters';
@@ -27,7 +27,7 @@ export function GalleryContent() {
         ? ['name', sortFilter.includes('asc') ? 'asc' : 'desc']
         : ['created_at', sortFilter.includes('asc') ? 'asc' : 'desc'];
 
-    const { data: items = [], isLoading, refetch } = useGetGalleryQuery({
+    const { data, isLoading, refetch } = useGetGalleryQuery({
         search: searchQuery || undefined,
         is_published: statusFilter ? statusFilter === 'true' : undefined,
         sort_by: sortBy,
@@ -35,6 +35,10 @@ export function GalleryContent() {
         page: currentPage,
         limit: ITEMS_PER_PAGE,
     });
+
+    const items = data?.items || [];
+    const totalItems = data?.totalItems || 0;
+    const totalPages = data?.totalPages || 1;
 
     const [deleteGallery] = useDeleteGalleryMutation();
 
@@ -75,10 +79,6 @@ export function GalleryContent() {
         refetch();
         handleModalClose();
     };
-
-    // Get total from API response or fallback
-    const totalItems = items.length > 0 ? 6 : 0; // TODO: Use actual meta from API
-    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
     if (isLoading) {
         return (

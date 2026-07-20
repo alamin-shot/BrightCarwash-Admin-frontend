@@ -8,12 +8,19 @@ import {
   GetNotificationParams,
   useGetNotificationQuery,
   useReadAllNotificationMutation,
+  useGetNotificationMetricsQuery,
 } from "@/services/notification.api";
 import { formatNotificationTime } from "@/lib/formatNotificationTime";
+import { useNotificationSocket } from "@/context/SocketContext";
 
 export default function Notification() {
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const { socket} = useNotificationSocket();
+  const { data: metricsData } = useGetNotificationMetricsQuery();
+  const initialCount = metricsData?.data?.unread || 0;
+  const [count, setCount] = useState(initialCount);
+  
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -24,22 +31,28 @@ export default function Notification() {
         setIsOpen(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
-
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('new_in_app_notification', (data) => {
+      console.log('new_in_app_notification', data);
+      setCount((prev: number) => prev + 1);
+    });
+    return () => {
+      socket.off('new_in_app_notification');
+    };
+  }, [socket]);
 
   const { data, isLoading, error } = useGetNotificationQuery({
     page: 1,
     limit: 5,
   } as GetNotificationParams);
-
   const notifications = data?.data?.items || [];
-  console.log("notifications", notifications);
 
   const [readAll] = useReadAllNotificationMutation();
-
   const handleReadAll = async () => {
     await readAll();
   };
@@ -50,10 +63,17 @@ export default function Notification() {
         onClick={() => {
           setIsOpen((prev) => !prev);
           handleReadAll();
+          setCount(0);
         }}
         className="cursor-pointer rounded-lg border border-[#DFE1E7] p-2 duration-300 hover:bg-gray-50"
       >
+        {count > 0 && (
+          <span className="absolute top-0 right-0 w-4 h-4 rounded-full bg-[#B23730] text-white text-xs font-bold flex items-center justify-center">
+            {count}
+          </span>
+        )}
         <BellIcon />
+        
       </button>
 
       <div
@@ -88,7 +108,12 @@ export default function Notification() {
                 href="/notifications"
                 className="text-[#B23730] hover:text-[#B23730]/80 duration-300 text-sm font-semibold flex justify-center items-center gap-1 w-full cursor-pointer mt-4 "
               >
-                View all <GoArrowRight />
+                <button onClick={() => {
+                  setIsOpen(false);
+                  setCount(0);
+                }} className="w-full flex justify-center items-center gap-1 cursor-pointer">
+                  View all <GoArrowRight />
+                </button>
               </Link>
             </div>
           ) : (

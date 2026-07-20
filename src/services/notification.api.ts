@@ -8,6 +8,8 @@ export interface GetNotificationParams {
   limit?: number;
 }
 
+
+
 export const notificationApi = createApi({
   reducerPath: "notificationApi",
   baseQuery: async () => ({ data: null }),
@@ -41,9 +43,10 @@ export const notificationApi = createApi({
     readAllNotification: builder.mutation<ReadAllNotificationInterface, void>({
       queryFn: async () => {
         try {
-          const response = await axiosInstance.patch<ReadAllNotificationInterface>(
-            `/admin/notifications/read/all`,
-          );
+          const response =
+            await axiosInstance.patch<ReadAllNotificationInterface>(
+              `/admin/notifications/read/all`,
+            );
           return { data: response.data };
         } catch (error: any) {
           return {
@@ -58,7 +61,26 @@ export const notificationApi = createApi({
       },
       invalidatesTags: ["Notification"],
     }),
+
+    getNotificationMetrics: builder.query<any, void>({
+      queryFn: async () => {
+        try {
+          const { data } = await axiosInstance.get<any>(
+            "/admin/notifications/metrics"
+          );
+          return { data };
+        } catch (error: any) {
+          return {
+            error: {
+              status: error?.response?.status || 500,
+              data: error?.response?.data?.message || "Failed to fetch metrics",
+            },
+          };
+        }
+      },
+    }),
   }),
 });
 
-export const { useGetNotificationQuery, useReadAllNotificationMutation } = notificationApi;
+export const { useGetNotificationQuery, useReadAllNotificationMutation, useGetNotificationMetricsQuery } =
+  notificationApi;

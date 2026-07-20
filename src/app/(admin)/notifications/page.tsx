@@ -8,7 +8,7 @@ import {
 } from "@/services/notification.api";
 import { useRouter } from "next/navigation";
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 6;
 
 export default function NotificationsPage() {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -53,14 +53,16 @@ export default function NotificationsPage() {
         </div>
       ))}
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={(page) => setCurrentPage(page)}
-        totalItems={totalItems}
-        itemsPerPage={ITEMS_PER_PAGE}
-        isLoading={isLoading}
-      />
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+          totalItems={totalItems}
+          itemsPerPage={ITEMS_PER_PAGE}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 }

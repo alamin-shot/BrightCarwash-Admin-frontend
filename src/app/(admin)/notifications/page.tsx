@@ -1,20 +1,34 @@
 "use client";
+import { useEffect, useState } from "react";
+import { Pagination } from "@/components/ui/Pagination";
 import { formatNotificationTime } from "@/lib/formatNotificationTime";
 import {
   GetNotificationParams,
   useGetNotificationQuery,
 } from "@/services/notification.api";
+import { useRouter } from "next/navigation";
 
+const ITEMS_PER_PAGE = 20;
 
 export default function NotificationsPage() {
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const router = useRouter();
+
   const { data, isLoading, error } = useGetNotificationQuery({
-    page: 1,
-    limit: 10,
+    page: currentPage,
+    limit: ITEMS_PER_PAGE,
   } as GetNotificationParams);
 
   const notifications = data?.data?.items || [];
-  console.log("notifications", notifications);
-
+  const totalItems = data?.data?.meta?.total || 0;
+  const totalPages =
+    data?.data?.meta?.total_pages ||
+    Math.max(1, Math.ceil(totalItems / ITEMS_PER_PAGE));
+  useEffect(() => {
+    router.push(`/notifications?page=${currentPage}&limit=${ITEMS_PER_PAGE}`, {
+      scroll: false,
+    });
+  }, [currentPage, router]);
 
   return (
     <div className="space-y-2">
@@ -38,6 +52,15 @@ export default function NotificationsPage() {
           </div>
         </div>
       ))}
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={(page) => setCurrentPage(page)}
+        totalItems={totalItems}
+        itemsPerPage={ITEMS_PER_PAGE}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

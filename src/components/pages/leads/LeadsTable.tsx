@@ -128,7 +128,6 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 								data={leads}
 								rowKey={(row) => row.id}
 								className="w-full"
-								onRowClick={(row) => router.push(`/leads/${row.id}`)}
 							/>
 						</div>
 						<Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={totalItems} itemsPerPage={ITEMS_PER_PAGE} isLoading={isPageLoading} />

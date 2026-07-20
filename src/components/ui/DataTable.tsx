@@ -14,7 +14,6 @@ interface DataTableProps<T> {
   data: T[];
   rowKey: (row: T) => string;
   className?: string;
-  onRowClick?: (row: T) => void; // ✅ Added row click handler
 }
 
 export function DataTable<T>({
@@ -22,7 +21,6 @@ export function DataTable<T>({
   data,
   rowKey,
   className = '',
-  onRowClick,
 }: DataTableProps<T>) {
   if (data.length === 0) {
     return (
@@ -50,21 +48,11 @@ export function DataTable<T>({
         <tbody>
           {data.map((row) => {
             const rowId = rowKey(row);
-            const isClickable = !!onRowClick;
 
             return (
               <tr
                 key={rowId}
-                className={`border-t border-[#E8E8E9] bg-white transition-colors ${isClickable ? 'hover:bg-[#F8FAFB] cursor-pointer' : ''
-                  }`}
-                onClick={() => {
-                  if (isClickable) {
-                    // Check if click target is inside a dropdown or checkbox
-                    const target = window.event?.target as HTMLElement;
-                    if (target?.closest('.no-row-click')) return;
-                    onRowClick?.(row);
-                  }
-                }}
+                className="border-t border-[#E8E8E9] bg-white transition-colors"
               >
                 {columns.map((col) => (
                   <td

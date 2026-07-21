@@ -39,6 +39,7 @@ export const NAVIGATION_CONFIG: NavSection[] = [
       },
       { id: "reports", label: "Reports", icon: "reports", href: "/reports" },
       { id: "activity-log", label: "Activity Log", icon: "activity-log", href: "/activity-log" },
+      { id: "ai-chatbox", label: "AI Chatbox", icon: "bot", href: "/ai-chatbox" },
       { id: "settings", label: "Settings", icon: "settings", href: "/settings" },
     ],
   },

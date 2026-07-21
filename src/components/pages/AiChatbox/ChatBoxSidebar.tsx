@@ -3,7 +3,7 @@ import UserList from "./UserList";
 
 export default function Sidebar({ selectedUser, onSelectUser }: any) {
   return (
-    <div className="flex flex-col rounded-xl border border-[#DFE1E7] bg-white">
+    <div className="flex flex-col rounded-xl border border-[#DFE1E7] bg-white ">
       <div className="flex-1 overflow-y-auto p-3 ">
         <div className="relative mb-2">
           <Search

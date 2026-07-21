@@ -19,14 +19,14 @@ export default function ChatSessionList({
   onSelectSession,
 }: Props) {
   return (
-    <div className="rounded-xl border bg-white">
-      <div className="flex items-center justify-between border-b p-4">
+    <div className="rounded-xl border border-[#DFE1E7] bg-white">
+      <div className="flex items-center justify-between border-b border-[#DFE1E7] p-4.5">
         <div>
           <h3 className="font-medium">Chat Sessions</h3>
-          <p className="text-sm text-gray-500">Showing conversations for {user.name}</p>
         </div>
-
-        <RefreshCw size={16} className="text-gray-500" />
+        <button className="cursor-pointer p-1.5 rounded-md border border-[#DFE1E7] bg-[#F8FAFB]">
+          <RefreshCw size={16} className="text-gray-500" />
+        </button>
       </div>
 
       <div className="space-y-3 p-3">
@@ -35,15 +35,19 @@ export default function ChatSessionList({
             <button
               key={session.id}
               onClick={() => onSelectSession(session.id)}
-              className={`w-full rounded-2xl border px-4 py-4 text-left transition shadow-sm
-              ${selectedSession === session.id
-                ? "border-blue-500 bg-blue-50"
-                : "border-gray-200 hover:border-slate-400 hover:bg-slate-50"}`}
+              className={`w-full rounded-2xl border px-4 py-4 text-left transition 
+              ${
+                selectedSession === session.id
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-200 hover:border-slate-400 hover:bg-slate-50"
+              }`}
             >
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div className="font-medium text-slate-900">{session.date}</div>
-                <span className={`rounded-full px-2 py-1 text-xs font-semibold ${statusColors[session.status]}`}>
-                  {session.status}
+                <span
+                  className={`rounded-full px-2 py-1 text-xs font-semibold ${statusColors[session.label]}`}
+                >
+                  {session.label}
                 </span>
               </div>
 

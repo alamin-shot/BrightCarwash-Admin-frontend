@@ -8,6 +8,7 @@ import {
 import { Ellipsis } from "lucide-react";
 import React, { useState } from "react";
 import { format } from "date-fns";
+import { Pagination } from "@/components/ui/Pagination";
 const actions = [
   {
     key: "details",
@@ -26,13 +27,15 @@ const actions = [
 export default function Queries() {
   const [categoryId, setCategoryId] = useState("");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const {
     data: quotesData,
     isLoading: quotesLoading,
     error: quotesError,
     refetch: quotesRefetch,
-  } = useGetQuotesQuery({ page: 1, limit: 10 });
+  } = useGetQuotesQuery({ page: currentPage, limit: pageSize });
 
   const [updateStatus] = useUpdateStatusMutation();
 
@@ -40,6 +43,7 @@ export default function Queries() {
     await updateStatus({ id, status });
     quotesRefetch();
   };
+
 
 
 
@@ -150,6 +154,16 @@ export default function Queries() {
       status: item.status || "new",
     })) || [];
 
+  const totalItems = quotesData?.data?.meta?.total || 0;
+  const itemsPerPage = quotesData?.data?.meta?.limit || pageSize;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
   return (
     <div>
       <div>
@@ -161,7 +175,14 @@ export default function Queries() {
         />
       </div>
       <div className="flex justify-end items-center p-4 border-b border-x border-[#E8E8E9] rounded-b-lg relative">
-        Here will be pagination
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+          isLoading={quotesLoading}
+        />
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ const pageTitles: Record<string, string> = {
   "/website-cms": "Website CMS",
   "/reports": "Reports",
   "/notifications": "Notifications",
+  "/ai-chatbox": "AI Chatbot Insights",
   "/activity-log": "Activity Log",
   "/settings": "Settings",
   "/settings/change-password": "Change Password",

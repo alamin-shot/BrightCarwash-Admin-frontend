@@ -28,7 +28,7 @@ export default function AiChatbox() {
 
   return (
     <div className="h-[80vh]">
-      <h2 className="mb-5 text-3xl font-semibold">
+      <h2 className="mb-8 text-2xl font-semibold">
         Overview of AI Chats
       </h2>
 

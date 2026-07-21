@@ -12,14 +12,14 @@ export default function UserList({ selectedUser, onSelectUser }: Props) {
         <button
           key={user.id}
           onClick={() => onSelectUser(user.id)}
-          className={`w-full rounded-2xl border p-4 text-left transition shadow-sm
+          className={`w-full rounded-2xl border p-3.5 text-left transition 
             ${
               selectedUser === user.id
-                ? "border-blue-500 bg-blue-50"
+                ? "border-2 border-blue-500"
                 : "border-gray-200 hover:border-slate-300 hover:bg-slate-50"
             }`}
         >
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex justify-between gap-2">
             <div>
               <h3 className="font-medium text-slate-900">{user.name}</h3>
               <p className="text-sm text-gray-500">{user.email}</p>

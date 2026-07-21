@@ -27,12 +27,12 @@ export default function AiChatbox() {
   );
 
   return (
-    <div className="">
+    <div className="h-[80vh]">
       <h2 className="mb-5 text-3xl font-semibold">
         Overview of AI Chats
       </h2>
 
-      <div className="grid h-full grid-cols-[280px_1fr] gap-4">
+      <div className="grid h-full grid-cols-[344px_1fr] gap-4">
         <Sidebar
           selectedUser={selectedUserId}
           onSelectUser={(id: string) => {

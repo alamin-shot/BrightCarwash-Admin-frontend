@@ -8,9 +8,9 @@ type Props = {
 };
 
 const statusColors: Record<string, string> = {
-  Normal: "bg-green-100 text-green-700",
-  "Need Inquiry": "bg-amber-100 text-amber-700",
-  Urgent: "bg-red-100 text-red-700",
+  Normal: "border border-[#DFE1E7] text-[#006F1F]",
+  "Need Inquiry": "border border-[#DFE1E7] text-[#FFAF00]",
+  Urgent: "border border-[#DFE1E7] text-[#FF4000]",
 };
 
 export default function ChatSessionList({
@@ -19,8 +19,8 @@ export default function ChatSessionList({
   onSelectSession,
 }: Props) {
   return (
-    <div className="rounded-xl border border-[#DFE1E7] bg-white">
-      <div className="flex items-center justify-between border-b border-[#DFE1E7] p-4.5">
+    <div className="rounded-xl overflow-hidden border border-[#DFE1E7] bg-[#F8FAFB]">
+      <div className="flex items-center justify-between border-b border-[#DFE1E7] p-4.5 bg-white">
         <div>
           <h3 className="font-medium">Chat Sessions</h3>
         </div>
@@ -29,13 +29,13 @@ export default function ChatSessionList({
         </button>
       </div>
 
-      <div className="space-y-3 p-3">
+      <div className="space-y-3 p-3 bg-[#F8FAFB] overflow-y-auto">
         {user.sessions.length ? (
           user.sessions.map((session: ChatSession) => (
             <button
               key={session.id}
               onClick={() => onSelectSession(session.id)}
-              className={`w-full rounded-2xl border px-4 py-4 text-left transition 
+              className={`w-full rounded-2xl border px-4 py-4 text-left transition bg-white 
               ${
                 selectedSession === session.id
                   ? "border-blue-500 bg-blue-50"
@@ -45,7 +45,7 @@ export default function ChatSessionList({
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div className="font-medium text-slate-900">{session.date}</div>
                 <span
-                  className={`rounded-full px-2 py-1 text-xs font-semibold ${statusColors[session.label]}`}
+                  className={`rounded px-2 py-1 text-xs font-semibold ${statusColors[session.label]}`}
                 >
                   {session.label}
                 </span>

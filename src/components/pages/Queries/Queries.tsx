@@ -4,6 +4,7 @@ import { FilterDropdown } from "@/components/ui/FilterDropdown";
 import { useGetQuotesQuery } from "@/services/queries.api";
 import { Ellipsis } from "lucide-react";
 import React, { useState } from "react";
+import { format } from "date-fns";
 const actions = [
   {
     key: "details",
@@ -23,9 +24,13 @@ export default function Queries() {
   const [categoryId, setCategoryId] = useState("");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
-  const { data: quotesData, isLoading: quotesLoading, error: quotesError } = useGetQuotesQuery({page: 1, limit: 10,});
+  const {
+    data: quotesData,
+    isLoading: quotesLoading,
+    error: quotesError,
+  } = useGetQuotesQuery({ page: 1, limit: 10 });
 
-  console.log("hello queries",quotesData?.data?.items)
+  console.log("hello queries", quotesData?.data?.items);
 
   const queries = quotesData?.data?.items || [];
 
@@ -82,7 +87,7 @@ export default function Queries() {
       key: "date",
       header: "Date",
       render: (row: any) => {
-        return row.date?.substring(0, 10) || "";
+        return format(new Date(row.date), "dd-MM-yyyy HH:mm") || "";
       },
     },
     {
@@ -123,12 +128,11 @@ export default function Queries() {
     },
   ];
 
-
-
-  const data = queries?.map((item) => ({
-    ...item,
-    status: item.status || "New",
-  })) || [];
+  const data =
+    queries?.map((item) => ({
+      ...item,
+      status: item.status || "new",
+    })) || [];
 
   return (
     <div>

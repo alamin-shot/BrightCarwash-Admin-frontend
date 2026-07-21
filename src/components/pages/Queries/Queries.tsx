@@ -63,12 +63,23 @@ export default function Queries() {
       render: (row: any) => {
         return (
           <div className="flex items-center relative">
-            <button onClick={() => setOpen(!open)} className="border border-[#E8E8E9] p-2 rounded-md cursor-pointer hover:bg-[#F5F5F5] duration-200">
+            <button
+              onClick={() => setOpen(!open)}
+              className="border border-[#E8E8E9] p-2 rounded-md cursor-pointer hover:bg-[#F5F5F5] duration-200"
+            >
               <Ellipsis />
             </button>
             {open && (
-              <div className="absolute top-5 -left-10 shadow border border-[#E8E8E9] rounded-md p-2 bg-white">
-                hello
+              <div className="absolute top-5 -left-10 shadow border border-[#E8E8E9] rounded-md bg-white">
+                <button className="w-full p-2 rounded-md hover:bg-[#F5F5F5] duration-200">
+                  View Detail
+                </button>
+                <button className="w-full p-2 rounded-md hover:bg-[#F5F5F5] duration-200">
+                  Send E-mail
+                </button>
+                <button className="w-full p-2 rounded-md hover:bg-[#F5F5F5] duration-200">
+                  Delete Query
+                </button>
               </div>
             )}
           </div>

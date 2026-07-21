@@ -16,6 +16,7 @@ export const NAVIGATION_CONFIG: NavSection[] = [
           { id: "marketing-campaigns", label: "Campaigns", icon: "campaigns", href: "/marketing/campaigns" },
           { id: "marketing-email-list", label: "Email List", icon: "list", href: "/marketing/email-list" },
           { id: "marketing-lead-groups", label: "Lead Groups", icon: "staffs", href: "/marketing/lead-groups" },
+          { id: "marketing-queries", label: "Queries", icon: "staffs", href: "/marketing/queries" },
         ]
       },
     ],

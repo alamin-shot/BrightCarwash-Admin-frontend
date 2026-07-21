@@ -13,7 +13,7 @@ export const queriesApi = createApi({
   reducerPath: "queriesApi",
   baseQuery: async () => ({ data: null }),
   tagTypes: ["Queries"],
-  
+
   endpoints: (builder) => ({
     getQuotes: builder.query<quoteInterfece, GetQuotesParams>({
       queryFn: async (params = { page: 1, limit: 10 }) => {
@@ -35,24 +35,25 @@ export const queriesApi = createApi({
       keepUnusedDataFor: 60,
     }),
 
-    // getNotificationMetrics: builder.query<any, void>({
-    //   queryFn: async () => {
-    //     try {
-    //       const { data } = await axiosInstance.get<any>(
-    //         "/admin/notifications/metrics",
-    //       );
-    //       return { data };
-    //     } catch (error: any) {
-    //       return {
-    //         error: {
-    //           status: error?.response?.status || 500,
-    //           data: error?.response?.data?.message || "Failed to fetch metrics",
-    //         },
-    //       };
-    //     }
-    //   },
-    // }),
+    updateStatus: builder.mutation<any, { id: string; status: string }>({
+      queryFn: async ({ id, status }: { id: string; status: string }) => {
+        try {
+          const { data } = await axiosInstance.patch<any>(
+            `/admin/quotes/${id}`,
+            { status },
+          );
+          return { data };
+        } catch (error: any) {
+          return {
+            error: {
+              status: error?.response?.status || 500,
+              data: error?.response?.data?.message || "Failed to update status",
+            },
+          };
+        }
+      },
+    }),
   }),
 });
 
-export const { useGetQuotesQuery } = queriesApi;
+export const { useGetQuotesQuery, useUpdateStatusMutation } = queriesApi;

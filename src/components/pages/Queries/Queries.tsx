@@ -1,7 +1,10 @@
 "use client";
 import { DataTable } from "@/components/ui/DataTable";
 import { FilterDropdown } from "@/components/ui/FilterDropdown";
-import { useGetQuotesQuery } from "@/services/queries.api";
+import {
+  useGetQuotesQuery,
+  useUpdateStatusMutation,
+} from "@/services/queries.api";
 import { Ellipsis } from "lucide-react";
 import React, { useState } from "react";
 import { format } from "date-fns";
@@ -28,7 +31,17 @@ export default function Queries() {
     data: quotesData,
     isLoading: quotesLoading,
     error: quotesError,
+    refetch: quotesRefetch,
   } = useGetQuotesQuery({ page: 1, limit: 10 });
+
+  const [updateStatus] = useUpdateStatusMutation();
+
+  const handleUpdateStatus = async (id: string, status: string) => {
+    await updateStatus({ id, status });
+    quotesRefetch();
+  };
+
+
 
   console.log("hello queries", quotesData?.data?.items);
 
@@ -74,7 +87,8 @@ export default function Queries() {
               ]}
               value={row.status}
               onChange={(value) => {
-                setCategoryId(value);
+                setCategoryId(value || "");
+                handleUpdateStatus(row.id, value || "");
               }}
               className="w-fit"
               buttonClassName={`rounded-full border-none px-3 py-1.5 text-sm font-medium ${selectedStatusClass}`}
@@ -113,7 +127,9 @@ export default function Queries() {
               <div className="absolute top-10 w-40 -left-40 shadow border border-[#E8E8E9] rounded-2xl bg-white z-50 overflow-hidden">
                 {actions.map((action) => (
                   <button
-                    onClick={() => setOpenMenuId(null)}
+                    onClick={() => {
+                      setOpenMenuId(null);
+                    }}
                     key={action.key}
                     className="text-[#4A4C56] hover:text-white w-full p-2 hover:bg-[#0098E8] duration-200 cursor-pointer"
                   >

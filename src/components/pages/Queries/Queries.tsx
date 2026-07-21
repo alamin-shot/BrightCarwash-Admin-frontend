@@ -6,7 +6,7 @@ import React, { useState } from "react";
 
 export default function Queries() {
   const [categoryId, setCategoryId] = useState("");
-  const [open, setOpen] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const columns = [
     {
       key: "name",
@@ -43,8 +43,8 @@ export default function Queries() {
                 { value: "Replied", label: "Replied" },
                 { value: "Closed", label: "Closed" },
               ]}
-              // value={row.status}
-              value={categoryId}
+              value={row.status}
+            //   value={categoryId}
               onChange={(value) => {
                 setCategoryId(value);
               }}
@@ -61,23 +61,30 @@ export default function Queries() {
       key: "action",
       header: "Action",
       render: (row: any) => {
+        const isOpen = openMenuId === row.id;
         return (
           <div className="flex items-center relative">
             <button
-              onClick={() => setOpen(!open)}
-              className="border border-[#E8E8E9] p-2 rounded-md cursor-pointer hover:bg-[#F5F5F5] duration-200"
+              type="button"
+              onClick={() => setOpenMenuId(isOpen ? null : row.id)}
+              aria-expanded={isOpen}
+              className={`border border-[#E8E8E9] p-2 rounded-md cursor-pointer hover:bg-[#F5F5F5] duration-200 ${
+                isOpen ? "bg-[#F5F5F5] border-[#DADCE0]" : ""
+              }`}
             >
-              <Ellipsis />
+              <Ellipsis
+                className={isOpen ? "text-[#0098E8]" : "text-[#111827]"}
+              />
             </button>
-            {open && (
-              <div className="absolute top-5 -left-10 shadow border border-[#E8E8E9] rounded-md bg-white">
-                <button className="w-full p-2 rounded-md hover:bg-[#F5F5F5] duration-200">
+            {isOpen && (
+              <div className="absolute top-10 w-40 -left-40 shadow border border-[#E8E8E9] rounded-md bg-white z-10 overflow-hidden">
+                <button className="w-full p-2 hover:bg-[#0098E8] duration-200 cursor-pointer">
                   View Detail
                 </button>
-                <button className="w-full p-2 rounded-md hover:bg-[#F5F5F5] duration-200">
+                <button className="w-full p-2 hover:bg-[#0098E8] duration-200 cursor-pointer">
                   Send E-mail
                 </button>
-                <button className="w-full p-2 rounded-md hover:bg-[#F5F5F5] duration-200">
+                <button className="w-full p-2 hover:bg-[#0098E8] duration-200 cursor-pointer">
                   Delete Query
                 </button>
               </div>

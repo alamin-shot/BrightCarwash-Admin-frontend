@@ -20,6 +20,7 @@ import { heroApi } from '@/services/hero.api';
 import { emailListApi } from '@/services/email-list.api';
 import { settingsApi } from '@/services/settings.api';
 import { notificationApi } from '@/services/notification.api';
+import { queriesApi } from '@/services/queries.api';
 export const store = configureStore({
 	reducer: {
 		auth: authReducer,
@@ -41,7 +42,8 @@ export const store = configureStore({
 		[heroApi.reducerPath]: heroApi.reducer,
 		[emailListApi.reducerPath]: emailListApi.reducer,
 		[settingsApi.reducerPath]: settingsApi.reducer,
-		[notificationApi.reducerPath]: notificationApi.reducer
+		[notificationApi.reducerPath]: notificationApi.reducer,
+		[queriesApi.reducerPath]: queriesApi.reducer,
 	},
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware().concat(
@@ -62,7 +64,8 @@ export const store = configureStore({
 			heroApi.middleware,
 			emailListApi.middleware,
 			settingsApi.middleware,
-			notificationApi.middleware
+			notificationApi.middleware,
+			queriesApi.middleware
 		),
 });
 

@@ -7,53 +7,58 @@ import {
   useUpdateStatusMutation,
 } from "@/services/queries.api";
 import { Ellipsis, SearchIcon } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { format } from "date-fns";
 import { Pagination } from "@/components/ui/Pagination";
+import { useParams } from "@/hooks/useParams";
 
 const actions = [
-  {
-    key: "details",
-    label: "View Detail",
-  },
-  {
-    key: "send",
-    label: "Send email",
-  },
-  {
-    key: "delete",
-    label: "Delete query",
-  },
+  { key: "details", label: "View Detail" },
+  { key: "send", label: "Send email" },
+  { key: "delete", label: "Delete query" },
 ];
 
 export default function Queries() {
-  const [status, setStatus] = useState("");
-  const [search, setSearch] = useState("");
+  const [queryState, setQueryState] = useParams({
+    status: "",
+    search: "",
+    page: "1",
+    limit: "10",
+  });
+
   const [categoryId, setCategoryId] = useState("");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
 
   const {
     data: quotesData,
     isLoading: quotesLoading,
     refetch: quotesRefetch,
-  } = useGetQuotesQuery({ page: currentPage, limit: pageSize, status, search });
+  } = useGetQuotesQuery({
+    page: parseInt(queryState.page),
+    limit: parseInt(queryState.limit),
+    status: queryState.status,
+    search: queryState.search,
+  });
 
   const [updateStatus] = useUpdateStatusMutation();
+  const [deleteQuote] = useDeleteQuoteMutation();
+
   const handleUpdateStatus = async (id: string, status: string) => {
     await updateStatus({ id, status });
     quotesRefetch();
   };
 
-  const [deleteQuote] = useDeleteQuoteMutation();
   const handleDeleteQuote = async (id: string) => {
     await deleteQuote({ id });
     quotesRefetch();
   };
 
-  console.log("hello queries", quotesData?.data?.items);
-  const queries = quotesData?.data?.items || [];
+  const handleSearch = useCallback(
+    (value: string) => {
+      setQueryState({ search: value, page: "1" });
+    },
+    [setQueryState],
+  );
 
   const columns = [
     {
@@ -108,9 +113,7 @@ export default function Queries() {
     {
       key: "date",
       header: "Date",
-      render: (row: any) => {
-        return format(new Date(row.date), "d MMM, yyyy") || "";
-      },
+      render: (row: any) => format(new Date(row.date), "d MMM, yyyy") || "",
     },
     {
       key: "action",
@@ -132,14 +135,12 @@ export default function Queries() {
               />
             </button>
             {isOpen && (
-              <div className="absolute top-10 w-40 -left-20 shadow border border-[#E8E8E9] rounded-2xl bg-white z-50 overflow-hidden">
-                {actions?.map((action) => (
+              <div className="absolute top-10 lg:w-40 -left-20 shadow border border-[#E8E8E9] rounded-2xl bg-white z-50 overflow-hidden">
+                {actions.map((action) => (
                   <button
                     onClick={() => {
                       setOpenMenuId(null);
-                      if (action.key === "delete") {
-                        handleDeleteQuote(row.id);
-                      }
+                      if (action.key === "delete") handleDeleteQuote(row.id);
                     }}
                     key={action.key}
                     className="text-[#4A4C56] hover:text-white w-full p-2 hover:bg-[#0098E8] duration-200 cursor-pointer"
@@ -156,34 +157,29 @@ export default function Queries() {
   ];
 
   const data =
-    queries?.map((item) => ({
+    quotesData?.data?.items?.map((item) => ({
       ...item,
       status: item.status || "new",
     })) || [];
 
   const totalItems = quotesData?.data?.meta?.total || 0;
-  const itemsPerPage = quotesData?.data?.meta?.limit || pageSize;
+  const itemsPerPage = parseInt(queryState.limit);
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
 
   return (
     <div>
       <h2 className="text-[#0B1220] font-lora text-lg xl:text-2xl font-semibold mb-4 lg:mb-8">
         Website Queries Overview
       </h2>
+
       <div className="mb-3 flex justify-between items-center">
         <div className="relative">
           <input
             className="w-full lg:w-87 border border-[#E8E8E9] rounded-lg text-sm py-3 px-3.75 outline-none"
             placeholder="Search by name, phone number, email..."
             type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={queryState.search}
+            onChange={(e) => handleSearch(e.target.value)}
           />
           <SearchIcon className="absolute top-1/2 right-3 -translate-y-1/2 text-[#E8E8E9] text-sm" />
         </div>
@@ -195,29 +191,31 @@ export default function Queries() {
             { value: "closed", label: "Closed" },
           ]}
           dropdownOffsetX={-50}
-          value={status}
-          onChange={(value) => {
-            setStatus(value || "");
-          }}
+          value={queryState.status}
+          onChange={(value) =>
+            setQueryState({ status: value || "", page: "1" })
+          }
           className="w-fit left-0"
         />
       </div>
+
       <div>
         <DataTable
           columns={columns}
           data={data}
           rowKey={(item) => item.id}
-          className={`w-full border border-[#E8E8E9]  ${totalPages > 1 ? "rounded-t-lg" : "rounded-lg"}`}
+          className={`w-full border border-[#E8E8E9] ${totalPages > 1 ? "rounded-t-lg" : "rounded-lg"}`}
         />
       </div>
+
       {totalPages > 1 && (
         <div className="flex justify-end items-center p-4 border-b border-x border-[#E8E8E9] rounded-b-lg relative">
           <Pagination
-            currentPage={currentPage}
+            currentPage={parseInt(queryState.page)}
             totalPages={totalPages}
             totalItems={totalItems}
             itemsPerPage={itemsPerPage}
-            onPageChange={handlePageChange}
+            onPageChange={(page) => setQueryState({ page: page.toString() })}
             isLoading={quotesLoading}
           />
         </div>

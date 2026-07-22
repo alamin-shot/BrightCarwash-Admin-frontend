@@ -15,6 +15,9 @@ interface LeadsFiltersProps {
 	depositFilter: string;
 	onDepositChange: (val: string) => void;
 	uniqueSources: string[];
+	kanbanLimit?: number;
+	setKanbanLimit?: (val: number) => void;
+	viewMode?: 'list' | 'kanban';
 }
 
 const PRIORITY_OPTIONS = [
@@ -22,6 +25,13 @@ const PRIORITY_OPTIONS = [
 	{ value: "MEDIUM", label: "Medium" },
 	{ value: "HIGH", label: "High" },
 	{ value: "URGENT", label: "Urgent" },
+];
+
+const KANBAN_LIMIT_OPTIONS = [
+	{ value: '50', label: '50' },
+	{ value: '100', label: '100' },
+	{ value: '200', label: '200' },
+	{ value: '9999', label: 'All' },
 ];
 
 export function LeadsFilters({
@@ -33,6 +43,9 @@ export function LeadsFilters({
 	priorityFilter,
 	onPriorityChange,
 	uniqueSources,
+	kanbanLimit = 100,
+	setKanbanLimit,
+	viewMode = 'list',
 }: LeadsFiltersProps) {
 	const [inputValue, setInputValue] = useState(searchQuery);
 
@@ -83,6 +96,18 @@ export function LeadsFilters({
 				value={priorityFilter}
 				onChange={onPriorityChange}
 			/>
+
+			{viewMode === 'kanban' && setKanbanLimit && (
+				<>
+					<div className="w-px h-8 bg-[#DFE1E7]" />
+					<FilterDropdown
+						label="Show"
+						options={KANBAN_LIMIT_OPTIONS}
+						value={String(kanbanLimit)}
+						onChange={(val) => setKanbanLimit(Number(val))}
+					/>
+				</>
+			)}
 		</div>
 	);
 }

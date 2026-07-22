@@ -24,6 +24,15 @@ export function useStepTwoState({ designFilled = false, initialFilled }: StepTwo
         }
     }, [designFilled, filled.design]);
 
+    useEffect(() => {
+        if (initialFilled) {
+            setFilled((prev) => ({
+                ...prev,
+                ...initialFilled
+            }));
+        }
+    }, [initialFilled]);
+
     const toggleFilled = (key: keyof CardState) => {
         setFilled((prev) => ({ ...prev, [key]: !prev[key] }));
     };

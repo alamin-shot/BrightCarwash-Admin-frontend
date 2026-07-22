@@ -1,7 +1,7 @@
 import { AuthLayout } from '@/components/layouts/AuthLayout';
 import { SetPasswordForm } from '@/components/pages/auth-pages/set-password/SetPasswordForm';
 
-export function SetPasswordLayout() {
+export default function SetPasswordLayout() {
     return (
         <AuthLayout
             title="Set Password"

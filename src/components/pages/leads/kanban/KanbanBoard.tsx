@@ -11,12 +11,16 @@ interface KanbanBoardProps {
 	leads: Lead[];
 	stages: StageOption[];
 	onStageChange: (id: string, stageId: string) => void;
+	onDeleteLead: (lead: Lead) => void;
+	onStageDeleted: () => void;
 }
 
 export function KanbanBoard({
 	leads,
 	stages,
 	onStageChange,
+	onDeleteLead,
+	onStageDeleted
 }: KanbanBoardProps) {
 	const boardRef = useRef<HTMLDivElement>(null);
 
@@ -62,6 +66,8 @@ export function KanbanBoard({
 							icon={icon}
 							items={getLeadsByStage(stage.value)}
 							stages={stages}
+							onDeleteLead={onDeleteLead}
+							onStageDeleted={onStageDeleted}
 						/>
 					);
 				})}

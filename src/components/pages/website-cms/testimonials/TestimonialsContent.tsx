@@ -114,6 +114,7 @@ export function TestimonialsContent() {
                 <TestimonialsGridView
                     items={items}
                     onEdit={handleEdit}
+                    onDelete={handleDelete}
                 />
             ) : (
                 <TestimonialsListView

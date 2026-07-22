@@ -1,20 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Icon } from "@/components/ui/Icon";
-import { TemplateCard } from "@/components/pages/campaigns/create/templates/TemplateCard";
+import { DataTable } from "@/components/ui/DataTable";
+import { TemplatePreviewModal } from "@/components/pages/campaigns/create/templates/TemplatePreviewModal";
+import { createTemplatesColumns } from "@/components/pages/campaigns/create/templates/TemplatesColumns";
 import { getSavedTemplates } from "@/services/template.service";
 import type { Template } from "@/types/template";
 import { toast } from "react-toastify";
 
-interface StepThreeCardsProps {
+interface StepThreeTableProps {
 	onTemplateSelect: (name: string, id: string) => void;
 }
 
-export function StepThreeCards({ onTemplateSelect }: StepThreeCardsProps) {
+export function StepThreeTable({ onTemplateSelect }: StepThreeTableProps) {
 	const [savedTemplates, setSavedTemplates] = useState<Template[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
+	const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
 
 	useEffect(() => {
 		getSavedTemplates()
@@ -24,15 +27,21 @@ export function StepThreeCards({ onTemplateSelect }: StepThreeCardsProps) {
 	}, []);
 
 	const handleUse = (template: Template) => {
-		console.log("🎯 Template selected in StepThreeCards:", {
-			name: template.name,
-			id: template.id
-		});
-
 		setSelectedId(template.id);
 		toast.success(`"${template.name}" selected for this campaign`);
 		onTemplateSelect(template.name, template.id);
+		setPreviewTemplate(null);
 	};
+
+	const handleView = (template: Template) => {
+		setPreviewTemplate(template);
+	};
+
+	const columns = useMemo(() => createTemplatesColumns({
+		onView: handleView,
+		onEdit: () => { },
+		onDelete: () => { },
+	}), []);
 
 	return (
 		<div className="flex p-4 flex-col gap-4 self-stretch rounded-xl border border-[#DFE1E7] bg-[#F8FAFB]">
@@ -44,23 +53,24 @@ export function StepThreeCards({ onTemplateSelect }: StepThreeCardsProps) {
 				</div>
 			</div>
 			{loading ? (
-				<div className="grid grid-cols-3 gap-4">
-					{[...Array(3)].map((_, i) => <div key={i} className="h-[340px] bg-gray-100 rounded-lg animate-pulse" />)}
-				</div>
+				<div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
 			) : savedTemplates.length === 0 ? (
 				<div className="flex items-center justify-center py-12 text-[#777980] font-inter text-sm">No saved templates yet. Create one in the email editor.</div>
 			) : (
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-					{savedTemplates.map((t) => (
-						<TemplateCard
-							key={t.id}
-							template={t}
-							onUse={handleUse}
-							isSelected={t.id === selectedId}
-						/>
-					))}
-				</div>
+				<DataTable
+					columns={columns}
+					data={savedTemplates}
+					rowKey={(row) => row.id}
+					className="w-full border border-[#E8E8E9] rounded-lg"
+				/>
 			)}
+
+			<TemplatePreviewModal
+				isOpen={!!previewTemplate}
+				onClose={() => setPreviewTemplate(null)}
+				template={previewTemplate}
+				onUse={handleUse}
+			/>
 		</div>
 	);
 }

@@ -45,28 +45,21 @@ export function useAuth() {
 	const login = useCallback(
 		async (credentials: LoginCredentials) => {
 			try {
-				console.log('[useAuth] Starting login process...');
 				const response = await authService.login(credentials);
-				console.log('[useAuth] Login response received, setting tokens...');
 				setTokens(
 					response.authorization.access_token,
 					response.authorization.refresh_token,
 				);
 				const profile = await authService.getProfile();
-				console.log('[useAuth] Profile fetched:', profile);
 				dispatch(setUser(profile));
 				toast.success('Login successful');
 				router.replace('/dashboard');
 				return true;
-			} catch (error) {
-				console.error('[useAuth] Login error:', error);
-
+			} catch (error: any) {
 				clearTokens();
 				dispatch(clearAuth());
-
-				const errorMessage = error instanceof Error ? error.message : 'Login failed. Please check your credentials.';
-				toast.error(errorMessage);
-
+				const message = error?.response?.data?.message || error?.message || 'Login failed. Please check your credentials.';
+				toast.error(message);
 				return false;
 			}
 		},

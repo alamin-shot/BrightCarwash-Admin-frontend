@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { LeadsTable, type LeadsTableHandle } from '@/components/pages/leads/LeadsTable';
 import { AddLeadModal } from '@/components/pages/leads/kanban/AddLeadModal';
 import { CreateGroupModal } from '@/components/pages/leads/groups/CreateGroupModal';
@@ -8,6 +8,7 @@ import { LeadsContentHeader } from './LeadsContentHeader';
 import { useLeadsContent } from '@/hooks/useLeadsContent';
 
 export function LeadsContent() {
+	const [kanbanLimit, setKanbanLimit] = useState(100);
 	const tableRef = useRef<LeadsTableHandle>(null);
 	const {
 		modalOpen, setModalOpen,
@@ -47,9 +48,17 @@ export function LeadsContent() {
 				setViewMode={setViewMode}
 				leadType={leadType}
 				setLeadType={setLeadType}
+
 			/>
 
-			<LeadsTable ref={tableRef} viewMode={viewMode} onSelectionChange={handleSelectionChange} leadType={leadType} />
+			<LeadsTable
+				ref={tableRef}
+				viewMode={viewMode}
+				onSelectionChange={handleSelectionChange}
+				leadType={leadType}
+				kanbanLimit={kanbanLimit}
+				setKanbanLimit={setKanbanLimit}
+			/>
 
 			<AddLeadModal isOpen={modalOpen} onClose={() => setModalOpen(false)} stages={stages} />
 			<CreateGroupModal

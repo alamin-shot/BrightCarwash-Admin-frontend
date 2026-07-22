@@ -3,43 +3,36 @@
 import { useState, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/Button";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 
 export function LoginForm() {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-
     e.preventDefault();
     e.stopPropagation();
-
-
     setError(null);
-
-
     if (!email.trim() || !password.trim()) {
       setError("Please fill in all fields");
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       const success = await login({ email, password });
-
       if (!success) {
         setPassword("");
         setError("Invalid email or password");
       }
-    } catch (err) {
-
-      setError(err instanceof Error ? err.message : "Login failed");
+    } catch (err: any) {
+      const message = err?.response?.data?.message || err?.message || "Login failed";
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -52,14 +45,12 @@ export function LoginForm() {
       className="flex flex-col gap-4 sm:gap-6 w-full"
       noValidate
     >
-      {/* ✅ Show error message if any */}
       {error && (
         <div className="w-full p-3 bg-[#FF4345]/20 border border-[#FF4345] rounded-lg text-[#FF4345] font-inter text-sm text-center">
           {error}
         </div>
       )}
 
-      {/* Email */}
       <div>
         <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-[#E9E9EA] mb-1.5 sm:mb-2">
           Email Address
@@ -76,35 +67,33 @@ export function LoginForm() {
         />
       </div>
 
-      {/* Password */}
       <div>
         <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-[#E9E9EA] mb-1.5 sm:mb-2">
           Password
         </label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          placeholder="Enter your password"
-          disabled={isSubmitting}
-          className="w-full px-3 sm:px-4 py-3 sm:py-4 bg-white/[0.12] border border-white/20 rounded-lg text-white placeholder-[#777980] font-inter text-sm outline-none focus:border-[#0098E8] focus:ring-1 focus:ring-[#0098E8] transition-all disabled:opacity-50"
-        />
+        <div className="relative">
+          <input
+            id="password"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            placeholder="Enter your password"
+            disabled={isSubmitting}
+            className="w-full px-3 sm:px-4 pr-11 py-3 sm:py-4 bg-white/[0.12] border border-white/20 rounded-lg text-white placeholder-[#777980] font-inter text-sm outline-none focus:border-[#0098E8] focus:ring-1 focus:ring-[#0098E8] transition-all disabled:opacity-50"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#777980] hover:text-white transition-colors"
+            tabIndex={-1}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
       </div>
 
-      {/* Remember me + Forgot password */}
-      <div className="flex justify-between items-center flex-wrap gap-2">
-        <label className="flex items-center gap-1.5 sm:gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
-            disabled={isSubmitting}
-            className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border-white/30 bg-white/10 accent-[#0098E8] cursor-pointer disabled:opacity-50"
-          />
-          <span className="text-[#E9E9EA] font-inter text-xs sm:text-sm">Remember me</span>
-        </label>
+      <div className="flex justify-end">
         <Link
           href="/forgot-password"
           className="text-[#B23730] font-inter text-xs sm:text-sm font-medium underline underline-offset-[4px] decoration-[1.68px] hover:text-[#D14540] transition-colors"
@@ -113,7 +102,6 @@ export function LoginForm() {
         </Link>
       </div>
 
-      {/* Login button */}
       <Button
         type="submit"
         isLoading={isSubmitting}

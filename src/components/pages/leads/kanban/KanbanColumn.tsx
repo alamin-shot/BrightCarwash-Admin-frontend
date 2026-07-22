@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { Icon } from '@/components/ui/Icon';
 import { Button } from '@/components/ui/Button';
 import { KanbanCard } from '@/components/pages/leads/kanban/KanbanCard';
@@ -10,6 +10,8 @@ import { AddLeadModal } from '@/components/pages/leads/kanban/AddLeadModal';
 import type { Lead } from '@/types/leads';
 import type { StageOption } from '@/components/ui/StageDropdown';
 import Image from 'next/image';
+import { toast } from 'react-toastify';
+import { deleteStage } from '@/services/stage.service';
 
 interface KanbanColumnProps {
 	id: string;
@@ -20,6 +22,8 @@ interface KanbanColumnProps {
 	icon: string;
 	items: Lead[];
 	stages: StageOption[];
+	onDeleteLead: (lead: Lead) => void;
+	onStageDeleted: () => void;
 }
 
 export function KanbanColumn({
@@ -30,6 +34,8 @@ export function KanbanColumn({
 	items,
 	stageId,
 	stages,
+	onDeleteLead,
+	onStageDeleted
 }: KanbanColumnProps) {
 	const [modalOpen, setModalOpen] = useState(false);
 	const badgeTint = borderColor + '26';
@@ -87,6 +93,22 @@ export function KanbanColumn({
 					>
 						<Plus size={18} />
 					</Button>
+					<Button
+						variant='icon'
+						onClick={async () => {
+							if (!confirm(`Delete stage "${title}"?`)) return;
+							try {
+								await deleteStage(stageId);
+								toast.success(`Stage "${title}" deleted`);
+								onStageDeleted();
+							} catch {
+								toast.error('Failed to delete stage');
+							}
+						}}
+						className='flex p-1.5 items-center rounded-lg border border-transparent text-[#777980] cursor-pointer hover:bg-white/70 hover:border-[#D0D5DD] hover:text-[#FF4345] transition-all duration-200'
+					>
+						<Trash2 size={18} />
+					</Button>
 				</div>
 
 				<Droppable droppableId={id}>
@@ -113,7 +135,7 @@ export function KanbanColumn({
 													}`}
 												style={provided.draggableProps.style}
 											>
-												<KanbanCard lead={lead} index={index} />
+												<KanbanCard lead={lead} index={index} onDelete={onDeleteLead} />
 											</div>
 										)}
 									</Draggable>

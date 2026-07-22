@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import { Icon } from '@/components/ui/Icon';
 import { Button } from '@/components/ui/Button';
 
@@ -66,10 +67,11 @@ export function HeroBannerUpload({
                     </div>
                 ) : displayUrl && !imageError ? (
                     <div className='relative w-full h-full'>
-                        <img
+                        <Image
                             src={displayUrl}
                             alt='Banner'
-                            className='w-full h-full object-cover'
+                            fill
+                            className='object-cover'
                             onError={() => setImageError(true)}
                             onLoad={() => setImageError(false)}
                         />
@@ -110,16 +112,18 @@ export function HeroBannerUpload({
                                 </p>
                             )}
                         </div>
-                        <input
-                            ref={fileInputRef}
-                            type='file'
-                            accept='image/*'
-                            onChange={onFileChange}
-                            className='hidden'
-                        />
                     </div>
                 )}
             </div>
+
+            <input
+                ref={fileInputRef}
+                type='file'
+                accept='image/*'
+                onChange={onFileChange}
+                className='hidden'
+            />
+
             {isPreviewMode && (
                 <div className='flex gap-2 justify-end'>
                     <Button

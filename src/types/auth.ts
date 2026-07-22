@@ -22,6 +22,7 @@ export interface UserResponse {
     last_name: string;
     email: string;
     avatar: string | null;
+    avatar_url?: string | undefined;
     phone_number?: string | null;
     roleUsers: {
       role: {
@@ -39,6 +40,7 @@ export interface User {
   lastName: string;
   email: string;
   avatar: string | null;
+  avatar_url?: string | undefined;
   role: string;
   permissions: string[];
 }

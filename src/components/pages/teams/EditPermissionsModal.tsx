@@ -14,6 +14,11 @@ interface EditPermissionsModalProps {
     onSave: (roleId: string, permissions: string[]) => void;
 }
 
+function isSuperAdmin(roleName: string): boolean {
+    const normalized = roleName.toLowerCase().replace(/[\s_-]/g, "");
+    return normalized === "superadmin" || normalized === "superuser";
+}
+
 export const EditPermissionsModal = memo(function EditPermissionsModal({
     isOpen,
     onClose,
@@ -24,6 +29,7 @@ export const EditPermissionsModal = memo(function EditPermissionsModal({
 }: EditPermissionsModalProps) {
     const [selected, setSelected] = useState<Set<string>>(() => new Set(selectedPermissions));
     const prevPermissionsRef = useRef<string[]>(selectedPermissions);
+    const isLocked = role ? isSuperAdmin(role.name) : false;
 
     // Sync external selectedPermissions into state when they change
     useEffect(() => {
@@ -48,9 +54,13 @@ export const EditPermissionsModal = memo(function EditPermissionsModal({
     const allIds = useMemo(() => allPermissions.map((p) => p.id), [allPermissions]);
     const isAllSelected = allIds.every((id) => selected.has(id));
 
-    const toggleAll = () => setSelected(isAllSelected ? new Set() : new Set(allIds));
+    const toggleAll = () => {
+        if (isLocked) return;
+        setSelected(isAllSelected ? new Set() : new Set(allIds));
+    };
 
     const toggleModule = (module: string) => {
+        if (isLocked) return;
         const moduleIds = grouped[module].map((p) => p.id);
         const allModSelected = moduleIds.every((id) => selected.has(id));
         setSelected((prev) => {
@@ -61,6 +71,7 @@ export const EditPermissionsModal = memo(function EditPermissionsModal({
     };
 
     const togglePermission = (id: string) => {
+        if (isLocked) return;
         setSelected((prev) => {
             const next = new Set(prev);
             next.has(id) ? next.delete(id) : next.add(id);
@@ -73,6 +84,13 @@ export const EditPermissionsModal = memo(function EditPermissionsModal({
         onSave(role.id, Array.from(selected));
         onClose();
     };
+
+    function formatPermissionName(name: string): string {
+        return name
+            .split(':')
+            .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(':');
+    }
 
     return (
         <Modal
@@ -90,6 +108,7 @@ export const EditPermissionsModal = memo(function EditPermissionsModal({
                         type="checkbox"
                         checked={isAllSelected}
                         onChange={toggleAll}
+                        disabled={isLocked}
                         className="w-4 h-4 rounded accent-[#0098E8]"
                     />
                     <span className="text-sm font-medium text-[#1B1B1B]">Select All Permissions</span>
@@ -115,6 +134,7 @@ export const EditPermissionsModal = memo(function EditPermissionsModal({
                                                 if (el) el.indeterminate = someModSelected && !allModSelected;
                                             }}
                                             onChange={() => toggleModule(module)}
+                                            disabled={isLocked}
                                             className="w-3.5 h-3.5 rounded accent-[#0098E8] cursor-pointer"
                                         />
                                         Module All
@@ -125,17 +145,18 @@ export const EditPermissionsModal = memo(function EditPermissionsModal({
                                         <label
                                             key={perm.id}
                                             className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border cursor-pointer transition-colors text-sm ${selected.has(perm.id)
-                                                    ? "border-[#0098E8] bg-[#EBF5FF]"
-                                                    : "border-[#DFE1E7] bg-[#F8FAFB] hover:border-[#B0B3BC]"
+                                                ? "border-[#0098E8] bg-[#EBF5FF]"
+                                                : "border-[#DFE1E7] bg-[#F8FAFB] hover:border-[#B0B3BC]"
                                                 }`}
                                         >
                                             <input
                                                 type="checkbox"
                                                 checked={selected.has(perm.id)}
                                                 onChange={() => togglePermission(perm.id)}
+                                                disabled={isLocked}
                                                 className="w-3.5 h-3.5 rounded accent-[#0098E8] cursor-pointer shrink-0"
                                             />
-                                            <span className="text-[#1B1B1B] text-xs leading-tight">{perm.name}</span>
+                                            <span className="text-[#1B1B1B] text-xs leading-tight">{formatPermissionName(perm.name)}</span>
                                         </label>
                                     ))}
                                 </div>
@@ -148,7 +169,7 @@ export const EditPermissionsModal = memo(function EditPermissionsModal({
                     <Button type="button" variant="outline" onClick={onClose} className="px-6 w-auto!">
                         Cancel
                     </Button>
-                    <Button onClick={handleSave} className="px-6 w-auto!">
+                    <Button onClick={handleSave} disabled={isLocked} className="px-6 w-auto!">
                         Save
                     </Button>
                 </div>

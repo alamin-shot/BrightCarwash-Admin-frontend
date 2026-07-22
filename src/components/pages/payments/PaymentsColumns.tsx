@@ -35,7 +35,9 @@ export const paymentsColumns: Column<PaymentTransaction>[] = [
 		key: 'service',
 		header: 'Service',
 		render: (row) => (
-			<span className="text-[#1B1B1B] font-inter text-sm">{row.service}</span>
+			<span className="text-[#1B1B1B] font-inter text-sm truncate max-w-150! block" title={row.service}>
+				{row.service}
+			</span>
 		),
 	},
 	{

@@ -34,6 +34,15 @@ export async function getStages(): Promise<Stage[]> {
 	return json.data;
 }
 
+export async function deleteStage(id: string): Promise<void> {
+	const token = getAccessToken();
+	const res = await fetch(`${APP_CONFIG.API_BASE_URL}/admin/stage/${id}`, {
+		method: 'DELETE',
+		headers: { Authorization: `Bearer ${token}` },
+	});
+	if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+}
+
 export async function createStage(data: CreateStageRequest): Promise<Stage> {
 	if (APP_CONFIG.MOCK_MODE || APP_CONFIG.DASHBOARD_MOCK) {
 		await delay(APP_CONFIG.MOCK_DELAY_MS);

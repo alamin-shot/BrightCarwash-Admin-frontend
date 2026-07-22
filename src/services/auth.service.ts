@@ -14,6 +14,7 @@ function mapUser(data: UserResponse['data']): User {
 		lastName: data.last_name,
 		email: data.email,
 		avatar: data.avatar,
+		avatar_url: data.avatar_url,
 		role: data.roleUsers?.[0]?.role?.name || 'staff',
 		permissions: data.permissions || [],
 	};

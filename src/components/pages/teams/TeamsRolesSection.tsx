@@ -18,6 +18,11 @@ const roleColors: Record<string, string> = {
     "View Only": "#777980",
 };
 
+function isSuperAdmin(roleName: string): boolean {
+    const normalized = roleName.toLowerCase().replace(/[\s_-]/g, "");
+    return normalized === "superadmin" || normalized === "superuser";
+}
+
 interface TeamsRolesSectionProps {
     roles: TeamRole[];
     members: TeamMember[];
@@ -91,6 +96,7 @@ export function TeamsRolesSection({
                             paginatedRoles.map((role) => {
                                 const color = roleColors[role.name] || "#777980";
                                 const count = roleMemberCounts[role.name] || 0;
+                                const superAdmin = isSuperAdmin(role.name);
                                 return (
                                     <tr
                                         key={role.id}
@@ -118,25 +124,27 @@ export function TeamsRolesSection({
                                             </div>
                                         </td>
                                         <td className="py-2.5 px-4">
-                                            <div className="flex items-center gap-1">
-                                                <Button
-                                                    variant="icon"
-                                                    permission={PERMISSIONS.role.update}
-                                                    onClick={() => onEditPermissions(role)}
-                                                    onMouseEnter={() => prefetchRole(role.name)}
-                                                    className="flex p-1.5 items-center rounded text-[#777980] hover:text-[#1B1B1B] hover:bg-gray-100 transition-colors"
-                                                >
-                                                    <Pencil size={15} />
-                                                </Button>
-                                                <Button
-                                                    variant="icon"
-                                                    permission={PERMISSIONS.role.delete}
-                                                    onClick={() => onDeleteRole(role)}
-                                                    className="flex p-1.5 items-center rounded text-[#777980] hover:text-[#FF4345] hover:bg-[#FFE6E6] transition-colors"
-                                                >
-                                                    <Icon name="delete" width={15} height={15} />
-                                                </Button>
-                                            </div>
+                                            {!superAdmin && (
+                                                <div className="flex items-center gap-1">
+                                                    <Button
+                                                        variant="icon"
+                                                        permission={PERMISSIONS.role.update}
+                                                        onClick={() => onEditPermissions(role)}
+                                                        onMouseEnter={() => prefetchRole(role.name)}
+                                                        className="flex p-1.5 items-center rounded text-[#777980] hover:text-[#1B1B1B] hover:bg-gray-100 transition-colors"
+                                                    >
+                                                        <Pencil size={15} />
+                                                    </Button>
+                                                    <Button
+                                                        variant="icon"
+                                                        permission={PERMISSIONS.role.delete}
+                                                        onClick={() => onDeleteRole(role)}
+                                                        className="flex p-1.5 items-center rounded text-[#777980] hover:text-[#FF4345] hover:bg-[#FFE6E6] transition-colors"
+                                                    >
+                                                        <Icon name="delete" width={15} height={15} />
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </td>
                                     </tr>
                                 );

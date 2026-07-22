@@ -20,9 +20,6 @@ export function Pagination({
   itemsPerPage,
   isLoading = false,
 }: PaginationProps) {
-  const startItem = (currentPage - 1) * (itemsPerPage || 10) + 1;
-  const endItem = Math.min(currentPage * (itemsPerPage || 10), totalItems || 0);
-
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     if (totalPages <= 7) {
@@ -40,56 +37,55 @@ export function Pagination({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full pt-2">
-
-      {totalItems !== undefined && itemsPerPage && (
-        <div className="text-[#777980] font-inter text-sm">
-          Showing {startItem}-{endItem} of {totalItems} results
-          {isLoading && ' (loading...)'}
-        </div>
-      )}
-      <div className="flex items-center gap-1">
+    <div className="flex items-center justify-between gap-3 w-full pt-2">
+      <div className="text-[#1B1B1B] font-inter text-sm font-normal leading-5">
+        Page {currentPage} of {totalPages}
+      </div>
+      <div className="flex items-center gap-2">
         <Button
           variant="icon"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1 || isLoading}
-          className="flex p-2 items-center rounded-lg border border-[#DFE1E7] bg-white text-[#777980] hover:bg-[#F8FAFB] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex p-1.5 items-center rounded-md border border-[#DFE1E7] bg-white disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={16} className="text-[#A5A5AB]" />
         </Button>
 
-        {getPageNumbers().map((page, index) =>
-          typeof page === 'string' ? (
-            <span key={`ellipsis-${index}`} className="px-2 text-[#777980]">
-              {page}
-            </span>
-          ) : (
-            <Button
-              key={page}
-              variant="icon"
-              onClick={() => onPageChange(page)}
-              disabled={isLoading}
-              className={`flex min-w-[36px] p-2 items-center justify-center rounded-lg border text-sm font-inter transition-colors ${page === currentPage
-                ? 'border-[#0098E8] bg-[#0098E8] text-white'
-                : 'border-[#DFE1E7] bg-white text-[#1B1B1B] hover:bg-[#F8FAFB]'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              {page}
-            </Button>
-          ),
-        )}
+        <div className="flex items-center gap-0.5 p-0.5 bg-[#F6F6F6] rounded-md">
+          {getPageNumbers().map((page, index) =>
+            typeof page === 'string' ? (
+              <div
+                key={`ellipsis-${index}`}
+                className="w-6 h-6 flex items-center justify-center text-[#1B1B1B] font-inter text-sm font-medium"
+              >
+                {page}
+              </div>
+            ) : (
+              <Button
+                key={page}
+                variant="icon"
+                onClick={() => onPageChange(page)}
+                disabled={isLoading}
+                className={`w-6 h-6 flex items-center justify-center rounded-md text-sm font-inter font-medium transition-colors ${page === currentPage
+                  ? 'bg-white text-[#1B1B1B] shadow-[0px_4px_4px_0px_rgba(0,0,0,0.05)]'
+                  : 'text-[#1B1B1B] hover:bg-white/50'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {page}
+              </Button>
+            ),
+          )}
+        </div>
 
         <Button
           variant="icon"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages || isLoading}
-          className="flex p-2 items-center rounded-lg border border-[#DFE1E7] bg-white text-[#777980] hover:bg-[#F8FAFB] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex p-1.5 items-center rounded-md border border-[#DFE1E7] bg-white disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <ChevronRight size={16} />
+          <ChevronRight size={16} className="text-[#1B1B1B]" />
         </Button>
       </div>
-
-
     </div>
   );
 }

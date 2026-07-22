@@ -5,10 +5,12 @@ import { ActionsDropdown } from '@/components/ui/ActionsDropdown';
 import type { Lead } from '@/types/leads';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
+import { PERMISSIONS } from '@/lib/permissions';
 
 interface KanbanCardProps {
 	lead: Lead;
 	index: number;
+	onDelete: (lead: Lead) => void;
 }
 
 const depositStatusStyles: Record<string, string> = {
@@ -17,7 +19,7 @@ const depositStatusStyles: Record<string, string> = {
 	REFUNDED: 'text-[#FF4345] border-[#DFE1E7] bg-white',
 	NONE: 'text-[#777980] border-[#DFE1E7] bg-white',
 };
-export function KanbanCard({ lead }: KanbanCardProps) {
+export function KanbanCard({ lead, onDelete }: KanbanCardProps) {
 	const formatDate = (dateStr: string): string => {
 		const d = new Date(dateStr);
 		return d.toLocaleDateString('en-US', {
@@ -58,6 +60,12 @@ export function KanbanCard({ lead }: KanbanCardProps) {
 						{
 							label: 'Delete',
 							onClick: () => toast.info(`Delete ${lead.name}`),
+						},
+						{
+							label: 'Delete',
+							onClick: () => onDelete(lead),
+							variant: 'danger' as const,
+							permission: PERMISSIONS.lead.delete,
 						},
 					]}
 				/>

@@ -22,10 +22,12 @@ interface LeadsTableExternalProps {
 	onSelectionChange?: (count: number, ids: string[]) => void;
 	searchQuery?: string;
 	leadType?: 'all' | 'mine';
+	kanbanLimit?: number;
+	setKanbanLimit?: (val: number) => void;
 }
 
 export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
-	function LeadsTable({ viewMode, onSelectionChange, searchQuery: externalSearch, leadType = 'all' }, ref) {
+	function LeadsTable({ viewMode, onSelectionChange, searchQuery: externalSearch, leadType = 'all', kanbanLimit, setKanbanLimit }, ref) {
 		const router = useRouter();
 
 		const {
@@ -51,12 +53,11 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 			refreshStages,
 			selectedIds,
 			handleSelectRow,
-			handleSelectAll,
 			handleStageChange,
 			handlePriorityChange,
 			handleDelete,
 			handleSearchSubmit,
-		} = useLeadsData(externalSearch, leadType);
+		} = useLeadsData(externalSearch, leadType, viewMode === 'kanban' ? kanbanLimit : undefined);
 
 
 		const { exportExcel, exportCSV } = useLeadsExport(leads, selectedIds, {
@@ -113,6 +114,9 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 					depositFilter={depositFilter}
 					onDepositChange={(val) => { setDepositFilter(val); setCurrentPage(1); }}
 					uniqueSources={uniqueSources}
+					viewMode={viewMode}
+					kanbanLimit={kanbanLimit}
+					setKanbanLimit={setKanbanLimit}
 				/>
 				{viewMode === 'list' ? (
 					<>
@@ -136,7 +140,14 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 					</>
 				) : (
 					<div className='h-[calc(100vh-220px)] overflow-hidden'>
-						<KanbanBoard leads={leads} stages={stages} onStageChange={handleStageChange} />
+						<KanbanBoard
+							leads={leads}
+							stages={stages}
+							onStageChange={handleStageChange}
+							onDeleteLead={handleDelete}
+							onStageDeleted={refreshStages}
+						/>
+
 					</div>
 				)}
 			</div>

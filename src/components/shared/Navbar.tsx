@@ -31,7 +31,11 @@ export function Navbar({ onMenuClick }: NavbarProps) {
   const user = useAppSelector((state) => state.auth.user);
   const [avatarError, setAvatarError] = useState(false);
 
-  const title = pageTitles[pathname] || "Welcome back";
+	const title = pageTitles[pathname] || 'Welcome back';
+	const fullName = user?.firstName && user?.lastName
+		? `${user.firstName} ${user.lastName}`
+		: user?.firstName || 'User';
+	const initials = user?.firstName?.charAt(0) || 'U';
 
   return (
     <header className="flex w-full h-18 px-3 sm:px-4 lg:px-6 py-5 justify-between items-center border-b border-[#DFE1E7] bg-white sticky top-0 z-30">

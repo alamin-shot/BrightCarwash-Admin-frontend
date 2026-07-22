@@ -42,6 +42,7 @@ export function TestimonialsModal({ isOpen, onClose, item, onSuccess }: Testimon
     }, [isOpen]);
 
     useEffect(() => {
+        if (!isOpen) return;
         if (item) {
             setName(item.name);
             setDesignation(item.designation);
@@ -58,7 +59,7 @@ export function TestimonialsModal({ isOpen, onClose, item, onSuccess }: Testimon
             setPreview(null);
             setIsActive(true);
         }
-    }, [item, isOpen]);
+    }, [isOpen, item?.id]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {

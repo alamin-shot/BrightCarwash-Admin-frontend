@@ -67,13 +67,11 @@ export function StepTwoCards({
 	const handleCardClick = (key: keyof CardState) => {
 		if (key === 'subject') {
 			modals.openModal('subject');
-			if (!filled.subject) onToggle('subject');
 		} else if (key === 'design') {
 			onToggle('design');
 			onDesignClick?.();
 		} else if (key === 'recipients') {
 			modals.openModal('recipients');
-			if (!filled.recipients) onToggle('recipients');
 		}
 	};
 
@@ -81,14 +79,12 @@ export function StepTwoCards({
 		if (onRecipientsSave) {
 			onRecipientsSave(groupId, groupName);
 		}
-		if (!filled.recipients) {
-			onToggle('recipients');
-		}
+
 		modals.closeModal();
 	};
 
 	const getDescription = (key: keyof CardState) => {
-		if (key === 'recipients' && filled.recipients && selectedGroupName) {
+		if (key === 'recipients' && selectedGroupName) {
 			return selectedGroupName;
 		}
 		if (key === 'design' && filled.design && selectedTemplateName) {
@@ -131,8 +127,8 @@ export function StepTwoCards({
 								variant='outline'
 								onClick={() => handleCardClick(card.key)}
 								className={`flex py-2.5 px-4 justify-center items-center gap-2 rounded border text-sm w-full! ${isFilled
-										? 'border-[#006F1F] text-[#006F1F] bg-[#DCF7EA]'
-										: 'border-[#DFE1E7] text-[#1B1B1B]'
+									? 'border-[#006F1F] text-[#006F1F] bg-[#DCF7EA]'
+									: 'border-[#DFE1E7] text-[#1B1B1B]'
 									}`}
 							>
 								{isFilled ? '✓ Added' : card.btn}

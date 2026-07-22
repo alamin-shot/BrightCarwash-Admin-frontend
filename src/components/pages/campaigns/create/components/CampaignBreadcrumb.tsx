@@ -7,12 +7,14 @@ interface CampaignBreadcrumbProps {
     isEdit: boolean;
     currentStep: number;
     campaignName: string;
+    onBackToStep1?: () => void;
 }
 
 export function CampaignBreadcrumb({
     isEdit,
     currentStep,
     campaignName,
+    onBackToStep1,
 }: CampaignBreadcrumbProps) {
     return (
         <div className="flex items-center gap-2 text-sm text-[#777980] font-inter whitespace-nowrap">
@@ -23,9 +25,12 @@ export function CampaignBreadcrumb({
 
             {currentStep >= 3 ? (
                 <>
-                    <Link href="/campaigns/create" className="hover:text-[#0098E8] transition-colors">
+                    <button
+                        onClick={onBackToStep1}
+                        className="hover:text-[#0098E8] transition-colors cursor-pointer bg-transparent border-none p-0 text-sm font-inter"
+                    >
                         {isEdit ? "Edit Campaign" : "Create Campaign"}
-                    </Link>
+                    </button>
                     <ChevronRight size={14} />
                     <span className="text-[#1B1B1B] truncate max-w-[150px]">
                         {campaignName || "Untitled"}
@@ -35,9 +40,12 @@ export function CampaignBreadcrumb({
                 </>
             ) : currentStep >= 2 ? (
                 <>
-                    <Link href="/campaigns/create" className="hover:text-[#0098E8] transition-colors">
+                    <button
+                        onClick={onBackToStep1}
+                        className="hover:text-[#0098E8] transition-colors cursor-pointer bg-transparent border-none p-0 text-sm font-inter"
+                    >
                         {isEdit ? "Edit Campaign" : "Create Campaign"}
-                    </Link>
+                    </button>
                     <ChevronRight size={14} />
                     <span className="text-[#1B1B1B] truncate max-w-[150px]">
                         {campaignName || "Untitled"}

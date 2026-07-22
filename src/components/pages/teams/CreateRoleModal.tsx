@@ -20,6 +20,11 @@ export function CreateRoleModal({ isOpen, onClose, onRoleCreated }: CreateRoleMo
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!roleName.trim()) { toast.warning("Role name is required"); return; }
+        const validNameRegex = /^[a-zA-Z\s-]+$/;
+        if (!validNameRegex.test(roleName.trim())) {
+            toast.warning("Role name can only contain letters, spaces, and hyphens");
+            return;
+        }
         setIsSubmitting(true);
         try {
             if (APP_CONFIG.MOCK_MODE) {

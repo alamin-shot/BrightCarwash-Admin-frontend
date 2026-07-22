@@ -59,7 +59,7 @@ export function PaymentsTable({
 	};
 
 	return (
-		<div className="flex flex-col gap-4 w-full">
+		<div className="flex flex-col gap-4 w-full whitespace-nowrap">
 			<div className="flex justify-between items-center gap-4">
 				<div className="relative flex-1 max-w-[400px]">
 					<input

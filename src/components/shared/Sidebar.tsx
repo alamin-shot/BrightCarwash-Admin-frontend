@@ -13,6 +13,7 @@ import { useSelector } from "react-redux";
 import { hasPermission } from "@/lib/permissions";
 import type { RootState } from "@/lib/store";
 import type { SidebarProps, NavItem } from "@/types/navigation";
+import { useGetBusinessProfileQuery } from "@/services/settings.api";
 
 function filterItemsByPermission(items: NavItem[], userPermissions: string[]): NavItem[] {
   return items.filter((item) => {
@@ -49,6 +50,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     });
     return activeIds;
   });
+  const { data: businessProfile } = useGetBusinessProfileQuery();
+  const businessLogo = businessProfile?.logo;
 
   const filteredConfig = NAVIGATION_CONFIG.map((section) => ({
     ...section,
@@ -94,7 +97,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             {!logoError ? (
               <div className="flex justify-center items-center w-full">
                 <Image
-                  src="/images/logo.png"
+                  src={businessLogo || "/images/logo.png"}
                   alt="Logo"
                   width={64}
                   height={72}

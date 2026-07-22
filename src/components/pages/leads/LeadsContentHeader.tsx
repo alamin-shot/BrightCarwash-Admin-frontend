@@ -20,6 +20,7 @@ interface LeadsContentHeaderProps {
     setViewMode: (val: 'list' | 'kanban') => void;
     leadType: 'all' | 'mine';
     setLeadType: (val: 'all' | 'mine') => void;
+
 }
 
 export function LeadsContentHeader({
@@ -35,6 +36,7 @@ export function LeadsContentHeader({
     setViewMode,
     leadType,
     setLeadType,
+
 }: LeadsContentHeaderProps) {
     return (
         <div className="flex flex-col sm:flex-row justify-between items-center sm:items-end text-center gap-2 sm:gap-3 self-stretch">

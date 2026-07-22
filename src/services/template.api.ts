@@ -44,7 +44,7 @@ export const templateApi = createApi({
     tagTypes: ['Templates', 'Template'],
     endpoints: (builder) => ({
         // GET all templates with filters
-        getTemplates: builder.query<Template[], GetTemplatesParams>({
+        getTemplates: builder.query<{ templates: Template[]; total: number; totalPages: number }, GetTemplatesParams>({
             queryFn: async (params = {}) => {
                 try {
                     const queryParams = new URLSearchParams();
@@ -58,7 +58,13 @@ export const templateApi = createApi({
 
                     const url = `/admin/templates${queryParams.toString() ? `?${queryParams}` : ''}`;
                     const { data } = await axiosInstance.get<TemplateListResponse>(url);
-                    return { data: data.data.map(transformTemplate) };
+                    return {
+                        data: {
+                            templates: (data.data || []).map(transformTemplate),
+                            total: data.meta?.total || 0,
+                            totalPages: data.meta?.totalPages || 1,
+                        },
+                    };
                 } catch (error) {
                     return {
                         error: {

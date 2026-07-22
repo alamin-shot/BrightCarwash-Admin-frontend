@@ -72,6 +72,7 @@ export function CampaignCreateContent() {
 					isEdit={isEdit}
 					currentStep={currentStep}
 					campaignName={campaign.campaignName}
+					onBackToStep1={() => setCurrentStep(1)}
 				/>
 				<Stepper steps={steps} currentStep={currentStep} />
 			</div>

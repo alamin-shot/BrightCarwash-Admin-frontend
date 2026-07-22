@@ -23,7 +23,8 @@ export function TeamsContent() {
         page: memberPage,
         limit: ITEMS_PER_PAGE,
     });
-
+    const { data: allMembersData } = useGetTeamMembersQuery({ limit: 1000 });
+    const allMembers = allMembersData?.members || [];
     const members = membersData?.members || [];
     const membersMeta = membersData?.meta || { totalItems: 0, totalPages: 1, currentPage: 1 };
 
@@ -109,7 +110,7 @@ export function TeamsContent() {
 
             <TeamsRolesSection
                 roles={roles}
-                members={members}
+                members={allMembers}
                 onEditPermissions={(role) => setEditRole(role)}
                 onCreateRole={() => setCreateRoleOpen(true)}
                 onDeleteRole={handleDeleteRole}

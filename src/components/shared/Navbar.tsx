@@ -27,6 +27,10 @@ export function Navbar({ onMenuClick }: NavbarProps) {
 	const [avatarError, setAvatarError] = useState(false);
 
 	const title = pageTitles[pathname] || 'Welcome back';
+	const fullName = user?.firstName && user?.lastName
+		? `${user.firstName} ${user.lastName}`
+		: user?.firstName || 'User';
+	const initials = user?.firstName?.charAt(0) || 'U';
 
 	return (
 		<header className='flex w-full h-18 px-3 sm:px-4 lg:px-6 py-5 justify-between items-center border-b border-[#DFE1E7] bg-white sticky top-0 z-30'>
@@ -45,14 +49,13 @@ export function Navbar({ onMenuClick }: NavbarProps) {
 			</div>
 
 			<div className='flex items-center gap-1 sm:gap-2 shrink-0'>
-
 				<div className='flex py-1.5 px-1.5 lg:py-1.5 lg:px-1.5 items-center gap-2 lg:gap-4 rounded-lg border border-[#E8E8E9] bg-white'>
 					<div className='flex items-center gap-2'>
 						<div className='rounded-full overflow-hidden w-7 h-7 lg:w-9 lg:h-9 shrink-0'>
-							{!avatarError ? (
+							{user?.avatar_url || user?.avatar ? (
 								<Image
-									src='/images/avatar-placeholder.png'
-									alt='User avatar'
+									src={user?.avatar_url || user?.avatar || '/images/avatar-placeholder.png'}
+									alt={fullName}
 									width={36}
 									height={36}
 									className='w-full h-full object-cover'
@@ -60,12 +63,12 @@ export function Navbar({ onMenuClick }: NavbarProps) {
 								/>
 							) : (
 								<div className='w-7 h-7 lg:w-9 lg:h-9 rounded-full bg-[#B23730] text-white flex items-center justify-center font-inter text-xs lg:text-sm font-medium'>
-									{user?.firstName?.charAt(0) || 'U'}
+									{initials}
 								</div>
 							)}
 						</div>
 						<span className='hidden lg:block text-[#1F274B] font-inter text-xs font-normal leading-[100%] truncate max-w-25'>
-							{user?.firstName || 'User'}
+							{fullName}
 						</span>
 					</div>
 				</div>

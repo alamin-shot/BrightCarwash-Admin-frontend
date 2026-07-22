@@ -1,8 +1,8 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
@@ -10,6 +10,8 @@ import type { EditorRef } from 'react-email-editor';
 import { toast } from 'react-toastify';
 import {
 	useCreateTemplateMutation,
+	useUpdateTemplateMutation,
+	useGetTemplateByIdQuery,
 	useUploadTemplateImageMutation,
 } from '@/services/template.api';
 import { uploadImagesInHtml } from '@/lib/image-upload';
@@ -23,9 +25,30 @@ export function EmailEditor() {
 	const emailEditorRef = useRef<EditorRef>(null);
 	const [saving, setSaving] = useState(false);
 	const [templateName, setTemplateName] = useState('');
+	const [editorReady, setEditorReady] = useState(false);
 	const router = useRouter();
+	const searchParams = useSearchParams();
+	const templateId = searchParams.get('templateId');
+	const isEditing = !!templateId;
+
 	const [createTemplate] = useCreateTemplateMutation();
+	const [updateTemplate] = useUpdateTemplateMutation();
 	const [uploadImage] = useUploadTemplateImageMutation();
+	const { data: existingTemplate } = useGetTemplateByIdQuery(templateId || '', { skip: !templateId });
+
+	useEffect(() => {
+		if (existingTemplate) {
+			setTemplateName(existingTemplate.name || '');
+		}
+	}, [existingTemplate]);
+
+	useEffect(() => {
+		if (editorReady && existingTemplate?.emailBody?.designJson) {
+			const designData = existingTemplate.emailBody.designJson;
+			const design = designData.design || designData;
+			emailEditorRef.current?.editor?.loadDesign(design);
+		}
+	}, [editorReady, existingTemplate]);
 
 	const onEditorLoad = () => {
 		const mergeTags = {
@@ -41,42 +64,52 @@ export function EmailEditor() {
 
 		if (emailEditorRef.current?.editor) {
 			emailEditorRef.current.editor.setMergeTags(mergeTags);
+			setEditorReady(true);
 		}
 	};
 
 	const handleSave = () => {
-		const name =
-			templateName.trim() || `Template ${new Date().toLocaleDateString()}`;
+		const name = templateName.trim() || `Template ${new Date().toLocaleDateString()}`;
 		if (emailEditorRef.current?.editor) {
 			setSaving(true);
 			emailEditorRef.current.editor.exportHtml(async (data) => {
 				try {
 					const htmlContent = data.html || '<p>Empty template</p>';
 
-					const processedHtml = await uploadImagesInHtml(
-						htmlContent,
-						async (file) => {
-							const result = await uploadImage(file).unwrap();
-							return result;
-						}
-					);
+					const processedHtml = await uploadImagesInHtml(htmlContent, async (file) => {
+						const result = await uploadImage(file).unwrap();
+						return result;
+					});
 
-					await createTemplate({
-						name: name,
-						description: `Created on ${new Date().toLocaleDateString()}`,
-						type: 'EMAIL',
-						editorType: 'VISUAL_DRAG_DROP',
-						emailBody: {
-							subject: name,
-							htmlContent: processedHtml,
-							designJson: { design: data.design || {} },
-						},
-					}).unwrap();
+					const emailBody = {
+						subject: name,
+						htmlContent: processedHtml,
+						designJson: data.design || {},
+					};
 
-					toast.success(`Template "${name}" saved!`);
+					if (isEditing && templateId) {
+						await updateTemplate({
+							id: templateId,
+							data: {
+								name,
+								emailBody,
+							},
+						}).unwrap();
+						toast.success('Template updated!');
+					} else {
+						await createTemplate({
+							name,
+							description: `Created on ${new Date().toLocaleDateString()}`,
+							type: 'EMAIL',
+							editorType: 'VISUAL_DRAG_DROP',
+							emailBody,
+						}).unwrap();
+						toast.success(`Template "${name}" saved!`);
+					}
+
 					router.push('/campaigns/create?step=3');
 				} catch (error) {
-					toast.error('Failed to save template');
+					toast.error(isEditing ? 'Failed to update template' : 'Failed to save template');
 					console.error(error);
 				} finally {
 					setSaving(false);
@@ -96,7 +129,7 @@ export function EmailEditor() {
 						<ChevronLeft size={20} />
 					</Link>
 					<span className='text-[#1B1B1B] font-inter text-lg font-semibold'>
-						Email Editor
+						{isEditing ? 'Edit Template' : 'Email Editor'}
 					</span>
 				</div>
 				<div className='flex items-center gap-3'>
@@ -113,7 +146,7 @@ export function EmailEditor() {
 						loadingText='Saving...'
 						className='w-auto! px-6'
 					>
-						Save Template
+						{isEditing ? 'Update Template' : 'Save Template'}
 					</Button>
 				</div>
 			</div>

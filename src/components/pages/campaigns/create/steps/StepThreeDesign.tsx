@@ -3,7 +3,10 @@
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { StepThreeCards } from "../steps_cards/StepThreeCards";
+import { Icon } from "@/components/ui/Icon";
+import { TemplatesList } from "@/components/pages/campaigns/create/templates/TemplatesList";
+import { Template } from "@/types/template";
+
 
 interface StepThreeDesignProps {
 	onBack: () => void;
@@ -12,7 +15,9 @@ interface StepThreeDesignProps {
 
 export function StepThreeDesign({ onBack, onTemplateSelect }: StepThreeDesignProps) {
 	const router = useRouter();
-
+	const handleTemplateSelect = (template: Template) => {
+		onTemplateSelect(template.name, template.id);
+	};
 	return (
 		<div className="flex flex-col gap-6 self-stretch min-w-0">
 			<div className="flex justify-between items-center self-stretch">
@@ -31,7 +36,16 @@ export function StepThreeDesign({ onBack, onTemplateSelect }: StepThreeDesignPro
 					</Button>
 				</div>
 			</div>
-			<StepThreeCards onTemplateSelect={onTemplateSelect} />
+			<div className="flex p-4 flex-col gap-4 self-stretch rounded-xl border border-[#DFE1E7] bg-[#F8FAFB]">
+				<div className="flex items-start gap-3">
+					<Icon name="convert" width={24} height={24} color="#0098E8" />
+					<div className="flex flex-col gap-1">
+						<span className="text-[#1D1F2C] font-inter text-2xl font-medium leading-[100%]">Your saved templates</span>
+						<span className="text-[#4A4C56] font-inter text-sm font-normal leading-[150%] tracking-[0.28px]">Start building your email using a previously saved template.</span>
+					</div>
+				</div>
+				<TemplatesList onTemplateSelect={handleTemplateSelect} />
+			</div>
 		</div>
 	);
 }

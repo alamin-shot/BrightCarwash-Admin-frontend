@@ -52,10 +52,16 @@ export const PERMISSIONS = {
         delete: 'testimonial:delete' as const,
     },
     news_and_events: {
-        manage: 'news-and-events:manage' as const,
+        read: 'news-and-events:read' as const,
+        create: 'news-and-events:create' as const,
+        update: 'news-and-events:update' as const,
+        delete: 'news-and-events:delete' as const,
     },
     news_category: {
-        manage: 'news-and-events-category:manage' as const,
+        read: 'news-and-events-category:read' as const,
+        create: 'news-and-events-category:create' as const,
+        update: 'news-and-events-category:update' as const,
+        delete: 'news-and-events-category:delete' as const,
     },
     mail_management: {
         view_logs: 'mail-management:view_logs' as const,

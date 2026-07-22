@@ -34,7 +34,7 @@ export const NAVIGATION_CONFIG: NavSection[] = [
         subItems: [
           { id: "cms-hero-section", label: "Hero Section", icon: "hero", href: "/website-cms/hero-section" },
           { id: "cms-testimonials", label: "Testimonials", icon: "testimonials", href: "/website-cms/testimonials", permission: PERMISSIONS.testimonial.read },
-          { id: "cms-news-blog", label: "News & Blog", icon: "news", href: "/website-cms/news-blog", permission: PERMISSIONS.news_and_events.manage },
+          { id: "cms-news-blog", label: "News & Blog", icon: "news", href: "/website-cms/news-blog", permission: PERMISSIONS.news_and_events.read },
           { id: "cms-gallery", label: "Gallery", icon: "gallery", href: "/website-cms/gallery", permission: PERMISSIONS.gallery.read },
           { id: "cms-faq", label: "FAQ", icon: "faq", href: "/website-cms/faq", permission: PERMISSIONS.faq.read },
         ]

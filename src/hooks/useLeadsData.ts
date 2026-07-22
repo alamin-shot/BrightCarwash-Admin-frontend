@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 
 const ITEMS_PER_PAGE = 10;
 
-export function useLeadsData(externalSearch?: string, leadType: 'all' | 'mine' = 'all') {
+export function useLeadsData(externalSearch?: string, leadType: 'all' | 'mine' = 'all', kanbanLimit?: number) {
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [sourceFilter, setSourceFilter] = useState('');
@@ -20,6 +20,8 @@ export function useLeadsData(externalSearch?: string, leadType: 'all' | 'mine' =
     const currentUser = useSelector((state: { auth: { user: { id: string } | null } }) => state.auth.user);
     const assignedToId = leadType === 'mine' && currentUser?.id ? currentUser.id : undefined;
 
+    const limit = kanbanLimit || ITEMS_PER_PAGE;
+
     const {
         data: paginatedData,
         isLoading,
@@ -28,7 +30,7 @@ export function useLeadsData(externalSearch?: string, leadType: 'all' | 'mine' =
         refetch
     } = useGetLeadsQuery({
         page: currentPage,
-        limit: ITEMS_PER_PAGE,
+        limit,
         search: searchSubmitted ? (searchTerm || externalSearch || undefined) : undefined,
         source: sourceFilter || undefined,
         priority: priorityFilter || undefined,

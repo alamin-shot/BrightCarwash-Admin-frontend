@@ -1,5 +1,5 @@
+import SetPasswordLayout from "@/components/layouts/SetPasswordLayout";
 import { Suspense } from "react";
-import { SetPasswordLayout } from "@/components/layouts/SetPasswordLayout";
 
 export default function SetPasswordPage() {
     return (

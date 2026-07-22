@@ -10,6 +10,7 @@ import { FAQModal } from './FAQModal';
 import { useGetFAQsQuery, useDeleteFAQMutation, useReorderFAQsMutation } from '@/services/faq.api';
 import type { FAQ } from '@/types/faq';
 import { toast } from 'react-toastify';
+import { PERMISSIONS } from '@/lib/permissions';
 
 const STATUS_OPTIONS = [
     { value: 'true', label: 'Published' },
@@ -130,6 +131,7 @@ export function FAQContent() {
                 </h2>
                 <Button
                     onClick={() => setIsModalOpen(true)}
+                    permission={PERMISSIONS.faq.create}
                     className="w-auto! flex py-2.5 px-4 justify-center items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors"
                 >
                     <Icon name="plus" width={16} height={16} color="white" />

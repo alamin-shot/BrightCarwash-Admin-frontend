@@ -4,6 +4,9 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
+import { PERMISSIONS } from "@/lib/permissions";
+// Ensure PERMISSIONS export is retained by referencing it at module scope
+const _PERMISSIONS = PERMISSIONS;
 
 interface EmailListHeaderProps {
     search: string;
@@ -33,7 +36,7 @@ export function EmailListHeader({ search, onSearchChange }: EmailListHeaderProps
                     </button>
                 </div>
                 <Link href="/marketing/email-list/create">
-                    <Button className="flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto!">
+                    <Button permission={_PERMISSIONS.mail_management.send_email} className="flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto!">
                         <Icon name="plus" width={14} height={14} /> Create Email List
                     </Button>
                 </Link>

@@ -23,7 +23,7 @@ export function AssignmentHistory({ activities }: Props) {
     const assignmentActivities = useMemo(() => {
         return activities
             .filter((activity) => activity.type === "staff")
-            .filter((activity) => activity.subtitle !== "Unknown") // ✅ Skip "Unknown"
+            .filter((activity) => activity.subtitle !== "Unknown")
             .sort((a, b) => {
                 return new Date(b.date).getTime() - new Date(a.date).getTime();
             });

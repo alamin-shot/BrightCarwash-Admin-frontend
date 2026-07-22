@@ -24,7 +24,7 @@ export function useLeadAssignment(
                     year: "numeric",
                 });
 
-                // ✅ Use the provided memberName, fallback to a generic "a team member"
+
                 const displayName = memberName || "a team member";
 
                 const newActivity: ActivityItem = {

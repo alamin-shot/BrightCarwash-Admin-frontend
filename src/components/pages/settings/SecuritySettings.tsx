@@ -5,6 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { toast } from "react-toastify";
 import { useChangePasswordMutation } from "@/services/settings.api";
+import { PERMISSIONS, hasPermission } from "@/lib/permissions";
 
 const labelClass = "text-[#777980] font-inter text-base font-normal leading-5";
 const inputClass = "w-full px-4 py-3 pr-11 bg-white rounded-lg border border-[#DFE1E7] text-[#1B1B1B] font-inter text-base outline-none focus:border-[#0098E8] transition-all";
@@ -36,7 +37,6 @@ export function SecuritySettings() {
 
     const updateField = (key: keyof FormState, value: string) => {
         setForm((p) => ({ ...p, [key]: value }));
-        // clear error for this field as user retypes
         setErrors((prev) => ({ ...prev, [key]: undefined }));
     };
 
@@ -169,6 +169,7 @@ export function SecuritySettings() {
                     onClick={handleSave}
                     isLoading={isSaving}
                     loadingText="Saving..."
+                    permission={PERMISSIONS.user.update}
                     className="flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto!"
                 >
                     Save Changes

@@ -9,6 +9,7 @@ export function useLeadsContent() {
     const [modalOpen, setModalOpen] = useState(false);
     const [groupModalOpen, setGroupModalOpen] = useState(false);
     const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
+    const [leadType, setLeadType] = useState<'all' | 'mine'>('all');
     const [selectedCount, setSelectedCount] = useState(0);
     const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
     const [stages, setStages] = useState<StageOption[]>([]);
@@ -43,6 +44,8 @@ export function useLeadsContent() {
         setGroupModalOpen,
         viewMode,
         setViewMode,
+        leadType,
+        setLeadType,
         selectedCount,
         selectedLeads,
         setSelectedLeads,

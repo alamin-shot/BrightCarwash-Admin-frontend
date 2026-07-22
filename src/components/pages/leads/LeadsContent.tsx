@@ -13,6 +13,7 @@ export function LeadsContent() {
 		modalOpen, setModalOpen,
 		groupModalOpen, setGroupModalOpen,
 		viewMode, setViewMode,
+		leadType, setLeadType,
 		selectedCount, selectedLeads, setSelectedLeads,
 		stages,
 		isExportOpen, setIsExportOpen,
@@ -44,9 +45,11 @@ export function LeadsContent() {
 				setModalOpen={setModalOpen}
 				viewMode={viewMode}
 				setViewMode={setViewMode}
+				leadType={leadType}
+				setLeadType={setLeadType}
 			/>
 
-			<LeadsTable ref={tableRef} viewMode={viewMode} onSelectionChange={handleSelectionChange} />
+			<LeadsTable ref={tableRef} viewMode={viewMode} onSelectionChange={handleSelectionChange} leadType={leadType} />
 
 			<AddLeadModal isOpen={modalOpen} onClose={() => setModalOpen(false)} stages={stages} />
 			<CreateGroupModal

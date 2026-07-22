@@ -12,7 +12,7 @@ interface AssignMemberModalProps {
     leadId: string;
     currentAssigneeId?: string | null;
     currentAssigneeName?: string | null;
-    // ✅ Pass memberId AND memberName
+
     onAssign: (memberId: string | null, memberName: string | null) => Promise<void>;
 }
 
@@ -30,7 +30,8 @@ export function AssignMemberModal({
     );
     const [selectedName, setSelectedName] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { data: members = [], isLoading } = useGetTeamMembersQuery();
+    const { data: membersData, isLoading } = useGetTeamMembersQuery({ limit: 100 });
+    const members = membersData?.members || [];
 
     useEffect(() => {
         if (isOpen) {
@@ -46,7 +47,7 @@ export function AssignMemberModal({
             member.email?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // ✅ Toggle selection: if already selected, deselect (set to null)
+
     const handleSelectMember = (id: string) => {
         if (selectedId === id) {
             setSelectedId(null);
@@ -61,7 +62,7 @@ export function AssignMemberModal({
     const handleAssign = async () => {
         setIsSubmitting(true);
         try {
-            await onAssign(selectedId, selectedName); // ✅ pass both
+            await onAssign(selectedId, selectedName);
             onClose();
         } catch {
             // Error handled in parent

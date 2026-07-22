@@ -118,7 +118,7 @@ export function LeadDetailContent({ leadId }: Props) {
 				throw new Error(responseData.message || responseData.error || 'Failed to delete attachment');
 			}
 
-			// ✅ Add local activity for deletion
+
 			const now = new Date();
 			const dateStr = now.toLocaleDateString("en-US", {
 				day: "numeric",
@@ -150,7 +150,7 @@ export function LeadDetailContent({ leadId }: Props) {
 				return;
 			}
 
-			// ✅ Fetch the file and trigger download
+
 			const token = getAccessToken();
 			const response = await fetch(attachment.url, {
 				headers: {

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { LoginFooter } from '@/components/pages/auth-pages/login/LoginFooter';
+import { useRouter } from 'next/navigation';
 
 interface AuthLayoutProps {
 	title: string;
@@ -19,6 +20,7 @@ export function AuthLayout({
 	videoSrc,
 }: AuthLayoutProps) {
 	const [videoError, setVideoError] = useState(false);
+	const router = useRouter()
 
 	return (
 		<div className='flex h-screen overflow-hidden bg-[#0B1220]'>
@@ -26,14 +28,15 @@ export function AuthLayout({
 			<div className='flex w-full lg:max-w-162.5 flex-col items-start self-stretch overflow-y-auto'>
 				<div className='flex px-4 sm:px-6 lg:px-8 py-3 sm:py-4 justify-between items-center self-stretch'>
 					<Image
+						onClick={() => router.push('/login')}
 						src='/images/logo.png'
 						alt='Logo'
 						width={40}
 						height={48}
-						className='object-contain sm:w-12.5 sm:h-14.25 lg:w-14.25 lg:h-16'
+						className='object-contain sm:w-12.5 sm:h-14.25 lg:w-14.25 lg:h-16 cursor-pointer'
 						unoptimized
 					/>
-					<LanguageSelector />
+					{/* <LanguageSelector /> */}
 				</div>
 
 				<div className='flex px-5 sm:px-8 lg:px-10 py-10 sm:py-14 lg:py-20 flex-col justify-center items-center gap-6 sm:gap-8 flex-1 self-stretch'>

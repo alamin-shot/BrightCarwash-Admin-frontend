@@ -26,7 +26,7 @@ export function StepOneDetails({
 	tagInput,
 	setTagInput,
 	tags,
-	addTag,  // ✅ Added addTag to destructuring
+	addTag,
 	removeTag,
 	handleTagKeyDown,
 	onContinue,

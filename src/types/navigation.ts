@@ -6,12 +6,12 @@ export interface NavItem {
   icon: string;
   href: string;
   subItems?: NavItem[] | undefined;
+  permission?: string;
 }
 
 export interface NavSection {
   title: string;
   items: NavItem[];
-
 }
 
 export interface SidebarProps {

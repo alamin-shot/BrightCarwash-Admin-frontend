@@ -13,7 +13,7 @@ const depositStyles: Record<string, string> = {
   failed: "text-[#FF4345] border-[#FF4345] bg-white",
 };
 
-// ✅ Match by `value` (slug) – exact match
+
 function getStageFromName(name: string, stages: StageOption[]): StageOption | undefined {
   return stages.find(s => s.value === name);
 }

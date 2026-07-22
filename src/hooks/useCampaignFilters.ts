@@ -5,12 +5,12 @@ import type { Campaign, CampaignType, CampaignStatus } from "@/types/campaign";
 import { CHANNEL_TO_TYPE } from "@/types/campaign";
 
 export function useCampaignFilters(campaigns: Campaign[]) {
-	// ✅ All hooks called in the same order every time
+
 	const [searchQuery, setSearchQuery] = useState("");
 	const [typeFilter, setTypeFilter] = useState<CampaignType>("All Campaign");
 	const [statusFilter, setStatusFilter] = useState<CampaignStatus | "All">("All");
 
-	// ✅ No conditional returns here
+
 	const filtered = useMemo(
 		() => {
 			console.log("Filtering campaigns:", campaigns.length);

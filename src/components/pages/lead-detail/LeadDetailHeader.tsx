@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight, Pencil, UserPlus, Mail } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { PERMISSIONS } from "@/lib/permissions";
 
 interface LeadDetailHeaderProps {
     leadEmail: string;
@@ -39,6 +40,7 @@ export function LeadDetailHeader({ leadEmail, onAssignClick, onEditClick }: Lead
                 <div className="flex items-center gap-3 shrink-0">
                     <Button
                         onClick={handleSendEmail}
+                        permission={PERMISSIONS.mail_management.send_email}
                         className="flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto!"
                     >
                         <Mail size={16} />
@@ -46,6 +48,7 @@ export function LeadDetailHeader({ leadEmail, onAssignClick, onEditClick }: Lead
                     </Button>
                     <Button
                         onClick={onAssignClick}
+                        permission={PERMISSIONS.lead.assign}
                         variant="outline"
                         className="flex py-2.5 px-4 items-center gap-2 rounded border border-[#DFE1E7] text-[#1B1B1B] font-inter text-sm hover:bg-[#F8FAFB] transition-colors w-auto!"
                     >
@@ -54,6 +57,7 @@ export function LeadDetailHeader({ leadEmail, onAssignClick, onEditClick }: Lead
                     </Button>
                     <Button
                         onClick={onEditClick}
+                        permission={PERMISSIONS.lead.update}
                         variant="outline"
                         className="flex py-2.5 px-4 items-center gap-2 rounded border border-[#DFE1E7] text-[#1B1B1B] font-inter text-sm hover:bg-[#F8FAFB] transition-colors w-auto!"
                     >

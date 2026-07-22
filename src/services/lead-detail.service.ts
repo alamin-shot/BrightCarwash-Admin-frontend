@@ -19,7 +19,7 @@ async function fetchFromBackend<T>(url: string, options?: RequestInit): Promise<
 function mapApiToLeadDetail(data: LeadDetailApiResponse): LeadDetail {
 	const assignee = data.assigned_to || (data as any).assignee || null;
 
-	// ✅ Map activity timelines from API
+
 	const activityItems: ActivityItem[] = (data.activity_timelines || []).map((item: any) => {
 		let type: ActivityItem['type'] = 'lead';
 		const desc = item.description?.toLowerCase() || '';
@@ -49,7 +49,7 @@ function mapApiToLeadDetail(data: LeadDetailApiResponse): LeadDetail {
 		};
 	});
 
-	// ✅ Map assignment history from API
+
 	const assignmentItems: ActivityItem[] = (data.assignment_history || []).map((item: any) => {
 		const assigneeName = item.assignee
 			? `${item.assignee.first_name || ''} ${item.assignee.last_name || ''}`.trim() || 'Unknown'
@@ -73,7 +73,7 @@ function mapApiToLeadDetail(data: LeadDetailApiResponse): LeadDetail {
 		};
 	});
 
-	// ✅ Combine and sort all activities by date (newest first)
+
 	const allActivities = [...activityItems, ...assignmentItems];
 	allActivities.sort((a, b) => {
 		return new Date(b.date).getTime() - new Date(a.date).getTime();
@@ -289,7 +289,7 @@ export async function updateLeadDetails(
 	}
 	if (data.stage_name) formData.append('stage_name', data.stage_name);
 
-	// ✅ Append files
+
 	if (data.files && data.files.length > 0) {
 		data.files.forEach((file) => {
 			formData.append('files', file);

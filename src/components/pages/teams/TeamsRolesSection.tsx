@@ -1,11 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Pencil, Users, Key } from "lucide-react";
 import { Icon } from "@/components/ui/Icon";
 import { Button } from "@/components/ui/Button";
+import { Pagination } from "@/components/ui/Pagination";
 import { useLazyGetRoleByIdQuery } from "@/services/team.api";
 import type { TeamRole, TeamMember } from "@/types/team";
+import { PERMISSIONS } from "@/lib/permissions";
+
+const ITEMS_PER_PAGE = 5;
 
 const roleColors: Record<string, string> = {
     Admin: "#FF4345",
@@ -19,6 +23,7 @@ interface TeamsRolesSectionProps {
     members: TeamMember[];
     onEditPermissions: (role: TeamRole) => void;
     onCreateRole: () => void;
+    onDeleteRole: (role: TeamRole) => void;
 }
 
 export function TeamsRolesSection({
@@ -26,8 +31,16 @@ export function TeamsRolesSection({
     members,
     onEditPermissions,
     onCreateRole,
+    onDeleteRole
 }: TeamsRolesSectionProps) {
     const [prefetchRole] = useLazyGetRoleByIdQuery();
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const totalPages = Math.max(1, Math.ceil(roles.length / ITEMS_PER_PAGE));
+    const paginatedRoles = useMemo(
+        () => roles.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE),
+        [roles, currentPage]
+    );
 
     const roleMemberCounts = useMemo(() => {
         const counts: Record<string, number> = {};
@@ -44,6 +57,7 @@ export function TeamsRolesSection({
                     Roles & Permissions
                 </h2>
                 <Button
+                    permission={PERMISSIONS.role.create}
                     className="flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto!"
                     onClick={onCreateRole}
                 >
@@ -67,14 +81,14 @@ export function TeamsRolesSection({
                         </tr>
                     </thead>
                     <tbody>
-                        {roles.length === 0 ? (
+                        {paginatedRoles.length === 0 ? (
                             <tr>
                                 <td colSpan={3} className="py-10 text-center text-[#777980] text-sm">
                                     No roles found.
                                 </td>
                             </tr>
                         ) : (
-                            roles.map((role) => {
+                            paginatedRoles.map((role) => {
                                 const color = roleColors[role.name] || "#777980";
                                 const count = roleMemberCounts[role.name] || 0;
                                 return (
@@ -104,14 +118,25 @@ export function TeamsRolesSection({
                                             </div>
                                         </td>
                                         <td className="py-2.5 px-4">
-                                            <Button
-                                                variant="icon"
-                                                onClick={() => onEditPermissions(role)}
-                                                onMouseEnter={() => prefetchRole(role.name)} // 👈 pre‑fetch on hover
-                                                className="flex p-1.5 items-center rounded text-[#777980] hover:text-[#1B1B1B] hover:bg-gray-100 transition-colors"
-                                            >
-                                                <Pencil size={15} />
-                                            </Button>
+                                            <div className="flex items-center gap-1">
+                                                <Button
+                                                    variant="icon"
+                                                    permission={PERMISSIONS.role.update}
+                                                    onClick={() => onEditPermissions(role)}
+                                                    onMouseEnter={() => prefetchRole(role.name)}
+                                                    className="flex p-1.5 items-center rounded text-[#777980] hover:text-[#1B1B1B] hover:bg-gray-100 transition-colors"
+                                                >
+                                                    <Pencil size={15} />
+                                                </Button>
+                                                <Button
+                                                    variant="icon"
+                                                    permission={PERMISSIONS.role.delete}
+                                                    onClick={() => onDeleteRole(role)}
+                                                    className="flex p-1.5 items-center rounded text-[#777980] hover:text-[#FF4345] hover:bg-[#FFE6E6] transition-colors"
+                                                >
+                                                    <Icon name="delete" width={15} height={15} />
+                                                </Button>
+                                            </div>
                                         </td>
                                     </tr>
                                 );
@@ -120,6 +145,14 @@ export function TeamsRolesSection({
                     </tbody>
                 </table>
             </div>
+
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                totalItems={roles.length}
+                itemsPerPage={ITEMS_PER_PAGE}
+            />
         </div>
     );
 }

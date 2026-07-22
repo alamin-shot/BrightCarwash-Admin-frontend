@@ -1,12 +1,12 @@
 import type { PaymentStatsData, PaymentStatsResponse, PaymentTransaction } from '@/types/payment';
 import type { MetricCard } from '@/types/dashboard';
 
-// ✅ Helper to convert cents to dollars
+
 export function centsToDollars(cents: number): string {
     return (cents / 100).toFixed(2);
 }
 
-// ✅ Helper to format currency
+
 export function formatCurrency(amount: number, currency: string = 'USD'): string {
     const dollars = amount / 100;
     return new Intl.NumberFormat('en-US', {
@@ -17,12 +17,12 @@ export function formatCurrency(amount: number, currency: string = 'USD'): string
     }).format(dollars);
 }
 
-// ✅ Helper to format transaction amount (alias for clarity)
+
 export function formatTransactionAmount(amount: number, currency: string = 'USD'): string {
     return formatCurrency(amount, currency);
 }
 
-// ✅ Accept PaymentStatsData directly (the data from the response)
+
 export function mapStatsToMetrics(statsData: PaymentStatsData): MetricCard[] {
     return [
         {

@@ -2,11 +2,11 @@ export type CampaignType = "All Campaign" | "E-mail Template";
 export type CampaignStatus = "DRAFT" | "SCHEDULED" | "RUNNING" | "ACTIVE" | "COMPLETED" | "SUSPENDED";
 export type CampaignChannelType = "EMAIL" | "SMS" | "PUSH";
 
-// ✅ Constants for filters
+
 export const TYPE_FILTERS: CampaignType[] = ["All Campaign", "E-mail Template"];
 export const STATUS_FILTERS: CampaignStatus[] = ["ACTIVE", "COMPLETED", "DRAFT", "SCHEDULED", "SUSPENDED"];
 
-// ✅ Map channel type to display type
+
 export const CHANNEL_TO_TYPE: Record<CampaignChannelType, "E-mail Template"> = {
 	EMAIL: "E-mail Template",
 	SMS: "E-mail Template",
@@ -32,7 +32,7 @@ export interface CampaignEmailConfig {
 	};
 }
 
-// ✅ Only ONE Campaign interface
+
 export interface Campaign {
 	id: string;
 	name: string;

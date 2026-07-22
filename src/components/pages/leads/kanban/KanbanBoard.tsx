@@ -49,7 +49,7 @@ export function KanbanBoard({
 				className='flex gap-4 overflow-x-auto pb-4 adm-kanban-board h-full'
 			>
 				{stages.map((stage) => {
-					// ✅ Use custom icon if available, otherwise fallback to default
+
 					const icon = stage.icon || getDefaultStageIcon(stage.label);
 					return (
 						<KanbanColumn

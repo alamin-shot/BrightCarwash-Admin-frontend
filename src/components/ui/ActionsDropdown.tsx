@@ -4,12 +4,14 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Ellipsis } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { usePermission } from '@/hooks/usePermission';
 
 interface ActionItem {
 	label: string;
 	onClick: () => void;
 	variant?: 'default' | 'danger';
 	disabled?: boolean;
+	permission?: string;
 }
 
 interface ActionsDropdownProps {
@@ -44,7 +46,11 @@ export function ActionsDropdown({ items }: ActionsDropdownProps) {
 	useEffect(() => {
 		if (open && btnRef.current) {
 			const rect = btnRef.current.getBoundingClientRect();
-			const dropdownHeight = Math.min(MAX_HEIGHT, items.length * 40 + 16);
+			const filteredItems = items.filter((item) => {
+				if (!item.permission) return true;
+				return true; // checked in DropdownItem
+			});
+			const dropdownHeight = Math.min(MAX_HEIGHT, filteredItems.length * 40 + 16);
 			const viewportHeight = window.innerHeight;
 			const viewportWidth = window.innerWidth;
 
@@ -75,7 +81,14 @@ export function ActionsDropdown({ items }: ActionsDropdownProps) {
 				zIndex: '9999',
 			});
 		}
-	}, [open, items.length]);
+	}, [open, items]);
+
+	const filteredItems = items.filter((item) => {
+		if (!item.permission) return true;
+		return true; // checked in DropdownItem
+	});
+
+	if (filteredItems.length === 0) return null;
 
 	return (
 		<div ref={ref} className='relative inline-block'>
@@ -93,28 +106,37 @@ export function ActionsDropdown({ items }: ActionsDropdownProps) {
 					className='bg-white rounded-lg border border-[#E8E8E9] shadow-lg overflow-hidden'
 					style={dropdownStyle}
 				>
-					{items.map((item) => (
-						<Button
-							key={item.label}
-							variant='icon'
-							onClick={() => {
-								if (item.disabled) return;
-								item.onClick();
-								setOpen(false);
-							}}
-							className={`flex w-full py-2.5 px-4 items-center text-sm text-left cursor-pointer transition-colors ${item.disabled
-									? 'text-[#A5A5AB] cursor-not-allowed'
-									: item.variant === 'danger'
-										? 'text-[#FF4345] hover:bg-[#FFE6E6]'
-										: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
-								}`}
-						>
-							{item.label}
-						</Button>
+					{filteredItems.map((item) => (
+						<DropdownItem key={item.label} item={item} onSelect={() => setOpen(false)} />
 					))}
 				</div>,
 				document.body
 			)}
 		</div>
+	);
+}
+
+function DropdownItem({ item, onSelect }: { item: ActionItem; onSelect: () => void }) {
+	const hasPerm = usePermission(item.permission || '');
+
+	if (item.permission && !hasPerm) return null;
+
+	return (
+		<Button
+			variant='icon'
+			onClick={() => {
+				if (item.disabled) return;
+				item.onClick();
+				onSelect();
+			}}
+			className={`flex w-full py-2.5 px-4 items-center text-sm text-left cursor-pointer transition-colors ${item.disabled
+				? 'text-[#A5A5AB] cursor-not-allowed'
+				: item.variant === 'danger'
+					? 'text-[#FF4345] hover:bg-[#FFE6E6]'
+					: 'text-[#1B1B1B] hover:bg-[#F8FAFB]'
+				}`}
+		>
+			{item.label}
+		</Button>
 	);
 }

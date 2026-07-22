@@ -9,12 +9,35 @@ import { Button } from "@/components/ui/Button";
 import { ChevronDown } from "lucide-react";
 import { NAVIGATION_CONFIG } from "@/configs/navigation.config";
 import { useAuth } from "@/hooks/useAuth";
+import { useSelector } from "react-redux";
+import { hasPermission } from "@/lib/permissions";
+import type { RootState } from "@/lib/store";
 import type { SidebarProps, NavItem } from "@/types/navigation";
+
+function filterItemsByPermission(items: NavItem[], userPermissions: string[]): NavItem[] {
+  return items.filter((item) => {
+    if (item.permission && !userPermissions.includes(item.permission)) return false;
+    if (item.subItems) {
+      const filteredSubs = filterItemsByPermission(item.subItems, userPermissions);
+      if (filteredSubs.length === 0 && item.href === "") return false;
+      return true;
+    }
+    return true;
+  }).map((item) => {
+    if (item.subItems) {
+      return { ...item, subItems: filterItemsByPermission(item.subItems, userPermissions) };
+    }
+    return item;
+  });
+}
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { logout } = useAuth();
   const [logoError, setLogoError] = useState(false);
+  const user = useSelector((state: RootState) => state.auth.user);
+  const userPermissions = user?.permissions || [];
+
   const [expandedItems, setExpandedItems] = useState<Set<string>>(() => {
     const activeIds = new Set<string>();
     NAVIGATION_CONFIG.forEach((section) => {
@@ -26,6 +49,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     });
     return activeIds;
   });
+
+  const filteredConfig = NAVIGATION_CONFIG.map((section) => ({
+    ...section,
+    items: filterItemsByPermission(section.items, userPermissions),
+  })).filter((section) => section.items.length > 0);
 
   function isActive(href: string): boolean {
     if (href === "/dashboard") return pathname === "/dashboard";
@@ -59,8 +87,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       )}
 
       <aside
-        className={`w-[250px] h-screen fixed top-0 left-0 flex flex-col py-4 sm:py-6 pl-4 sm:pl-6 pr-3 sm:pr-4 border-r border-[#ECEFF3] bg-[#0B1220] z-50 transition-transform duration-300 overflow-y-auto adm-sidebar-scroll ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-          }`}
+        className={`w-[250px] h-screen fixed top-0 left-0 flex flex-col py-4 sm:py-6 pl-4 sm:pl-6 pr-3 sm:pr-4 border-r border-[#ECEFF3] bg-[#0B1220] z-50 transition-transform duration-300 overflow-y-auto adm-sidebar-scroll ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
       >
         <div className="flex h-full flex-col justify-between items-start flex-1">
           <div className="flex flex-col items-start gap-6 sm:gap-8 w-full">
@@ -83,7 +110,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             )}
 
             <nav className="flex flex-col items-start gap-4 sm:gap-5 self-stretch">
-              {NAVIGATION_CONFIG.map((section) => (
+              {filteredConfig.map((section) => (
                 <div key={section.title} className="flex flex-col items-start gap-2 sm:gap-3 self-stretch">
                   <span className="text-[#777980] font-geist text-[10px] sm:text-xs font-medium leading-[140%] tracking-[0.06px] uppercase px-1">
                     {section.title}
@@ -96,14 +123,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
                       return (
                         <div key={item.id} className="flex flex-col items-start gap-0.5 sm:gap-1 self-stretch">
-                          {/* ✅ Parent Item */}
                           <div className="flex items-center gap-0 w-full">
                             {hasSubItems ? (
-
                               <button
                                 onClick={() => toggleExpand(item.id)}
-                                className={`flex flex-1 py-2.5 sm:py-[14px] px-3 sm:px-4 items-center justify-between rounded-lg font-inter text-sm sm:text-base font-normal leading-[124%] tracking-[0.08px] no-underline transition-colors duration-200 cursor-pointer ${isExpanded ? "bg-white/5 text-white" : "text-white/80 hover:bg-white/5"
-                                  }`}
+                                className={`flex flex-1 py-2.5 sm:py-[14px] px-3 sm:px-4 items-center justify-between rounded-lg font-inter text-sm sm:text-base font-normal leading-[124%] tracking-[0.08px] no-underline transition-colors duration-200 cursor-pointer ${isExpanded ? "bg-white/5 text-white" : "text-white/80 hover:bg-white/5"}`}
                               >
                                 <div className="flex items-center gap-2 sm:gap-3">
                                   <Icon
@@ -120,7 +144,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                 />
                               </button>
                             ) : (
-
                               <Link
                                 href={item.href}
                                 onClick={onClose}
@@ -140,7 +163,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                             )}
                           </div>
 
-
                           {hasSubItems && isExpanded && (
                             <div className="flex flex-col pl-10 mt-3">
                               {item.subItems?.map((subItem, index) => {
@@ -158,7 +180,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                       height="40"
                                       viewBox="0 0 20 40"
                                     >
-                                      {/* Vertical line */}
                                       {!isLast && (
                                         <line
                                           x1="1"
@@ -170,8 +191,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                           strokeLinecap="round"
                                         />
                                       )}
-
-                                      {/* Curved connector */}
                                       <g transform="translate(0,0)">
                                         <path
                                           d="M1 0 V10 Q1 18 9 18 H16"

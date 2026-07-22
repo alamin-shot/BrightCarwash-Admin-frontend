@@ -8,8 +8,9 @@ import { DataTable } from "@/components/ui/DataTable";
 import { Pagination } from "@/components/ui/Pagination";
 import { createTeamsColumns } from "@/components/pages/teams/TeamsColumns";
 import type { TeamMember, TeamRole } from "@/types/team";
+import { PERMISSIONS } from "@/lib/permissions";
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 5;
 
 interface TeamsMembersSectionProps {
     members: TeamMember[];
@@ -23,6 +24,8 @@ interface TeamsMembersSectionProps {
     onAddMember: () => void;
     currentUserId: string;
     currentUserRole: string;
+    meta: { totalItems: number; totalPages: number; currentPage: number };
+    isFetching: boolean;
 }
 
 export function TeamsMembersSection({
@@ -37,17 +40,20 @@ export function TeamsMembersSection({
     onAddMember,
     currentUserId,
     currentUserRole,
+    meta,
+    isFetching,
 }: TeamsMembersSectionProps) {
     const [inputValue, setInputValue] = useState(searchQuery);
-    const paginated = useMemo(
-        () => members.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE),
-        [members, currentPage]
-    );
 
     const columns = useMemo(
         () => createTeamsColumns({ onEditRole, onToggleBlock, currentUserId, currentUserRole, roles }),
         [onEditRole, onToggleBlock, currentUserId, currentUserRole, roles]
     );
+
+    const handleSearch = () => {
+        onSearchChange(inputValue);
+        onPageChange(1);
+    };
 
     return (
         <div className="flex flex-col gap-4">
@@ -62,20 +68,19 @@ export function TeamsMembersSection({
                             placeholder="Search members..."
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                             className="w-full pl-4 pr-12 py-3 border border-[#E8E8E9] rounded-lg bg-white text-sm text-[#1B1B1B] placeholder-[#777980] font-inter outline-none focus:border-[#0098E8]"
                         />
                         <button
                             type="button"
-                            onClick={() => {
-                                onSearchChange(inputValue);
-                                onPageChange(1);
-                            }}
+                            onClick={handleSearch}
                             className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-md bg-[#0098E8] text-white hover:bg-[#0088D8] transition-colors"
                         >
                             <Search size={16} />
                         </button>
                     </div>
                     <Button
+                        permission={PERMISSIONS.staff.invite}
                         className="flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto!"
                         onClick={onAddMember}
                     >
@@ -84,14 +89,28 @@ export function TeamsMembersSection({
                 </div>
             </div>
 
-            <div className="max-h-79 overflow-y-auto rounded-lg border border-[#E8E8E9]">
+            <div className="max-h-79 overflow-y-auto rounded-lg border border-[#E8E8E9] relative">
+                {isFetching && (
+                    <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center">
+                        <div className="w-6 h-6 border-2 border-[#0098E8] border-t-transparent rounded-full animate-spin" />
+                    </div>
+                )}
                 <DataTable
                     columns={columns}
-                    data={paginated}
+                    data={members}
                     rowKey={(row) => row.id}
                     className="border-0 rounded-none"
                 />
             </div>
+
+            <Pagination
+                currentPage={currentPage}
+                totalPages={meta.totalPages}
+                onPageChange={onPageChange}
+                totalItems={meta.totalItems}
+                itemsPerPage={ITEMS_PER_PAGE}
+                isLoading={isFetching}
+            />
         </div>
     );
 }

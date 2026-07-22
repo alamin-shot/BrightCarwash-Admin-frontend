@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import { PERMISSIONS } from '@/lib/permissions';
 
 interface NewsHeaderProps {
     onCategoryClick: () => void;
@@ -18,12 +19,14 @@ export function NewsHeader({ onCategoryClick, onAddClick }: NewsHeaderProps) {
                 <Button
                     variant="outline"
                     onClick={onCategoryClick}
+                    permission={PERMISSIONS.news_category.manage}
                     className="py-2.5 px-4 text-[#777980]"
                 >
                     Manage Categories
                 </Button>
                 <Button
                     onClick={onAddClick}
+                    permission={PERMISSIONS.news_and_events.manage}
                     className="flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors"
                 >
                     Add New

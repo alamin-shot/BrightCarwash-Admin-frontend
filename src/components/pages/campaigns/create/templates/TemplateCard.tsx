@@ -23,7 +23,7 @@ export function TemplateCard({ template, onUse, isSelected }: TemplateCardProps)
 		setIframeError(false);
 	}, [template.id]);
 
-	// ✅ Ensure we have valid HTML content
+
 	const htmlContent = template.html || template.emailBody?.htmlContent || '<div style="padding:20px;color:#999;">No preview available</div>';
 
 	return (

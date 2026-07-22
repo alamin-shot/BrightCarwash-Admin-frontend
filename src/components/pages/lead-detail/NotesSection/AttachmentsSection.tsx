@@ -33,7 +33,7 @@ interface AttachmentsSectionProps {
     onDownload?: (id: string) => void;
 }
 
-// ✅ Smart file icon detection based on file type
+
 function getFileIcon(mimeType: string, fileName: string) {
     const extension = fileName?.split('.').pop()?.toLowerCase() || '';
 

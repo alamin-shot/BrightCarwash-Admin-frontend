@@ -10,7 +10,7 @@ function delay(ms: number): Promise<void> {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// ✅ Same transform function for consistency
+
 function transformTemplate(apiTemplate: any): Template {
 	let htmlContent = apiTemplate.emailBody?.htmlContent || '';
 

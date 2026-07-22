@@ -36,7 +36,6 @@ export default function Queries() {
   const {
     data: quotesData,
     isLoading: quotesLoading,
-    error: quotesError,
     refetch: quotesRefetch,
   } = useGetQuotesQuery({ page: currentPage, limit: pageSize, status, search });
 

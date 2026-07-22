@@ -11,6 +11,7 @@ import React, { useState, useCallback } from "react";
 import { format } from "date-fns";
 import { Pagination } from "@/components/ui/Pagination";
 import { useParams } from "@/hooks/useParams";
+import QueryDetailPanel from "./QueryDetailPanel";
 
 const actions = [
   { key: "details", label: "View Detail" },
@@ -25,6 +26,8 @@ export default function Queries() {
     page: "1",
     limit: "10",
   });
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [selectedQuery, setSelectedQuery] = useState<any>(null);
 
   const [categoryId, setCategoryId] = useState("");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -52,7 +55,11 @@ export default function Queries() {
     await deleteQuote({ id });
     quotesRefetch();
   };
-
+  const handleViewDetails = (row: any) => {
+    setSelectedQuery(row);
+    setIsPanelOpen(true);
+  };
+  
   const handleSearch = useCallback(
     (value: string) => {
       setQueryState({ search: value, page: "1" });
@@ -140,7 +147,11 @@ export default function Queries() {
                   <button
                     onClick={() => {
                       setOpenMenuId(null);
-                      if (action.key === "delete") handleDeleteQuote(row.id);
+                      if (action.key === "details") {
+                        handleViewDetails(row);
+                      } else if (action.key === "delete") {
+                        handleDeleteQuote(row.id);
+                      }
                     }}
                     key={action.key}
                     className="text-[#4A4C56] hover:text-white w-full p-2 hover:bg-[#0098E8] duration-200 cursor-pointer"
@@ -220,6 +231,14 @@ export default function Queries() {
           />
         </div>
       )}
+
+      <QueryDetailPanel
+        isOpen={isPanelOpen}
+        onClose={() => setIsPanelOpen(false)}
+        data={selectedQuery}
+        // onSendEmail={handleSendEmail}
+        onDelete={handleDeleteQuote}
+      />
     </div>
   );
 }

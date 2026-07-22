@@ -205,7 +205,7 @@ export default function QueryDetailPanel({
           </button>
           <button
             onClick={handleDelete}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-[#FFE6E6] text-[#FF4345] rounded-lg hover:bg-[#FFD4D4] transition-colors duration-200 font-medium"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#FFE6E6] text-[#FF4345] rounded-lg hover:bg-[#FFD4D4] transition-colors duration-200 font-medium"
           >
             <Trash2 className="w-4 h-4" />
             Delete

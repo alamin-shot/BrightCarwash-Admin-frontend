@@ -7,6 +7,8 @@ import { quoteInterfece } from "@/types/queries";
 export interface GetQuotesParams {
   page?: number;
   limit?: number;
+  status?: string;
+  search?: string;
 }
 
 export const queriesApi = createApi({
@@ -16,10 +18,10 @@ export const queriesApi = createApi({
 
   endpoints: (builder) => ({
     getQuotes: builder.query<quoteInterfece, GetQuotesParams>({
-      queryFn: async (params = { page: 1, limit: 10 }) => {
+      queryFn: async (params = { page: 1, limit: 10, status: "",search: "" }) => {
         try {
           const { data } = await axiosInstance.get<quoteInterfece>(
-            `/admin/quotes?page=${params.page}&limit=${params.limit}`,
+            `/admin/quotes?page=${params.page}&limit=${params.limit}&status=${params.status}&search=${params.search}`,
           );
           return { data };
         } catch (error: any) {

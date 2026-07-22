@@ -5,10 +5,11 @@ import {
   useGetQuotesQuery,
   useUpdateStatusMutation,
 } from "@/services/queries.api";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, SearchIcon } from "lucide-react";
 import React, { useState } from "react";
 import { format } from "date-fns";
 import { Pagination } from "@/components/ui/Pagination";
+
 const actions = [
   {
     key: "details",
@@ -25,6 +26,8 @@ const actions = [
 ];
 
 export default function Queries() {
+  const [status, setStatus] = useState("");
+  const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,7 +38,7 @@ export default function Queries() {
     isLoading: quotesLoading,
     error: quotesError,
     refetch: quotesRefetch,
-  } = useGetQuotesQuery({ page: currentPage, limit: pageSize });
+  } = useGetQuotesQuery({ page: currentPage, limit: pageSize, status, search });
 
   const [updateStatus] = useUpdateStatusMutation();
 
@@ -44,12 +47,10 @@ export default function Queries() {
     quotesRefetch();
   };
 
-
-
-
   console.log("hello queries", quotesData?.data?.items);
-
   const queries = quotesData?.data?.items || [];
+
+  
 
   const columns = [
     {
@@ -129,7 +130,7 @@ export default function Queries() {
             </button>
             {isOpen && (
               <div className="absolute top-10 w-40 -left-40 shadow border border-[#E8E8E9] rounded-2xl bg-white z-50 overflow-hidden">
-                {actions.map((action) => (
+                {actions?.map((action) => (
                   <button
                     onClick={() => {
                       setOpenMenuId(null);
@@ -166,24 +167,56 @@ export default function Queries() {
 
   return (
     <div>
+      <h2 className="text-[#0B1220] font-lora text-lg xl:text-2xl font-semibold mb-4 lg:mb-8">
+        Website Queries Overview
+      </h2>
+      <div className="mb-3 flex justify-between items-center">
+        <div className="relative">
+            <input className="w-full lg:w-87 border border-[#E8E8E9] rounded-lg text-sm py-3 px-3.75 outline-none"
+            placeholder="Search by name, phone number, email..."
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <SearchIcon
+            className="absolute top-1/2 right-3 -translate-y-1/2 text-[#E8E8E9] text-sm"
+          />
+        </div>
+        <FilterDropdown
+          label="Status"
+          options={[
+            { value: "new", label: "New" },
+            { value: "replied", label: "Replied" },
+            { value: "closed", label: "Closed" },
+          ]}
+          dropdownOffsetX={-50}
+          value={status}
+          onChange={(value) => {
+            setStatus(value || "");
+          }}
+          className="w-fit left-0"
+        />
+      </div>
       <div>
         <DataTable
           columns={columns}
           data={data}
           rowKey={(item) => item.id}
-          className="w-full border border-[#E8E8E9] rounded-t-lg "
+          className={`w-full border border-[#E8E8E9]  ${totalPages > 1 ? 'rounded-t-lg' : 'rounded-lg'}`}
         />
       </div>
-      <div className="flex justify-end items-center p-4 border-b border-x border-[#E8E8E9] rounded-b-lg relative">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
-          isLoading={quotesLoading}
-        />
-      </div>
+      {totalPages > 1 && (
+        <div className="flex justify-end items-center p-4 border-b border-x border-[#E8E8E9] rounded-b-lg relative">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handlePageChange}
+            isLoading={quotesLoading}
+          />
+        </div>
+      )}
     </div>
   );
 }

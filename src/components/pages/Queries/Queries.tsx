@@ -50,8 +50,6 @@ export default function Queries() {
   console.log("hello queries", quotesData?.data?.items);
   const queries = quotesData?.data?.items || [];
 
-  
-
   const columns = [
     {
       key: "full_name",
@@ -172,15 +170,14 @@ export default function Queries() {
       </h2>
       <div className="mb-3 flex justify-between items-center">
         <div className="relative">
-            <input className="w-full lg:w-87 border border-[#E8E8E9] rounded-lg text-sm py-3 px-3.75 outline-none"
+          <input
+            className="w-full lg:w-87 border border-[#E8E8E9] rounded-lg text-sm py-3 px-3.75 outline-none"
             placeholder="Search by name, phone number, email..."
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <SearchIcon
-            className="absolute top-1/2 right-3 -translate-y-1/2 text-[#E8E8E9] text-sm"
-          />
+          <SearchIcon className="absolute top-1/2 right-3 -translate-y-1/2 text-[#E8E8E9] text-sm" />
         </div>
         <FilterDropdown
           label="Status"
@@ -202,7 +199,7 @@ export default function Queries() {
           columns={columns}
           data={data}
           rowKey={(item) => item.id}
-          className={`w-full border border-[#E8E8E9]  ${totalPages > 1 ? 'rounded-t-lg' : 'rounded-lg'}`}
+          className={`w-full border border-[#E8E8E9]  ${totalPages > 1 ? "rounded-t-lg" : "rounded-lg"}`}
         />
       </div>
       {totalPages > 1 && (

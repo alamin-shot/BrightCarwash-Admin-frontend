@@ -15,7 +15,7 @@ import { useParams } from "@/hooks/useParams";
 import QueryDetailPanel from "./QueryDetailPanel";
 
 const actions = [
-  { key: "details", label: "View Detail" },
+  { key: "details", label: "View Details" },
   { key: "send", label: "Send email" },
   { key: "delete", label: "Delete query" },
 ];
@@ -43,14 +43,9 @@ export default function Queries() {
     status: queryState.status,
     search: queryState.search,
   });
-  
-  const {
-    data: queryDetail,
-    isLoading: queryDetailLoading,
-  } = useQueriesDetailQuery(
-    { id: selectedQueryId },
-    { skip: !selectedQueryId }
-  );
+
+  const { data: queryDetail, isLoading: queryDetailLoading } =
+    useQueriesDetailQuery({ id: selectedQueryId }, { skip: !selectedQueryId });
 
   const [updateStatus] = useUpdateStatusMutation();
   const [deleteQuote] = useDeleteQuoteMutation();
@@ -68,6 +63,7 @@ export default function Queries() {
   const handleViewDetails = (id: string) => {
     setSelectedQueryId(id);
     setIsPanelOpen(true);
+    quotesRefetch();
   };
 
   const handleSearch = useCallback(
@@ -205,13 +201,13 @@ export default function Queries() {
           <SearchIcon className="absolute top-1/2 right-3 -translate-y-1/2 text-[#E8E8E9] text-sm" />
         </div>
         <FilterDropdown
-          label="Status"
+          label="All Status"
           options={[
             { value: "new", label: "New" },
             { value: "replied", label: "Replied" },
             { value: "closed", label: "Closed" },
           ]}
-          dropdownOffsetX={-50}
+          dropdownOffsetX={-80}
           value={queryState.status}
           onChange={(value) =>
             setQueryState({ status: value || "", page: "1" })
@@ -246,6 +242,7 @@ export default function Queries() {
         isOpen={isPanelOpen}
         onClose={() => setIsPanelOpen(false)}
         data={queryDetail?.data}
+        onStatusChange={handleUpdateStatus}
         // onSendEmail={handleSendEmail}
         onDelete={handleDeleteQuote}
       />

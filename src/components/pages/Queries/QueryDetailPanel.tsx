@@ -1,9 +1,10 @@
 // components/QueryDetailPanel.tsx
 "use client";
 
-import { X, Mail, Trash2, Phone, Mail as EmailIcon, Car, Calendar, User } from "lucide-react";
+import { X, Mail, Trash2, Mail as EmailIcon, Copy } from "lucide-react";
 import { format } from "date-fns";
 import { useEffect } from "react";
+import { FilterDropdown } from "@/components/ui/FilterDropdown";
 
 interface QueryDetailPanelProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ interface QueryDetailPanelProps {
     date: string;
     message?: string;
   } | null;
+  onStatusChange?: (id: string, status: string) => void;
   onSendEmail?: (id: string) => void;
   onDelete?: (id: string) => void;
 }
@@ -28,6 +30,7 @@ export default function QueryDetailPanel({
   data,
   onSendEmail,
   onDelete,
+  onStatusChange,
 }: QueryDetailPanelProps) {
   useEffect(() => {
     if (isOpen) {
@@ -72,7 +75,6 @@ export default function QueryDetailPanel({
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className={`fixed inset-0 bg-[#0098E81F] backdrop-blur-sm z-50 duration-300 ${
           isOpen ? "" : "opacity-0 pointer-events-none"
@@ -80,7 +82,6 @@ export default function QueryDetailPanel({
         onClick={onClose}
       />
 
-      {/* Panel */}
       <div
         className={`fixed top-0 right-0 h-full w-full sm:w-120 bg-white shadow-2xl z-50 flex flex-col transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
@@ -89,100 +90,100 @@ export default function QueryDetailPanel({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8E8E9] shrink-0">
           <div>
-            <h3 className="text-lg font-semibold text-[#0B1220]">
+            <h3 className="text-2xl font-medium text-[#1D1F2C]">
               Query Details
             </h3>
-            <p className="text-sm text-[#4A4C56]">ID: #{data.id.slice(0, 8)}</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-[#F5F5F5] transition-colors duration-200"
+            className="p-1 rounded-full hover:bg-[#F5F5F5] transition-colors duration-200 border border-[#777980]"
           >
-            <X className="w-5 h-5 text-[#4A4C56]" />
+            <X className="text-[#777980]" />
           </button>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* Status Badge */}
-          <div className="mb-6">
-            <span
-              className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${
-                statusStyles[data.status] || "bg-[#F5F5F5] text-[#111827]"
-              }`}
-            >
-              {statusLabels[data.status] || data.status}
-            </span>
-          </div>
-
           {/* Info Grid */}
           <div className="space-y-5">
             {/* Full Name */}
-            <div className="flex items-start gap-3">
-              <User className="w-5 h-5 text-[#4A4C56] mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm text-[#4A4C56]">Full Name</p>
-                <p className="text-base font-medium text-[#0B1220]">
-                  {data.full_name}
-                </p>
-              </div>
+            <div>
+              <p className="text-sm lg:text-base  text-[#777980] mb-3">
+                Full Name
+              </p>
+              <p className="text-base lg:text-lg  font-medium text-[#0B1220]">
+                {data.full_name}
+              </p>
+            </div>
+            {/* Date */}
+            <div>
+              <p className="text-sm lg:text-base text-[#777980] mb-2">Date</p>
+              <p className="text-base lg:text-lg font-medium text-[#0B1220]">
+                {format(new Date(data.date), "d MMM, yyyy")}
+              </p>
             </div>
 
             {/* Email */}
-            <div className="flex items-start gap-3">
-              <EmailIcon className="w-5 h-5 text-[#4A4C56] mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm text-[#4A4C56]">Email Address</p>
-                <a
-                  href={`mailto:${data.email}`}
-                  className="text-base font-medium text-[#0098E8] hover:underline"
-                >
-                  {data.email}
-                </a>
+            <div>
+              <p className="text-sm lg:text-base text-[#777980] mb-2">
+                Email Address
+              </p>
+              <div className="flex items-center gap-2 justify-between">
+                <p className="text-base lg:text-lg font-medium">{data.email}</p>
+                <button>
+                  <Copy className="w-5 h-5 text-[#b23730]" />
+                </button>
               </div>
             </div>
-
             {/* Phone */}
-            <div className="flex items-start gap-3">
-              <Phone className="w-5 h-5 text-[#4A4C56] mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm text-[#4A4C56]">Phone Number</p>
-                <a
-                  href={`tel:${data.phone}`}
-                  className="text-base font-medium text-[#0B1220] hover:text-[#0098E8]"
-                >
-                  {data.phone}
-                </a>
+            <div>
+              <p className="text-sm lg:text-base text-[#777980] mb-2">
+                Phone Number
+              </p>
+              <div className="flex items-center gap-2 justify-between">
+                <p className="text-base lg:text-lg font-medium">{data.phone}</p>
+                <button>
+                  <Copy className="w-5 h-5 text-[#b23730]" />
+                </button>
               </div>
             </div>
 
-            {/* Vehicle */}
-            <div className="flex items-start gap-3">
-              <Car className="w-5 h-5 text-[#4A4C56] mt-0.5 shrink-0" />
+            <div className="flex items-start justify-between ">
+              {/* Vehicle */}
               <div>
-                <p className="text-sm text-[#4A4C56]">Vehicle</p>
+                <p className="text-sm lg:text-base text-[#777980] mb-2">
+                  Vehicle
+                </p>
                 <p className="text-base font-medium text-[#0B1220]">
                   {data.vehicle}
                 </p>
               </div>
-            </div>
 
-            {/* Date */}
-            <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-[#4A4C56] mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm text-[#4A4C56]">Date</p>
-                <p className="text-base font-medium text-[#0B1220]">
-                  {format(new Date(data.date), "d MMM, yyyy")}
+              {/* Status Badge */}
+              <div className="mb-6">
+                <p className="text-sm lg:text-base text-[#777980] mb-2">
+                  Status
                 </p>
+                <FilterDropdown
+                  label="Status"
+                  options={[
+                    { value: "new", label: "New" },
+                    { value: "replied", label: "Replied" },
+                    { value: "closed", label: "Closed" },
+                  ]}
+                  dropdownOffsetX={-80}
+                  value={data.status}
+                  onChange={(value) => onStatusChange?.(data.id, value || "")}
+                  buttonClassName={`rounded-full border-none px-3 py-1.5 text-sm font-medium ${statusStyles[data.status] || ""}`}
+                />
               </div>
             </div>
 
             {/* Message (if available) */}
             {data.message && (
               <div className="mt-4 pt-4 border-t border-[#E8E8E9]">
-                <p className="text-sm text-[#4A4C56] mb-2">Message</p>
-                <p className="text-base text-[#0B1220] bg-[#F8F9FA] p-4 rounded-lg">
+                <p className="text-sm text-[#777980] mb-2">Message</p>
+                <p className="text-base lg:text-lg text-[#0B1220] bg-[#F8F9FA] p-4 rounded-lg">
                   {data.message}
                 </p>
               </div>

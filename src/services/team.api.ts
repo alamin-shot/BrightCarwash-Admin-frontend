@@ -55,29 +55,35 @@ export const teamApi = createApi({
     baseQuery: async () => ({ data: null }),
     tagTypes: ["TeamMembers", "TeamRoles"],
     endpoints: (builder) => ({
-        getTeamMembers: builder.query<TeamMember[], void>({
-            queryFn: async () => {
+        getTeamMembers: builder.query<
+            { members: TeamMember[]; meta: MembersApiResponse['meta'] },
+            { search?: string; page?: number; limit?: number }
+        >({
+            queryFn: async (params = {}) => {
                 try {
                     if (APP_CONFIG.MOCK_MODE) {
                         await delay(APP_CONFIG.MOCK_DELAY_MS);
-                        return { data: [...mockTeamMembers] };
+                        return { data: { members: mockTeamMembers, meta: { totalItems: 0, itemCount: 0, itemsPerPage: 10, totalPages: 1, currentPage: 1, hasNextPage: false, hasPreviousPage: false } } };
                     }
-                    const { data } = await axiosInstance.get<MembersApiResponse>(
-                        "/admin/members"
-                    );
-                    return { data: data.data.map(mapMember) };
+                    const queryParams = new URLSearchParams();
+                    if (params.search) queryParams.append('search', params.search);
+                    if (params.page) queryParams.append('page', String(params.page));
+                    if (params.limit) queryParams.append('limit', String(params.limit));
+
+                    const url = `/admin/members${queryParams.toString() ? `?${queryParams}` : ''}`;
+                    const { data } = await axiosInstance.get<MembersApiResponse>(url);
+                    return { data: { members: data.data.map(mapMember), meta: data.meta } };
                 } catch (error) {
                     return {
                         error: {
                             status: 500,
-                            data:
-                                error instanceof Error ? error.message : "Failed to fetch members",
+                            data: error instanceof Error ? error.message : "Failed to fetch members",
                         },
                     };
                 }
             },
             providesTags: ["TeamMembers"],
-            keepUnusedDataFor: 60, // cache for 1 minute (members change rarely)
+            keepUnusedDataFor: 60,
         }),
 
         getTeamRoles: builder.query<TeamRole[], void>({
@@ -106,7 +112,7 @@ export const teamApi = createApi({
             keepUnusedDataFor: 300, // cache 5 minutes (roles are semi‑static)
         }),
 
-        // ✅ Permissions list – cached for 1 hour (they rarely change)
+
         getPermissions: builder.query<Permission[], void>({
             queryFn: async () => {
                 try {
@@ -134,7 +140,7 @@ export const teamApi = createApi({
             keepUnusedDataFor: 3600, // 1 hour – permissions rarely change
         }),
 
-        // ✅ Role permissions – cached per role name for 5 minutes
+
         getRoleById: builder.query<string[], string>({
             queryFn: async (name) => {
                 try {
@@ -164,7 +170,7 @@ export const teamApi = createApi({
             keepUnusedDataFor: 300, // 5 minutes
         }),
 
-        // ✅ Update mutation – invalidates only the specific role’s cache
+
         updateRolePermissions: builder.mutation<
             { success: boolean; message: string; data?: any },
             { id: string; permissions: string[] }
@@ -295,6 +301,22 @@ export const teamApi = createApi({
             },
             invalidatesTags: ["TeamMembers"],
         }),
+        deleteRole: builder.mutation<{ success: boolean }, string>({
+            queryFn: async (id) => {
+                try {
+                    await axiosInstance.delete(`/admin/role/${id}`);
+                    return { data: { success: true } };
+                } catch (error) {
+                    return {
+                        error: {
+                            status: 500,
+                            data: error instanceof Error ? error.message : "Failed to delete role",
+                        },
+                    };
+                }
+            },
+            invalidatesTags: ["TeamRoles"],
+        }),
     }),
 });
 
@@ -308,4 +330,5 @@ export const {
     useUpdateMemberRoleMutation,
     useBlockMemberMutation,
     useUnblockMemberMutation,
+    useDeleteRoleMutation,
 } = teamApi;

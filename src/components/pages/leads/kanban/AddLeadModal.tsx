@@ -20,7 +20,7 @@ interface AddLeadModalProps {
 	title?: string;
 }
 
-// ✅ Priority options should match what backend expects
+
 // These come from the backend, but we define them here for the dropdown
 // Make sure these match the backend's priority values
 const PRIORITY_OPTIONS = [
@@ -100,7 +100,7 @@ export function AddLeadModal({
 			: `+880${phone.trim()}`;
 
 		try {
-			// ✅ Type assertion to match the Lead type
+
 			const result = await createLead({
 				name,
 				email,

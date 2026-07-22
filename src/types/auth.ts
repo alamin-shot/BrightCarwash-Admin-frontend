@@ -22,11 +22,14 @@ export interface UserResponse {
     last_name: string;
     email: string;
     avatar: string | null;
+    phone_number?: string | null;
     roleUsers: {
       role: {
+        id: string;
         name: string;
       };
     }[];
+    permissions?: string[];
   };
 }
 
@@ -37,6 +40,7 @@ export interface User {
   email: string;
   avatar: string | null;
   role: string;
+  permissions: string[];
 }
 
 export interface AuthState {

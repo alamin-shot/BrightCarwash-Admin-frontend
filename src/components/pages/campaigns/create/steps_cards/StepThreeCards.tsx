@@ -27,7 +27,7 @@ export function StepThreeCards({ onTemplateSelect }: StepThreeCardsProps) {
 		console.log("🎯 Template selected in StepThreeCards:", {
 			name: template.name,
 			id: template.id
-		}); // ✅ Debug log
+		});
 
 		setSelectedId(template.id);
 		toast.success(`"${template.name}" selected for this campaign`);

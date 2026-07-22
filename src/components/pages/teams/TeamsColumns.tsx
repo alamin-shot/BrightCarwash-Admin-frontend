@@ -1,9 +1,8 @@
 import { ActionsDropdown } from "@/components/ui/ActionsDropdown";
 import type { Column } from "@/components/ui/DataTable";
 import type { TeamMember, TeamRole } from "@/types/team";
+import { PERMISSIONS } from "@/lib/permissions";
 
-// Roles table থেকেই "super admin" role name dynamically বের করে আনা হচ্ছে (case-insensitive),
-// কোনো হার্ডকোড স্ট্রিং লাগবে না। "Super Admin", "Super User", "super_admin" — সবই ম্যাচ করবে।
 function resolveSuperAdminRoleName(roles: TeamRole[]): string | null {
     const match = roles.find((r) => {
         const normalized = r.name.toLowerCase().replace(/[\s_-]/g, "");
@@ -29,7 +28,7 @@ interface TeamsColumnsParams {
     onToggleBlock: (member: TeamMember) => void;
     currentUserId: string;
     currentUserRole: string;
-    roles: TeamRole[]; // 👈 roles table পাস করো, এখান থেকেই super admin role name বের হবে
+    roles: TeamRole[];
 }
 
 export function createTeamsColumns({
@@ -96,18 +95,22 @@ export function createTeamsColumns({
             header: "",
             className: "w-12",
             render: (row) => {
-                const items: { label: string; onClick: () => void; disabled?: boolean }[] = [];
+                const items: { label: string; onClick: () => void; disabled?: boolean; permission?: string }[] = [];
 
                 if (canEditRole()) {
-                    items.push({ label: "Edit Role", onClick: () => onEditRole(row) });
+                    items.push({
+                        label: "Edit Role",
+                        onClick: () => onEditRole(row),
+                        permission: PERMISSIONS.member.roles_update,
+                    });
                 }
 
-                // Block/Unblock সবসময় দেখানো হবে, permission না থাকলে শুধু disabled থাকবে
                 const blockAllowed = canBlockMember(row);
                 items.push({
                     label: row.status === 1 ? "Block" : "Unblock",
                     onClick: () => onToggleBlock(row),
                     disabled: !blockAllowed,
+                    permission: row.status === 1 ? PERMISSIONS.member.block : PERMISSIONS.member.unblock,
                 });
 
                 if (items.length === 0) return null;

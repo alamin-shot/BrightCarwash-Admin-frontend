@@ -32,7 +32,7 @@ export function useExportExcel<T>({
 				return;
 			}
 
-			// ✅ Format amount for export if it's a payment transaction
+
 			const formattedData = dataToExport.map((item) => {
 				const record = item as Record<string, unknown>;
 				// Check if it's a payment transaction (has amount and currency)

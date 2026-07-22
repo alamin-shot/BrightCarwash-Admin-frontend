@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/forgot-password", "/verify-otp", "/reset-password"];
+const PUBLIC_PATHS = ["/login", "/forgot-password", "/verify-otp", "/reset-password", "/set-password", "/auth/set-password", "/signup"];
 const PROTECTED_PREFIXES = [
   "/dashboard", "/profile", "/settings", "/products",
   "/leads", "/payments", "/campaigns", "/staffs",
@@ -30,10 +30,12 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/auth/set-password",
     "/login",
     "/forgot-password",
     "/verify-otp",
     "/reset-password",
+    "/set-password",
     "/dashboard/:path*",
     "/profile/:path*",
     "/settings/:path*",

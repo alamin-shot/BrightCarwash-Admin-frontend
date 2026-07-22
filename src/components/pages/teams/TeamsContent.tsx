@@ -6,28 +6,48 @@ import { TeamsMembersSection } from "@/components/pages/teams/TeamsMembersSectio
 import { TeamsRolesSection } from "@/components/pages/teams/TeamsRolesSection";
 import { TeamsModals } from "@/components/pages/teams/TeamsModals";
 import { EditMemberRoleModal } from "@/components/pages/teams/EditMemberRoleModal";
-import { useGetTeamMembersQuery, useGetTeamRolesQuery, useGetPermissionsQuery, useGetRoleByIdQuery, useBlockMemberMutation, useUnblockMemberMutation } from "@/services/team.api";
-import { useTeamFilters } from "@/hooks/useTeamFilters";
+import { useGetTeamMembersQuery, useGetTeamRolesQuery, useGetPermissionsQuery, useGetRoleByIdQuery, useBlockMemberMutation, useUnblockMemberMutation, useDeleteRoleMutation } from "@/services/team.api";
 import { useTeamPermissions } from "@/hooks/useTeamPermissions";
 import type { RootState } from "@/lib/store";
 import type { TeamMember, TeamRole } from "@/types/team";
 import { toast } from "react-toastify";
 
+const ITEMS_PER_PAGE = 5;
+
 export function TeamsContent() {
-    const { data: members = [], isLoading, error, refetch: refetchMembers } = useGetTeamMembersQuery();
+    const [searchQuery, setSearchQuery] = useState("");
+    const [memberPage, setMemberPage] = useState(1);
+
+    const { data: membersData, isLoading, error, isFetching, refetch: refetchMembers } = useGetTeamMembersQuery({
+        search: searchQuery || undefined,
+        page: memberPage,
+        limit: ITEMS_PER_PAGE,
+    });
+
+    const members = membersData?.members || [];
+    const membersMeta = membersData?.meta || { totalItems: 0, totalPages: 1, currentPage: 1 };
+
     const { data: roles = [], refetch: refetchRoles } = useGetTeamRolesQuery();
     const { data: permissions = [] } = useGetPermissionsQuery();
     const [blockMember] = useBlockMemberMutation();
     const [unblockMember] = useUnblockMemberMutation();
-    const { searchQuery, setSearchQuery, filteredMembers } = useTeamFilters(members);
-    const [currentPage, setCurrentPage] = useState(1);
     const [editRole, setEditRole] = useState<TeamRole | null>(null);
     const [rolePermissions, setRolePermissions] = useState<string[]>([]);
     const rolePermissionsRef = useRef<string[]>([]);
     const [addMemberOpen, setAddMemberOpen] = useState(false);
     const [createRoleOpen, setCreateRoleOpen] = useState(false);
     const [editMemberRoleTarget, setEditMemberRoleTarget] = useState<TeamMember | null>(null);
+    const [deleteRole] = useDeleteRoleMutation();
 
+    const handleDeleteRole = async (role: TeamRole) => {
+        if (!confirm(`Delete role "${role.name}"?`)) return;
+        try {
+            await deleteRole(role.id).unwrap();
+            toast.success(`Role "${role.name}" deleted`);
+        } catch {
+            toast.error("Failed to delete role");
+        }
+    };
     const currentUser = useSelector((state: RootState) => state.auth.user);
 
     const { data: rolePerms = [] } = useGetRoleByIdQuery(editRole?.name || "", { skip: !editRole });
@@ -72,17 +92,19 @@ export function TeamsContent() {
     return (
         <div className="flex flex-col gap-6 w-full">
             <TeamsMembersSection
-                members={filteredMembers}
+                members={members}
                 roles={roles}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
-                currentPage={currentPage}
-                onPageChange={setCurrentPage}
+                currentPage={memberPage}
+                onPageChange={setMemberPage}
                 onEditRole={handleEditRole}
                 onToggleBlock={handleToggleBlock}
                 onAddMember={() => setAddMemberOpen(true)}
                 currentUserId={currentUser?.id || ""}
                 currentUserRole={currentUser?.role || ""}
+                meta={membersMeta}
+                isFetching={isFetching}
             />
 
             <TeamsRolesSection
@@ -90,6 +112,7 @@ export function TeamsContent() {
                 members={members}
                 onEditPermissions={(role) => setEditRole(role)}
                 onCreateRole={() => setCreateRoleOpen(true)}
+                onDeleteRole={handleDeleteRole}
             />
 
             <TeamsModals

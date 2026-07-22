@@ -8,6 +8,7 @@ const MOCK_USER: User = {
   email: AUTH_CONFIG.MOCK_CREDENTIALS.email,
   avatar: null,
   role: "Admin",
+  permissions: []
 };
 
 const MOCK_OTP_STORE: Map<string, string> = new Map();
@@ -67,7 +68,7 @@ export function mockGetProfile(): UserResponse {
       last_name: MOCK_USER.lastName,
       email: MOCK_USER.email,
       avatar: MOCK_USER.avatar,
-      roleUsers: [{ role: { name: MOCK_USER.role } }],
+      roleUsers: [{ role: { id: "1", name: MOCK_USER.role } }],
     },
   };
 }

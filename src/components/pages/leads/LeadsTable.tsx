@@ -21,10 +21,11 @@ interface LeadsTableExternalProps {
 	viewMode: 'list' | 'kanban';
 	onSelectionChange?: (count: number, ids: string[]) => void;
 	searchQuery?: string;
+	leadType?: 'all' | 'mine';
 }
 
 export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
-	function LeadsTable({ viewMode, onSelectionChange, searchQuery: externalSearch }, ref) {
+	function LeadsTable({ viewMode, onSelectionChange, searchQuery: externalSearch, leadType = 'all' }, ref) {
 		const router = useRouter();
 
 		const {
@@ -55,7 +56,8 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 			handlePriorityChange,
 			handleDelete,
 			handleSearchSubmit,
-		} = useLeadsData(externalSearch);
+		} = useLeadsData(externalSearch, leadType);
+
 
 		const { exportExcel, exportCSV } = useLeadsExport(leads, selectedIds, {
 			search: searchTerm || externalSearch || undefined,

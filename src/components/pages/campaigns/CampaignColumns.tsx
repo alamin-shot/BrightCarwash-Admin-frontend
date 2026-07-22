@@ -1,5 +1,6 @@
 import { ActionsDropdown } from "@/components/ui/ActionsDropdown";
 import type { Column } from "@/components/ui/DataTable";
+import { PERMISSIONS } from "@/lib/permissions";
 import type { Campaign } from "@/types/campaign";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -25,7 +26,6 @@ export function createCampaignColumns({
 	onStatusAction,
 }: CampaignColumnsParams): Column<Campaign>[] {
 	return [
-
 		{
 			key: "name",
 			header: "Campaign Name",
@@ -86,28 +86,19 @@ export function createCampaignColumns({
 	];
 }
 
-function Checkbox() {
-	return (
-		<input
-			type="checkbox"
-			className="w-5 h-5 rounded-md border border-[#E8E8E9] bg-white cursor-pointer accent-[#0098E8]"
-		/>
-	);
-}
-
 function buildActions(
 	row: Campaign,
 	{ onEdit, onDelete, onLaunch, onStatusAction }: CampaignColumnsParams
 ) {
 	const isLocked = row.status === "SCHEDULED" || row.status === "COMPLETED";
 
-	const items = [
-		{ label: "Edit", onClick: () => onEdit(row), disabled: isLocked },
-		{ label: "Delete", onClick: () => onDelete(row), variant: "danger" as const, disabled: isLocked },
+	const items: { label: string; onClick: () => void; variant?: 'danger'; disabled?: boolean; permission?: string }[] = [
+		{ label: "Edit", onClick: () => onEdit(row), disabled: isLocked, permission: PERMISSIONS.campaign.update },
+		{ label: "Delete", onClick: () => onDelete(row), variant: "danger" as const, disabled: isLocked, permission: PERMISSIONS.campaign.delete },
 	];
 
 	if (row.status === "DRAFT" && onLaunch) {
-		items.splice(1, 0, { label: "Launch", onClick: () => onLaunch(row), disabled: false });
+		items.splice(1, 0, { label: "Launch", onClick: () => onLaunch(row), disabled: false, permission: PERMISSIONS.campaign.update });
 	}
 
 	if (row.status === "ACTIVE" && onStatusAction) {
@@ -116,6 +107,7 @@ function buildActions(
 			onClick: () => onStatusAction(row, "SUSPEND"),
 			variant: "danger" as const,
 			disabled: false,
+			permission: PERMISSIONS.campaign.update,
 		});
 	}
 
@@ -124,6 +116,7 @@ function buildActions(
 			label: "Restart",
 			onClick: () => onStatusAction(row, "RESTART"),
 			disabled: false,
+			permission: PERMISSIONS.campaign.update,
 		});
 	}
 

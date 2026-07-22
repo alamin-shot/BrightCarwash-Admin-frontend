@@ -1,4 +1,7 @@
+"use client";
+
 import { ButtonHTMLAttributes, ReactNode } from 'react';
+import { usePermission } from '@/hooks/usePermission';
 
 type ButtonVariant =
 	| 'primary'
@@ -15,6 +18,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	loadingText?: string;
 	children: ReactNode;
 	className?: string;
+	permission?: string;
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -35,9 +39,14 @@ export function Button({
 	children,
 	className = '',
 	disabled,
-	type = 'button', // ← default to "button" to prevent form submissions
+	type = 'button',
+	permission,
 	...props
 }: ButtonProps) {
+	const hasPerm = usePermission(permission || '');
+
+	if (permission && !hasPerm) return null;
+
 	if (variant === 'icon' || variant === 'sidebar' || variant === 'link') {
 		return (
 			<button

@@ -27,7 +27,7 @@ export const CampaignsTable = memo(function CampaignsTable({
 }: CampaignsTableProps) {
     const [currentPage, setCurrentPage] = useState(1);
 
-    // ✅ Ensure campaigns is always an array
+
     const safeCampaigns = campaigns || [];
     const totalPages = Math.max(1, Math.ceil(safeCampaigns.length / ITEMS_PER_PAGE));
 

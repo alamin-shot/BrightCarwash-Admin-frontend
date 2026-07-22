@@ -1,5 +1,5 @@
 export type TemplateType = 'EMAIL' | 'SMS' | 'PUSH';
-// ✅ Updated to match backend expectations
+
 export type EditorType = 'VISUAL_DRAG_DROP' | 'RAW_HTML' | 'PLAIN_TEXT';
 
 export interface EmailBody {

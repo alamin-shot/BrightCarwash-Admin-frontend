@@ -64,7 +64,7 @@ export interface LeadDetailApiResponse {
 	assigned_to?: { id: string; first_name: string; last_name: string } | null;
 	notes?: string[] | { id: string; content: string; author: { first_name: string; last_name: string } | null; created_at: string }[];
 	attachments?: string[] | { id: string; url: string; fileName: string; fileSize: number; mimeType: string }[];
-	attachments_url_paths?: { filename: string; url: string }[]; // ✅ New field
+	attachments_url_paths?: { filename: string; url: string }[];
 	created_at: string;
 	activity_timelines?: {
 		id: string;

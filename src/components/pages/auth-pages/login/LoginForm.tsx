@@ -15,14 +15,14 @@ export function LoginForm() {
   const formRef = useRef<HTMLFormElement>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    // ✅ Prevent ALL default behaviors
+
     e.preventDefault();
     e.stopPropagation();
 
-    // ✅ Clear previous error
+
     setError(null);
 
-    // ✅ Validate inputs
+
     if (!email.trim() || !password.trim()) {
       setError("Please fill in all fields");
       return;
@@ -38,7 +38,7 @@ export function LoginForm() {
         setError("Invalid email or password");
       }
     } catch (err) {
-      // ✅ This should not happen now since useAuth doesn't throw
+
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setIsSubmitting(false);

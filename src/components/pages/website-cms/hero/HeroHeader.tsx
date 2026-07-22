@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import { PERMISSIONS } from '@/lib/permissions';
 
 interface HeroHeaderProps {
     onSave: () => void;
@@ -16,6 +17,7 @@ export function HeroHeader({ onSave, isUpdating }: HeroHeaderProps) {
                 onClick={onSave}
                 isLoading={isUpdating}
                 loadingText="Saving..."
+                permission={PERMISSIONS.lead.update}
                 className="w-auto! flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors"
             >
                 <Icon name="update" width={16} height={16} color="white" />

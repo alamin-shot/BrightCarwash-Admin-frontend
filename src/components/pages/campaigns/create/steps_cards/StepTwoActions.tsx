@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import { useCreateCampaignMutation, useLaunchCampaignMutation } from '@/services/campaign.api';
 import { ScheduleModal } from '@/components/pages/campaigns/create/modals/ScheduleModal';
 import type { CreateCampaignRequest } from '@/types/campaign';
+import { PERMISSIONS } from '@/lib/permissions';
 
 interface StepTwoActionsProps {
 	allFilled: boolean;
@@ -116,6 +117,7 @@ export function StepTwoActions({
 				onClick={handleSendNow}
 				isLoading={isSending}
 				loadingText='Sending...'
+				permission={PERMISSIONS.campaign.create}
 				className='flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto!'
 			>
 				<Send size={16} />
@@ -126,6 +128,7 @@ export function StepTwoActions({
 				isLoading={isScheduling}
 				loadingText='Scheduling...'
 				variant='outline'
+				permission={PERMISSIONS.campaign.create}
 				className='flex py-2.5 px-4 items-center gap-2 rounded border border-[#DFE1E7] text-[#1B1B1B] font-inter text-sm hover:bg-[#F8FAFB] transition-colors w-auto!'
 			>
 				<Calendar size={16} />

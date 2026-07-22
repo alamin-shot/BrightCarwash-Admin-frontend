@@ -44,7 +44,7 @@ function ComposeEmailFormWrapper() {
                     onClick={handleSend}
                     isLoading={isSending}
                     loadingText="Sending..."
-                    className="w-auto! flex py-2.5 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors"
+                    className="w-auto! flex py-2.5  items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors"
                 >
                     <Send width={16} height={16} color="white" />
                     Send Email

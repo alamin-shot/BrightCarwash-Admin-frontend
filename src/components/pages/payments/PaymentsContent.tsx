@@ -57,14 +57,14 @@ export function PaymentsContent() {
 		}
 	};
 
-	// ✅ Handle search submit
+
 	const handleSearchSubmit = useCallback(() => {
-		setSearch(searchValue); // ✅ Update the global search state
+		setSearch(searchValue);
 		setSearchSubmitted(true);
 		setPage(1);
 	}, [searchValue, setSearch, setPage]);
 
-	// ✅ Handle search change (update local input value)
+
 	const handleSearchChange = useCallback((value: string) => {
 		setSearchValue(value);
 		setSearchSubmitted(false);

@@ -34,7 +34,7 @@ export function KanbanColumn({
 	const [modalOpen, setModalOpen] = useState(false);
 	const badgeTint = borderColor + '26';
 
-	// ✅ Check if icon is a URL
+
 	const isIconUrl = icon && (icon.startsWith('http://') || icon.startsWith('https://'));
 
 	return (

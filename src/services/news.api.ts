@@ -36,7 +36,7 @@ export const newsApi = createApi({
 
                     const url = `/admin/news-and-events${queryParams.toString() ? `?${queryParams}` : ''}`;
                     const json = await fetchFromBackend<NewsListResponse>(url);
-                    // ✅ Use 'items' from API response
+
                     return { data: json.data.items || [] };
                 } catch (error) {
                     return {

@@ -18,7 +18,9 @@ export const queriesApi = createApi({
 
   endpoints: (builder) => ({
     getQuotes: builder.query<quoteInterfece, GetQuotesParams>({
-      queryFn: async (params = { page: 1, limit: 10, status: "",search: "" }) => {
+      queryFn: async (
+        params = { page: 1, limit: 10, status: "", search: "" },
+      ) => {
         try {
           const { data } = await axiosInstance.get<quoteInterfece>(
             `/admin/quotes?page=${params.page}&limit=${params.limit}&status=${params.status}&search=${params.search}`,
@@ -55,7 +57,25 @@ export const queriesApi = createApi({
         }
       },
     }),
+
+    deleteQuote: builder.mutation<any, { id: string }>({
+      queryFn: async ({ id }: { id: string }) => {
+        try {
+          const { data } = await axiosInstance.delete<any>(
+            `/admin/quotes/${id}`,
+          );
+          return { data };
+        } catch (error: any) {
+          return {
+            error: {
+              status: error?.response?.status || 500,
+              data: error?.response?.data?.message || "Failed to delete quote",
+            },
+          };
+        }
+      },
+    }),
   }),
 });
 
-export const { useGetQuotesQuery, useUpdateStatusMutation } = queriesApi;
+export const { useGetQuotesQuery, useUpdateStatusMutation, useDeleteQuoteMutation } = queriesApi;

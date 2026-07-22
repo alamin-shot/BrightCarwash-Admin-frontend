@@ -2,6 +2,7 @@
 import { DataTable } from "@/components/ui/DataTable";
 import { FilterDropdown } from "@/components/ui/FilterDropdown";
 import {
+  useDeleteQuoteMutation,
   useGetQuotesQuery,
   useUpdateStatusMutation,
 } from "@/services/queries.api";
@@ -40,9 +41,14 @@ export default function Queries() {
   } = useGetQuotesQuery({ page: currentPage, limit: pageSize, status, search });
 
   const [updateStatus] = useUpdateStatusMutation();
-
   const handleUpdateStatus = async (id: string, status: string) => {
     await updateStatus({ id, status });
+    quotesRefetch();
+  };
+
+  const [deleteQuote] = useDeleteQuoteMutation();
+  const handleDeleteQuote = async (id: string) => {
+    await deleteQuote({ id });
     quotesRefetch();
   };
 
@@ -131,6 +137,9 @@ export default function Queries() {
                   <button
                     onClick={() => {
                       setOpenMenuId(null);
+                      if (action.key === "delete") {
+                        handleDeleteQuote(row.id);
+                      }
                     }}
                     key={action.key}
                     className="text-[#4A4C56] hover:text-white w-full p-2 hover:bg-[#0098E8] duration-200 cursor-pointer"

@@ -1,6 +1,7 @@
 "use client";
 import { DataTable } from "@/components/ui/DataTable";
 import { FilterDropdown } from "@/components/ui/FilterDropdown";
+import { useQueriesDetailQuery } from "@/services/queries.api";
 import {
   useDeleteQuoteMutation,
   useGetQuotesQuery,
@@ -27,7 +28,7 @@ export default function Queries() {
     limit: "10",
   });
   const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [selectedQuery, setSelectedQuery] = useState<any>(null);
+  const [selectedQueryId, setSelectedQueryId] = useState<string>("");
 
   const [categoryId, setCategoryId] = useState("");
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -42,6 +43,14 @@ export default function Queries() {
     status: queryState.status,
     search: queryState.search,
   });
+  
+  const {
+    data: queryDetail,
+    isLoading: queryDetailLoading,
+  } = useQueriesDetailQuery(
+    { id: selectedQueryId },
+    { skip: !selectedQueryId }
+  );
 
   const [updateStatus] = useUpdateStatusMutation();
   const [deleteQuote] = useDeleteQuoteMutation();
@@ -55,11 +64,12 @@ export default function Queries() {
     await deleteQuote({ id });
     quotesRefetch();
   };
-  const handleViewDetails = (row: any) => {
-    setSelectedQuery(row);
+
+  const handleViewDetails = (id: string) => {
+    setSelectedQueryId(id);
     setIsPanelOpen(true);
   };
-  
+
   const handleSearch = useCallback(
     (value: string) => {
       setQueryState({ search: value, page: "1" });
@@ -148,7 +158,7 @@ export default function Queries() {
                     onClick={() => {
                       setOpenMenuId(null);
                       if (action.key === "details") {
-                        handleViewDetails(row);
+                        handleViewDetails(row.id);
                       } else if (action.key === "delete") {
                         handleDeleteQuote(row.id);
                       }
@@ -235,7 +245,7 @@ export default function Queries() {
       <QueryDetailPanel
         isOpen={isPanelOpen}
         onClose={() => setIsPanelOpen(false)}
-        data={selectedQuery}
+        data={queryDetail?.data}
         // onSendEmail={handleSendEmail}
         onDelete={handleDeleteQuote}
       />

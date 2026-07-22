@@ -29,7 +29,6 @@ export default function QueryDetailPanel({
   onSendEmail,
   onDelete,
 }: QueryDetailPanelProps) {
-  // Prevent body scroll when panel is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";

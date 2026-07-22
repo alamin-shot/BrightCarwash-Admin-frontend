@@ -75,7 +75,34 @@ export const queriesApi = createApi({
         }
       },
     }),
+
+    queriesDetail: builder.query<any, { id: string }>({
+      queryFn: async ({ id }: { id: string }) => {
+        try {
+          const { data } = await axiosInstance.get<quoteInterfece>(
+            `/admin/quotes/${id}`,
+          );
+          return { data };
+        } catch (error: any) {
+          return {
+            error: {
+              status: error?.response?.status || 500,
+              data:
+                error?.response?.data?.message ||
+                "Failed to fetch quote detail",
+            },
+          };
+        }
+      },
+      providesTags: ["Queries"],
+      keepUnusedDataFor: 60,
+    }),
   }),
 });
 
-export const { useGetQuotesQuery, useUpdateStatusMutation, useDeleteQuoteMutation } = queriesApi;
+export const {
+  useGetQuotesQuery,
+  useUpdateStatusMutation,
+  useDeleteQuoteMutation,
+  useQueriesDetailQuery,
+} = queriesApi;

@@ -104,7 +104,7 @@ export default function Queries() {
       key: "date",
       header: "Date",
       render: (row: any) => {
-        return format(new Date(row.date), "dd-MM-yyyy HH:mm") || "";
+        return format(new Date(row.date), "d MMM, yyyy") || "";
       },
     },
     {
@@ -127,7 +127,7 @@ export default function Queries() {
               />
             </button>
             {isOpen && (
-              <div className="absolute top-10 w-40 -left-40 shadow border border-[#E8E8E9] rounded-2xl bg-white z-50 overflow-hidden">
+              <div className="absolute top-10 w-40 -left-20 shadow border border-[#E8E8E9] rounded-2xl bg-white z-50 overflow-hidden">
                 {actions?.map((action) => (
                   <button
                     onClick={() => {

@@ -56,6 +56,26 @@ export const queriesApi = createApi({
           };
         }
       },
+      invalidatesTags: ["Queries"],
+      async onQueryStarted({ id, status }, { dispatch, queryFulfilled }) {
+        const patchQueriesDetail = dispatch(
+          queriesApi.util.updateQueryData(
+            "queriesDetail",
+            { id },
+            (draft: any) => {
+              if (draft?.data) {
+                draft.data.status = status;
+              }
+            },
+          ),
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          patchQueriesDetail.undo();
+        }
+      },
     }),
 
     deleteQuote: builder.mutation<any, { id: string }>({
@@ -74,6 +94,7 @@ export const queriesApi = createApi({
           };
         }
       },
+      invalidatesTags: ["Queries"],
     }),
 
     queriesDetail: builder.query<any, { id: string }>({

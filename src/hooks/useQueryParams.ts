@@ -59,6 +59,10 @@ export function useQueryParams(p0: { status: string; search: string; page: strin
     });
     return result;
   }, [searchParams]);
+  const handleSendEmail = (email: string) => {
+    const params = new URLSearchParams({ to: email });
+    router.push(`/marketing/email-list/create?${params.toString()}`);
+  };
 
   return { getParam, setParam, setParams, removeParam, getAllParams, searchParams };
 }

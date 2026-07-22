@@ -16,11 +16,11 @@ import { useNotificationSocket } from "@/context/SocketContext";
 export default function Notification() {
   const [isOpen, setIsOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const { socket} = useNotificationSocket();
+  const { socket } = useNotificationSocket();
   const { data: metricsData } = useGetNotificationMetricsQuery();
   const initialCount = metricsData?.data?.unread || 0;
   const [count, setCount] = useState(initialCount);
-  
+
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -73,21 +73,20 @@ export default function Notification() {
           </span>
         )}
         <BellIcon />
-        
+
       </button>
 
       <div
-        className={`absolute right-0 mt-2 sm:w-72 lg:w-96 rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-[0px_0px_3px_rgba(0,0,0,0.12)] transition-all duration-200 ease-out ${
-          isOpen
+        className={`absolute right-0 mt-2 sm:w-72 lg:w-96 rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-[0px_0px_3px_rgba(0,0,0,0.12)] transition-all duration-200 ease-out ${isOpen
             ? "visible translate-y-0 scale-100 opacity-100"
             : "invisible -translate-y-2 scale-95 opacity-0"
-        }`}
+          }`}
       >
         <div>
           {notifications?.length > 0 ? (
             <div>
               {notifications?.map((notification) => (
-                <p
+                <div
                   key={notification?.id}
                   className="flex items-center justify-between text-sm border-b border-[#E5E7EB] py-3"
                 >
@@ -102,7 +101,7 @@ export default function Notification() {
                   <span className="text-xs text-[#4B5563] text-nowrap">
                     {formatNotificationTime(notification?.created_at)}
                   </span>
-                </p>
+                </div>
               ))}
               <Link
                 href="/notifications"

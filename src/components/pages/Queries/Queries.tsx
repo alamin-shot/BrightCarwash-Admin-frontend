@@ -1,26 +1,23 @@
 "use client";
 import { DataTable } from "@/components/ui/DataTable";
 import { FilterDropdown } from "@/components/ui/FilterDropdown";
+import { ActionsDropdown } from "@/components/ui/ActionsDropdown";
 import { useQueriesDetailQuery } from "@/services/queries.api";
 import {
   useDeleteQuoteMutation,
   useGetQuotesQuery,
   useUpdateStatusMutation,
 } from "@/services/queries.api";
-import { Ellipsis, SearchIcon } from "lucide-react";
+import { Search } from "lucide-react";
 import React, { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { Pagination } from "@/components/ui/Pagination";
 import { useParams } from "@/hooks/useParams";
 import QueryDetailPanel from "./QueryDetailPanel";
 
-const actions = [
-  { key: "details", label: "View Details" },
-  { key: "send", label: "Send email" },
-  { key: "delete", label: "Delete query" },
-];
-
 export default function Queries() {
+  const router = useRouter();
   const [queryState, setQueryState] = useParams({
     status: "",
     search: "",
@@ -29,9 +26,7 @@ export default function Queries() {
   });
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [selectedQueryId, setSelectedQueryId] = useState<string>("");
-
-  const [categoryId, setCategoryId] = useState("");
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [searchInput, setSearchInput] = useState(queryState.search);
 
   const {
     data: quotesData,
@@ -66,12 +61,14 @@ export default function Queries() {
     quotesRefetch();
   };
 
-  const handleSearch = useCallback(
-    (value: string) => {
-      setQueryState({ search: value, page: "1" });
-    },
-    [setQueryState],
-  );
+  const handleSendEmail = (email: string) => {
+    const params = new URLSearchParams({ to: email });
+    router.push(`/marketing/email-list/create?${params.toString()}`);
+  };
+
+  const handleSearchSubmit = () => {
+    setQueryState({ search: searchInput, page: "1" });
+  };
 
   const columns = [
     {
@@ -113,7 +110,6 @@ export default function Queries() {
               ]}
               value={row.status}
               onChange={(value) => {
-                setCategoryId(value || "");
                 handleUpdateStatus(row.id, value || "");
               }}
               className="w-fit"
@@ -131,45 +127,28 @@ export default function Queries() {
     {
       key: "action",
       header: "Action",
-      render: (row: any) => {
-        const isOpen = openMenuId === row.id;
-        return (
-          <div className="flex items-center relative">
-            <button
-              type="button"
-              onClick={() => setOpenMenuId(isOpen ? null : row.id)}
-              aria-expanded={isOpen}
-              className={`border border-[#E8E8E9] p-2 rounded-md cursor-pointer hover:bg-[#F5F5F5] duration-200 ${
-                isOpen ? "bg-[#F5F5F5] border-[#DADCE0]" : ""
-              }`}
-            >
-              <Ellipsis
-                className={isOpen ? "text-[#0098E8]" : "text-[#111827]"}
-              />
-            </button>
-            {isOpen && (
-              <div className="absolute top-10 lg:w-40 -left-20 shadow border border-[#E8E8E9] rounded-2xl bg-white z-50 overflow-hidden">
-                {actions.map((action) => (
-                  <button
-                    onClick={() => {
-                      setOpenMenuId(null);
-                      if (action.key === "details") {
-                        handleViewDetails(row.id);
-                      } else if (action.key === "delete") {
-                        handleDeleteQuote(row.id);
-                      }
-                    }}
-                    key={action.key}
-                    className="text-[#4A4C56] hover:text-white w-full p-2 hover:bg-[#0098E8] duration-200 cursor-pointer"
-                  >
-                    {action.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      },
+      className: "w-12",
+      render: (row: any) => (
+        <ActionsDropdown
+          items={[
+            {
+              label: "View Details",
+              onClick: () => handleViewDetails(row.id),
+            },
+            {
+              label: "Send email",
+              onClick: () => {
+                handleViewDetails(row.id);
+              },
+            },
+            {
+              label: "Delete query",
+              onClick: () => handleDeleteQuote(row.id),
+              variant: "danger" as const,
+            },
+          ]}
+        />
+      ),
     },
   ];
 
@@ -190,15 +169,22 @@ export default function Queries() {
       </h2>
 
       <div className="mb-3 flex justify-between items-center">
-        <div className="relative">
+        <div className="relative flex-1 max-w-[400px]">
           <input
-            className="w-full lg:w-87 border border-[#E8E8E9] rounded-lg text-sm py-3 px-3.75 outline-none"
+            className="w-full border border-[#E8E8E9] rounded-lg text-sm py-3 pl-4 pr-12 outline-none"
             placeholder="Search by name, phone number, email..."
             type="text"
-            value={queryState.search}
-            onChange={(e) => handleSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
           />
-          <SearchIcon className="absolute top-1/2 right-3 -translate-y-1/2 text-[#E8E8E9] text-sm" />
+          <button
+            type="button"
+            onClick={handleSearchSubmit}
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-md bg-[#0098E8] text-white hover:bg-[#0088D8] transition-colors"
+          >
+            <Search size={16} />
+          </button>
         </div>
         <FilterDropdown
           label="All Status"
@@ -243,7 +229,7 @@ export default function Queries() {
         onClose={() => setIsPanelOpen(false)}
         data={queryDetail?.data}
         onStatusChange={handleUpdateStatus}
-        // onSendEmail={handleSendEmail}
+        onSendEmail={handleSendEmail}
         onDelete={handleDeleteQuote}
       />
     </div>

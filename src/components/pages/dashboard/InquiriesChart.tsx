@@ -94,7 +94,7 @@ export function InquiriesChart({ data }: InquiriesChartProps) {
             <span className="text-[#777980] font-inter text-[10px] sm:text-xs">Total Leads</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#B23730] shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-[#007e2aff] shrink-0" />
             <span className="text-[#777980] font-inter text-[10px] sm:text-xs">Converted</span>
           </div>
         </div>

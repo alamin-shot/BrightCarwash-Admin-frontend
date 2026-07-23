@@ -22,6 +22,7 @@ export function LimitSelector({ limit, onLimitChange, options }: LimitSelectorPr
             options={options || DEFAULT_LIMIT_OPTIONS}
             value={String(limit)}
             onChange={(val: string) => onLimitChange(Number(val))}
+            dropdownOffsetX={-80}
         />
     );
 }

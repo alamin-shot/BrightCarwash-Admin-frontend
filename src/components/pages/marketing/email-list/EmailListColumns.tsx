@@ -1,9 +1,9 @@
 import { Trash2 } from "lucide-react";
 import type { Column } from "@/components/ui/DataTable";
 import type { EmailLog } from "@/types/email-list";
-import { usePermission } from "@/hooks/usePermission";
+import { hasPermission } from "@/lib/permissions";
 import { PERMISSIONS } from "@/lib/permissions";
-const _PERMISSIONS = PERMISSIONS;
+import { store } from "@/lib/store";
 
 interface EmailListColumnsParams {
     onDelete: (log: EmailLog) => void;
@@ -12,6 +12,9 @@ interface EmailListColumnsParams {
 export function createEmailListColumns({
     onDelete,
 }: EmailListColumnsParams): Column<EmailLog>[] {
+    const user = store.getState().auth.user;
+    const canDelete = hasPermission(user, PERMISSIONS.mail_management.view_logs);
+
     return [
         {
             key: "code",
@@ -54,14 +57,13 @@ export function createEmailListColumns({
             header: "Action",
             className: "w-12",
             render: (row) => {
-
-                const canDelete = usePermission(_PERMISSIONS.mail_management.view_logs);
-                return canDelete ? (
+                if (!canDelete) return null;
+                return (
                     <button onClick={() => onDelete(row)} className="p-2 rounded-lg text-[#777980] hover:bg-[#FFE6E6] hover:text-[#FF4345] transition-colors" title="Delete">
                         <Trash2 size={16} />
                     </button>
-                ) : null;
-            }
+                );
+            },
         },
     ];
 }

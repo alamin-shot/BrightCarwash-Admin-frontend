@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import type { notificationInterfece } from "@/types/notification";
 import axiosInstance from "@/lib/axios-instance";
-import { ReadAllNotificationInterface } from "@/types/navigation";
+
 
 export interface GetNotificationParams {
   page?: number;
@@ -40,11 +40,11 @@ export const notificationApi = createApi({
       keepUnusedDataFor: 60,
     }),
 
-    readAllNotification: builder.mutation<ReadAllNotificationInterface, void>({
+    readAllNotification: builder.mutation<notificationInterfece, void>({
       queryFn: async () => {
         try {
           const response =
-            await axiosInstance.patch<ReadAllNotificationInterface>(
+            await axiosInstance.patch<notificationInterfece>(
               `/admin/notifications/read/all`,
             );
           return { data: response.data };

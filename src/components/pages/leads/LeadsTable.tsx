@@ -14,21 +14,23 @@ export interface LeadsTableHandle {
 	exportExcel: () => void;
 	exportCSV: () => void;
 }
-
-const ITEMS_PER_PAGE = 10;
-
 interface LeadsTableExternalProps {
 	viewMode: 'list' | 'kanban';
 	onSelectionChange?: (count: number, ids: string[]) => void;
 	searchQuery?: string;
 	leadType?: 'all' | 'mine';
+	listLimit?: number;
+	setListLimit?: (val: number) => void;
 	kanbanLimit?: number;
 	setKanbanLimit?: (val: number) => void;
 }
 
 export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
-	function LeadsTable({ viewMode, onSelectionChange, searchQuery: externalSearch, leadType = 'all', kanbanLimit, setKanbanLimit }, ref) {
+	function LeadsTable({ viewMode, onSelectionChange, searchQuery: externalSearch, leadType = 'all', listLimit, setListLimit, kanbanLimit, setKanbanLimit }, ref) {
 		const router = useRouter();
+
+		const currentLimit = viewMode === 'kanban' ? (kanbanLimit || 100) : (listLimit || 10);
+		const setCurrentLimit = viewMode === 'kanban' ? setKanbanLimit : setListLimit;
 
 		const {
 			leads,
@@ -57,8 +59,7 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 			handlePriorityChange,
 			handleDelete,
 			handleSearchSubmit,
-		} = useLeadsData(externalSearch, leadType, viewMode === 'kanban' ? kanbanLimit : undefined);
-
+		} = useLeadsData(externalSearch, leadType, currentLimit);
 
 		const { exportExcel, exportCSV } = useLeadsExport(leads, selectedIds, {
 			search: searchTerm || externalSearch || undefined,
@@ -111,12 +112,19 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 					onSourceChange={(val) => { setSourceFilter(val); setCurrentPage(1); }}
 					priorityFilter={priorityFilter}
 					onPriorityChange={(val) => { setPriorityFilter(val); setCurrentPage(1); }}
-					depositFilter={depositFilter}
-					onDepositChange={(val) => { setDepositFilter(val); setCurrentPage(1); }}
 					uniqueSources={uniqueSources}
-					viewMode={viewMode}
-					kanbanLimit={kanbanLimit}
-					setKanbanLimit={setKanbanLimit}
+					limit={currentLimit}
+					onLimitChange={(val) => {
+						setCurrentLimit?.(val);
+						setCurrentPage(1);
+					}}
+					limitOptions={viewMode === 'kanban' ? [
+						{ value: '10', label: '10' },
+						{ value: '50', label: '50' },
+						{ value: '100', label: '100' },
+						{ value: '200', label: '200' },
+						{ value: '99999', label: 'All' },
+					] : undefined}
 				/>
 				{viewMode === 'list' ? (
 					<>
@@ -136,7 +144,7 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 								className="w-full"
 							/>
 						</div>
-						<Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={totalItems} itemsPerPage={ITEMS_PER_PAGE} isLoading={isPageLoading} />
+						<Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={totalItems} itemsPerPage={currentLimit} isLoading={isPageLoading} />
 					</>
 				) : (
 					<div className='h-[calc(100vh-220px)] overflow-hidden'>
@@ -147,7 +155,6 @@ export const LeadsTable = forwardRef<LeadsTableHandle, LeadsTableExternalProps>(
 							onDeleteLead={handleDelete}
 							onStageDeleted={refreshStages}
 						/>
-
 					</div>
 				)}
 			</div>

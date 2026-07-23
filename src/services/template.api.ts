@@ -43,7 +43,6 @@ export const templateApi = createApi({
     baseQuery: async () => ({ data: null }),
     tagTypes: ['Templates', 'Template'],
     endpoints: (builder) => ({
-        // GET all templates with filters
         getTemplates: builder.query<{ templates: Template[]; total: number; totalPages: number }, GetTemplatesParams>({
             queryFn: async (params = {}) => {
                 try {

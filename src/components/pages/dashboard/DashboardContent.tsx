@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Icon } from "@/components/ui/Icon";
-import { Button } from "@/components/ui/Button";
 import { DashboardMetrics } from "@/components/pages/dashboard/DashboardMetrics";
 import { DashboardCharts } from "@/components/pages/dashboard/DashboardCharts";
 import { RecentInquiriesTable } from "@/components/pages/dashboard/RecentInquiriesTable";
@@ -10,7 +8,6 @@ import { useGetDashboardMetricsQuery } from "@/services/dashboard.api";
 import { useGetLeadsQuery } from "@/services/leads.api";
 import { getStages } from "@/services/stage.service";
 import type { StageOption } from "@/components/ui/StageDropdown";
-import Link from "next/link";
 import { mapStagesToOptions } from "@/lib/stage-utils";
 
 export function DashboardContent() {
@@ -40,19 +37,31 @@ export function DashboardContent() {
 
   if (isLoading) {
     return (
-      <div className="w-full max-w-full flex flex-col gap-3 sm:gap-4">
+      <div className="w-full max-w-full flex flex-col gap-4 animate-pulse">
+        {/* Header */}
         <div className="flex justify-between items-end">
-          <div className="h-5 w-24 sm:w-32 bg-gray-200 rounded animate-pulse" />
-          <div className="h-8 sm:h-9 w-24 sm:w-28 bg-gray-200 rounded animate-pulse" />
+          <div className="h-6 w-32 bg-slate-200 rounded-md" />
+          <div className="h-9 w-28 bg-slate-200 rounded-md" />
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
-          {[...Array(4)].map((_, i) => <div key={i} className="h-[100px] sm:h-[140px] bg-gray-100 rounded-lg animate-pulse" />)}
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="h-[140px] bg-slate-200 rounded-xl"
+            />
+          ))}
         </div>
-        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
-          <div className="w-full lg:w-3/4 h-[350px] bg-gray-100 rounded-lg animate-pulse" />
-          <div className="w-full lg:w-1/4 h-[350px] bg-gray-100 rounded-lg animate-pulse" />
+
+        {/* Chart + Side Panel */}
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="w-full lg:w-3/4 h-[350px] bg-slate-200 rounded-xl" />
+          <div className="w-full lg:w-1/4 h-[350px] bg-slate-200 rounded-xl" />
         </div>
-        <div className="h-[250px] sm:h-[300px] bg-gray-100 rounded-lg animate-pulse" />
+
+        {/* Bottom Chart */}
+        <div className="h-[300px] bg-slate-200 rounded-xl" />
       </div>
     );
   }

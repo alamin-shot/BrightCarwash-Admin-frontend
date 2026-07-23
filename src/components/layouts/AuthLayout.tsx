@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { LanguageSelector } from '@/components/ui/LanguageSelector';
 import { LoginFooter } from '@/components/pages/auth-pages/login/LoginFooter';
 import { useRouter } from 'next/navigation';
 

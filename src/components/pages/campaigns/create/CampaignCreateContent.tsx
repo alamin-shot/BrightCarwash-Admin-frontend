@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { Stepper } from "@/components/ui/Stepper";
 import { useCampaignCreation } from "@/hooks/useCampaignCreation";
 import { CampaignBreadcrumb } from "./components/CampaignBreadcrumb";
 import { StepOneDetails } from "./steps/StepOneDetails";
@@ -11,18 +10,11 @@ import { StepTwoTemplate } from "./steps/StepTwoTemplate";
 import { StepThreeDesign } from "./steps/StepThreeDesign";
 import { loadCampaignForEdit, resetCampaignCreation } from "@/store/slices/campaignCreationSlice";
 
-const steps = [
-	{ id: 1, title: "Details" },
-	{ id: 2, title: "Template" },
-	{ id: 3, title: "Recipients" },
-	{ id: 4, title: "Review" },
-];
-
 export function CampaignCreateContent() {
 	const dispatch = useDispatch();
 	const searchParams = useSearchParams();
 	const isEdit = searchParams.get("edit") === "true";
-	const stepFromUrl = searchParams.get("step");
+	const stepFromUrl = searchParams.get("step") || "";
 
 	const [currentStep, setCurrentStep] = useState(() => {
 		if (stepFromUrl === "3") return 3;
@@ -51,12 +43,10 @@ export function CampaignCreateContent() {
 				isEdit: true,
 				campaignId: searchParams.get("id") || null,
 			}));
-		}
-
-		return () => {
+		} else if (stepFromUrl !== "3") {
 			dispatch(resetCampaignCreation());
-		};
-	}, [isEdit, searchParams, dispatch]);
+		}
+	}, [isEdit, stepFromUrl, searchParams, dispatch]);
 
 	const handleTemplateSelect = (name: string, id: string) => {
 		campaign.setSelectedTemplateName(name);
@@ -74,7 +64,6 @@ export function CampaignCreateContent() {
 					campaignName={campaign.campaignName}
 					onBackToStep1={() => setCurrentStep(1)}
 				/>
-				<Stepper steps={steps} currentStep={currentStep} />
 			</div>
 
 			{currentStep === 1 && (

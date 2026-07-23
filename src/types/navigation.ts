@@ -1,4 +1,3 @@
-import type { ComponentType } from "react";
 
 export interface NavItem {
   id: string;
@@ -21,16 +20,4 @@ export interface SidebarProps {
 
 export interface NavbarProps {
   onMenuClick: () => void;
-}
-
-
-
-export interface ReadAllNotificationInterface {
-  success: boolean
-  message: string
-  data: Data
-}
-
-export interface Data {
-  count: number
 }

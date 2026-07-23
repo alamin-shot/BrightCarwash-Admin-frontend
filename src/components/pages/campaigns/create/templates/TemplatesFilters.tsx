@@ -2,12 +2,9 @@
 
 import { Search } from "lucide-react";
 import { FilterDropdown } from "@/components/ui/FilterDropdown";
+import { LimitSelector } from "@/components/ui/LimitSelector";
 
-const LIMIT_OPTIONS = [
-    { value: '10', label: '10' },
-    { value: '50', label: '50' },
-    { value: '100', label: '100' },
-];
+
 
 interface TemplatesFiltersProps {
     searchInput: string;
@@ -44,11 +41,9 @@ export function TemplatesFilters({
                 </button>
             </div>
 
-            <FilterDropdown
-                label="Show"
-                options={LIMIT_OPTIONS}
-                value={String(limit)}
-                onChange={(val: string) => onLimitChange(Number(val))}
+            <LimitSelector
+                limit={limit}
+                onLimitChange={onLimitChange}
             />
         </div>
     );

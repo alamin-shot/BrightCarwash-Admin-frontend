@@ -8,6 +8,7 @@ import { LeadsContentHeader } from './LeadsContentHeader';
 import { useLeadsContent } from '@/hooks/useLeadsContent';
 
 export function LeadsContent() {
+	const [listLimit, setListLimit] = useState(10);
 	const [kanbanLimit, setKanbanLimit] = useState(100);
 	const tableRef = useRef<LeadsTableHandle>(null);
 	const {
@@ -56,6 +57,8 @@ export function LeadsContent() {
 				viewMode={viewMode}
 				onSelectionChange={handleSelectionChange}
 				leadType={leadType}
+				listLimit={listLimit}
+				setListLimit={setListLimit}
 				kanbanLimit={kanbanLimit}
 				setKanbanLimit={setKanbanLimit}
 			/>

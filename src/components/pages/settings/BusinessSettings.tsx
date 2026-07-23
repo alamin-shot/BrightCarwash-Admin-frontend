@@ -5,6 +5,7 @@ import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useBusinessSettings } from "@/hooks/useBusinessSettings";
 import { useGetBusinessProfileQuery } from "@/services/settings.api";
+import { PERMISSIONS } from "@/lib/permissions";
 
 const labelClass = "text-[#777980] font-inter text-base font-normal leading-5";
 const inputClass = "w-full px-4 py-3 bg-white rounded-lg border border-[#DFE1E7] text-[#1B1B1B] font-inter text-base outline-none focus:border-[#0098E8] transition-all";
@@ -96,6 +97,7 @@ export function BusinessSettings() {
                     onClick={handleSave}
                     isLoading={isSaving}
                     loadingText="Saving..."
+                    permission={PERMISSIONS.user.update}
                     className="flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors w-auto!"
                 >
                     Save Changes

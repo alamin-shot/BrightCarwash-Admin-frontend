@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Icon } from '@/components/ui/Icon';
-import { Button } from '@/components/ui/Button';
 import { MetricCard } from '@/components/ui/MetricCard';
 import { PaymentsTable } from '@/components/pages/payments/PaymentsTable';
 import { ExportDropdown } from '@/components/ui/ExportDropdown';

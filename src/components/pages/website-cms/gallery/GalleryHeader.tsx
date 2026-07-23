@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import { PERMISSIONS } from '@/lib/permissions';
 
 interface GalleryHeaderProps {
     onAddClick: () => void;
@@ -15,6 +16,7 @@ export function GalleryHeader({ onAddClick }: GalleryHeaderProps) {
             </h2>
             <Button
                 onClick={onAddClick}
+                permission={PERMISSIONS.gallery.create}
                 className="w-auto! flex py-2.5 px-4 items-center gap-2 rounded bg-[#0098E8] text-white font-inter text-sm hover:bg-[#0088D8] transition-colors"
             >
                 Add New
